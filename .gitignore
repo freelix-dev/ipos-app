@@ -27,6 +27,7 @@
 .pub/
 build/
 
+
 # Symbolication related
 app.*.symbols
 app.*.map.json
