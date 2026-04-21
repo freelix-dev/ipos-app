@@ -1,0 +1,55 @@
+services:
+  ipos-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: ipos-server
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST_WRITE=freelix-mysql
+      - DB_PORT_WRITE=3306
+      - DB_USER_WRITE=app_write
+      - DB_PASSWORD_WRITE=StrongAppPass456!
+      - DB_DATABASE_WRITE=production_db
+      - DB_HOST_READ=freelix-mysql
+      - DB_PORT_READ=3306
+      - DB_USER_READ=app_read
+      - DB_PASSWORD_READ=StrongAppPass456!
+      - DB_DATABASE_READ=production_db
+    depends_on:
+      freelix-mysql:
+        condition: service_healthy
+    networks:
+      - ipos-network
+
+  freelix-mysql:
+    image: mysql:8.0
+    container_name: freelix-mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=RootPassword123!
+      - MYSQL_DATABASE=production_db
+      - MYSQL_USER=app_write
+      - MYSQL_PASSWORD=StrongAppPass456!
+    ports:
+      - "19789:3306" # Maps external 19789 to internal 3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRootPassword123!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ipos-network
+
+networks:
+  ipos-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

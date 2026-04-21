@@ -1,0 +1,537 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Users as UsersIcon, 
+  Plus, 
+  Mail, 
+  Shield, 
+  Trash2, 
+  X, 
+  Lock, 
+  User, 
+  UserPlus,
+  Search,
+  Filter,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  ChevronLast,
+  ChevronFirst
+} from 'lucide-react';
+import { api } from '../services/api';
+
+const Users = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'user' });
+  
+  // Filtering & Pagination State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filtering Logic
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination Logic
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) return;
+
+    try {
+      const response = await api.addUser({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
+      });
+      setIsModalOpen(false);
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'user' });
+      loadUsers();
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Failed to add user. Email might already exist.';
+      alert(errorMsg);
+    }
+  };
+
+  const isPasswordError = formData.confirmPassword && formData.password !== formData.confirmPassword;
+
+  return (
+    <>
+      <div className="animate-slide-up">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
+          <div>
+            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Team Directory</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global access control and staff management</p>
+          </div>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <UserPlus size={20} />
+            <span>Add Team Member</span>
+          </button>
+        </div>
+
+        <div className="table-container" style={{ border: 'none', boxShadow: 'var(--shadow-premium)', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
+          {/* Quantum Filter Strip */}
+          <div style={{ 
+            padding: '24px 32px', 
+            background: '#fff', 
+            borderBottom: '1px solid var(--border)', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '20px' 
+          }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              {/* Search Zone */}
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
+                <input 
+                  type="text" 
+                  placeholder="Search by name, email, or personnel ID..." 
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{ 
+                    width: '100%', height: '50px', padding: '0 16px 0 48px', 
+                    borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                    background: '#f8fafc', fontSize: '0.9rem', fontWeight: 600,
+                    transition: 'var(--transition)', outline: 'none'
+                  }}
+                />
+              </div>
+
+              {/* Identity Filter Module */}
+              <button style={{ 
+                height: '50px', padding: '0 24px', borderRadius: '16px', 
+                border: '1px solid var(--border-strong)', background: '#fff', 
+                color: 'var(--text-main)', display: 'flex', alignItems: 'center', 
+                gap: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem',
+                transition: 'var(--transition)'
+              }} className="btn-hover-premium">
+                <Filter size={18} />
+                <span>Identity Filters</span>
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
+                {['All Members', 'Administrators', 'Operators', 'Inactive'].map((t) => (
+                  <button 
+                    key={t}
+                    style={{
+                      padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
+                      background: t === 'All Members' ? '#fff' : 'transparent',
+                      color: t === 'All Members' ? 'var(--primary)' : 'var(--text-muted)',
+                      fontWeight: 800, fontSize: '0.85rem',
+                      boxShadow: t === 'All Members' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>SECURE DIRECTORY</span>
+                 </div>
+                 <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
+                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredUsers.length} PERSONS</span>
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ padding: '100px', textAlign: 'center' }}>
+              <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Syncing directory...</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ borderCollapse: 'separate', borderSpacing: 0, width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th style={{ paddingLeft: '32px' }}>Member Profile</th>
+                    <th>Electronic Mail</th>
+                    <th>Functional Role</th>
+                    <th>Operational Status</th>
+                    <th style={{ textAlign: 'right', paddingRight: '32px' }}>Control Hub</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentUsers.map((user) => (
+                    <tr key={user.id} className="directory-row">
+                      <td style={{ paddingLeft: '32px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ 
+                            background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', 
+                            padding: '12px', 
+                            borderRadius: '16px', 
+                            color: 'var(--bg-sidebar)',
+                            boxShadow: 'var(--shadow-sm)',
+                            display: 'flex'
+                          }}>
+                            <User size={20} />
+                          </div>
+                          <div>
+                            <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{user.name}</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>UID: {user.id.toString().slice(-6)}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)', fontWeight: 500 }}>
+                          <Mail size={15} style={{ opacity: 0.5 }} />
+                          <span>{user.email}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${user.role === 'admin' ? 'badge-danger' : user.role === 'staff' ? 'badge-blue' : 'badge-success'}`}>
+                          {user.role.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <p style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB') : 'Auto-Sync'}
+                        </p>
+                      </td>
+                      <td style={{ textAlign: 'right', paddingRight: '32px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                          <button style={{ 
+                            padding: '10px', 
+                            borderRadius: '12px', 
+                            border: '1px solid var(--border-strong)', 
+                            background: '#fff', 
+                            color: 'var(--text-main)',
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }} className="row-action-btn">
+                            <Settings size={16} />
+                          </button>
+                          <button style={{ 
+                            padding: '10px', 
+                            borderRadius: '12px', 
+                            border: '1px solid #fee2e2', 
+                            background: '#fff', 
+                            color: '#dc2626', 
+                            cursor: 'pointer',
+                            transition: 'var(--transition)'
+                          }} className="row-delete-btn">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {/* Pagination Controls */}
+              <div style={{ 
+                padding: '24px 32px', 
+                borderTop: '1px solid var(--border)', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                background: '#fcfdfe'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+                    Showing <span style={{ color: 'var(--text-main)' }}>{indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> members
+                  </p>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                    <select 
+                      value={itemsPerPage} 
+                      onChange={(e) => {
+                        setItemsPerPage(parseInt(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      style={{ 
+                        padding: '6px 12px', 
+                        borderRadius: '10px', 
+                        border: '1px solid var(--border-strong)', 
+                        background: '#fff', 
+                        fontSize: '0.85rem', 
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        outline: 'none',
+                        color: 'var(--primary)'
+                      }}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(1)}
+                    className="pagination-btn"
+                  >
+                    <ChevronFirst size={18} />
+                  </button>
+                  <button 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className="pagination-btn"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  
+                  <div style={{ display: 'flex', gap: '4px', margin: '0 8px' }}>
+                    {[...Array(totalPages)].map((_, i) => {
+                      const page = i + 1;
+                      // Only show current page and neighbors if many pages
+                      if (totalPages > 5 && Math.abs(page - currentPage) > 1 && page !== 1 && page !== totalPages) {
+                        if (Math.abs(page - currentPage) === 2) return <span key={page} style={{ alignSelf: 'flex-end', padding: '0 4px', color: 'var(--text-sidebar)' }}>...</span>;
+                        return null;
+                      }
+                      return (
+                        <button 
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          style={{
+                            minWidth: '36px', height: '36px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                            background: currentPage === page ? 'var(--primary)' : 'transparent',
+                            color: currentPage === page ? '#fff' : 'var(--text-muted)',
+                            fontWeight: 800, transition: 'var(--transition)', fontSize: '0.9rem'
+                          }}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button 
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className="pagination-btn"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                  <button 
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="pagination-btn"
+                  >
+                    <ChevronLast size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Level 2 */}
+        {isModalOpen && (
+          <div style={{ 
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+            background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)',
+            zIndex: 3000, display: 'flex', justifyContent: 'center', alignItems: 'center',
+            padding: '20px'
+          }}>
+            <div className="animate-slide-up" style={{ 
+              width: '100%', maxWidth: '520px', background: '#fff', borderRadius: '32px', 
+              overflow: 'hidden', boxShadow: '0 40px 100px -20px rgba(0,0,0,0.4)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ 
+                background: 'var(--bg-sidebar)', 
+                padding: '36px 40px', 
+                color: '#fff', 
+                position: 'relative', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '20px' 
+              }}>
+                <div style={{ 
+                  background: 'linear-gradient(135deg, var(--primary), #059669)', 
+                  padding: '14px', 
+                  borderRadius: '20px',
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.3)'
+                }}>
+                  <UserPlus size={28} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Onboard Member</h2>
+                  <p style={{ opacity: 0.5, fontSize: '0.9rem', fontWeight: 500 }}>Assign role and access scope</p>
+                </div>
+                <button 
+                  onClick={() => setIsModalOpen(false)} 
+                  style={{ 
+                    position: 'absolute', top: '32px', right: '32px', 
+                    background: 'rgba(255,255,255,0.08)', border: 'none', 
+                    cursor: 'pointer', color: '#fff', padding: '10px', 
+                    borderRadius: '14px', transition: 'var(--transition)'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                  onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} style={{ padding: '40px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>FULL NAME</label>
+                    <input 
+                      type="text" required value={formData.name}
+                      placeholder="e.g. Alexander Pierce"
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="input-premium"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>EMAIL ADDRESS</label>
+                    <input 
+                      type="email" required value={formData.email}
+                      placeholder="alex@ipos-pro.com"
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="input-premium"
+                      style={{ background: '#f8fafc' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="form-group">
+                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>SET PASSWORD</label>
+                      <input 
+                        type="password" required value={formData.password}
+                        placeholder="••••••••"
+                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        className="input-premium"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: isPasswordError ? '#dc2626' : 'inherit' }}>CONFIRM PASSWORD</label>
+                      <input 
+                        type="password" required value={formData.confirmPassword}
+                        placeholder="••••••••"
+                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                        className="input-premium"
+                        style={{ borderColor: isPasswordError ? '#dc2626' : undefined, background: '#f8fafc' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ACCESS ROLE</label>
+                    <div style={{ position: 'relative' }}>
+                      <select 
+                        value={formData.role}
+                        onChange={(e) => setFormData({...formData, role: e.target.value})}
+                        className="input-premium"
+                        style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        <option value="user">Standard User</option>
+                        <option value="staff">Staff / Cashier</option>
+                        <option value="admin">System Administrator</option>
+                      </select>
+                      <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                        <Filter size={16} color="var(--text-sidebar)" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => setIsModalOpen(false)} 
+                      style={{ 
+                        flex: 1, 
+                        padding: '16px', 
+                        borderRadius: '16px', 
+                        border: '1px solid var(--border-strong)', 
+                        background: '#fff', 
+                        color: 'var(--text-main)', 
+                        fontWeight: 800, 
+                        cursor: 'pointer',
+                        transition: 'var(--transition)'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+                      onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+                    >
+                      Dismiss
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={isPasswordError}
+                      className="btn-primary"
+                      style={{ flex: 1.8, justifyContent: 'center', opacity: isPasswordError ? 0.5 : 1, fontSize: '1rem' }}
+                    >
+                      Create Account
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <style>{`
+        .directory-row td { transition: var(--transition); }
+        .directory-row:hover td { background: #fcfdfe; }
+        .row-action-btn:hover { border-color: var(--primary) !important; color: var(--primary) !important; transform: scale(1.05); }
+        .row-delete-btn:hover { background: #fef2f2 !important; transform: scale(1.05); }
+        .spinner { width: 44px; height: 44px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .badge-blue { background: #e0f2fe; color: #0369a1; }
+        .pagination-btn {
+          width: 36px; height: 36px; border-radius: 10px; 
+          border: 1px solid var(--border-strong); background: #fff; 
+          color: var(--text-main); display: flex; align-items: center; 
+          justify-content: center; cursor: pointer; transition: var(--transition);
+        }
+        .pagination-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+      `}</style>
+    </>
+  );
+};
+
+export default Users;
+
+
+
