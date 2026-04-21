@@ -353,7 +353,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
         await SunmiPrinter.printText('--- TEST PRINT ---\n');
         await SunmiPrinter.printText('Printer: $printerName\n');
         await SunmiPrinter.printText('------------------\n');
-        await SunmiPrinter.printText('ສະບາຍດີປີໃໝ່\n');
+        await SunmiPrinter.printText('ສະບາຍດີ\n');
         await SunmiPrinter.printText('IPOS by freelix.la\n');
         
         // Feed paper at the bottom (padding bottom) so it can be torn off
