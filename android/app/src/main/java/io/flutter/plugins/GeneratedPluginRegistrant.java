@@ -35,5 +35,10 @@ public final class GeneratedPluginRegistrant {
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin sqflite_android, com.tekartik.sqflite.SqflitePlugin", e);
     }
+    try {
+      flutterEngine.getPlugins().add(new br.com.brasizza.sunmi_printer_plus.SunmiPrinterPlusPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin sunmi_printer_plus, br.com.brasizza.sunmi_printer_plus.SunmiPrinterPlusPlugin", e);
+    }
   }
 }

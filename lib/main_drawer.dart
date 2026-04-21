@@ -4,6 +4,7 @@ import 'package:ipos/view_orders_screen.dart';
 import 'package:ipos/sync_screen.dart';
 import 'package:ipos/sales_report_screen.dart';
 import 'package:ipos/settings_screen.dart';
+import 'package:ipos/printer_screen.dart';
 
 class MainDrawer extends StatelessWidget {
   final Color primaryGreen;
@@ -96,7 +97,10 @@ class MainDrawer extends StatelessWidget {
                   label: 'ເຊື່ອມຕໍ່ເຄື່ອງພິມ',
                   onTap: () {
                     Navigator.pop(context);
-                    // Add printer logic here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PrinterScreen()),
+                    );
                   },
                 ),
                 _buildMenuItem(
