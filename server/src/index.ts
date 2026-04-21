@@ -31,3 +31,14 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(Number(port), '0.0.0.0', () => {
   console.log(`[server]: Server is running at http://0.0.0.0:${port}`);
 });
+
+// Capture termination signals
+process.on('SIGTERM', () => {
+  console.log('[server]: SIGTERM received. Shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('[server]: SIGINT received. Shutting down gracefully...');
+  process.exit(0);
+});

@@ -16,6 +16,11 @@ export const writePool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Log pool errors to prevent silent crashes
+writePool.on('error', (err) => {
+  console.error('[server]: Unexpected error on idle WRITE database connection', err);
+});
+
 // Create read pool
 export const readPool = mysql.createPool({
   host: process.env.DB_HOST_READ,
@@ -27,6 +32,10 @@ export const readPool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+});
+
+readPool.on('error', (err) => {
+  console.error('[server]: Unexpected error on idle READ database connection', err);
 });
 
 export const initDb = async () => {
