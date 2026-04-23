@@ -13,6 +13,7 @@ import SaleReports from './pages/SaleReports';
 import StockReports from './pages/StockReports';
 import Shops from './pages/Shops';
 import RegisterShop from './pages/RegisterShop';
+import ExchangeRates from './pages/ExchangeRates';
 
 function App() {
   const user = localStorage.getItem('user');
@@ -37,6 +38,7 @@ function App() {
         <Route path="products/edit/:id" element={isAdmin ? <UpdateProduct /> : <Navigate to="/dashboard" />} />
         <Route path="users" element={isAdmin ? <Users /> : <Navigate to="/dashboard" />} />
         <Route path="shops" element={isAdmin ? <Shops /> : <Navigate to="/dashboard" />} />
+        <Route path="exchange-rates" element={isAdmin ? <ExchangeRates /> : <Navigate to="/dashboard" />} />
         
         <Route path="stock" element={<StockManagement />} />
         <Route path="orders" element={<Orders />} />

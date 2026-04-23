@@ -197,10 +197,20 @@ export const api = {
     return response.json();
   },
 
-  // Exchange Rates
-  getExchangeRates: async () => {
-    const response = await fetch(`${API_BASE_URL}/exchange-rates`);
+  getExchangeRates: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/exchange-rates?shopId=${shopId}` : `${API_BASE_URL}/exchange-rates`;
+    const response = await fetch(url, { headers: getHeaders() });
     if (!response.ok) throw new Error('Failed to fetch rates');
+    return response.json();
+  },
+
+  updateExchangeRates: async (rates: any, shopId?: string) => {
+    const response = await fetch(`${API_BASE_URL}/exchange-rates`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ rates, shopId }),
+    });
+    if (!response.ok) throw new Error('Failed to update rates');
     return response.json();
   }
 };

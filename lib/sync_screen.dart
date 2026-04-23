@@ -59,7 +59,8 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       // 2. Sync Exchange Rates
-      final rateUrl = Uri.parse(ApiConfig.ratesUrl);
+      final shopId = prefs.getString('shop_id') ?? '';
+      final rateUrl = Uri.parse('${ApiConfig.ratesUrl}?shopId=$shopId');
       final rateRes = await http.get(
         rateUrl,
         headers: {'Authorization': 'Bearer $token'},
@@ -230,7 +231,8 @@ class _SyncScreenState extends State<SyncScreen> {
         _progress = 0.85;
       });
 
-      final rateUrl = Uri.parse(ApiConfig.ratesUrl);
+      final shopId = prefs.getString('shop_id') ?? '';
+      final rateUrl = Uri.parse('${ApiConfig.ratesUrl}?shopId=$shopId');
       final rateRes = await http.get(
         rateUrl,
         headers: {'Authorization': 'Bearer $token'},

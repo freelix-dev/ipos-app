@@ -82,10 +82,12 @@ CREATE TABLE IF NOT EXISTS orders (
 
 -- 5. Create Exchange Rates Table
 CREATE TABLE IF NOT EXISTS exchange_rates (
-  currency VARCHAR(10) PRIMARY KEY,
+  currency VARCHAR(10) NOT NULL,
+  shop_id VARCHAR(255) NOT NULL DEFAULT 'global',
   rate DECIMAL(15, 2) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (currency, shop_id)
 );
 
 -- Seed System Administrator
@@ -93,7 +95,7 @@ INSERT IGNORE INTO users (id, shop_id, name, email, password, role) VALUES
 ('00000000-0000-0000-0000-000000000000', NULL, 'System Admin', 'system@ipos.com', 'admin123', 'admin');
 
 -- Seed Default Exchange Rates
-INSERT IGNORE INTO exchange_rates (currency, rate) VALUES 
-('LAK', 1),
-('THB', 740.0),
-('USD', 21500.0);
+INSERT IGNORE INTO exchange_rates (currency, shop_id, rate) VALUES 
+('LAK', 'global', 1),
+('THB', 'global', 740.0),
+('USD', 'global', 21500.0);

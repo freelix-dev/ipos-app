@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -11,11 +11,15 @@ import {
   Layers,
   PieChart,
   TrendingUp,
-  Store
+  Store,
+  Coins,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
   const isSystemAdmin = currentUser && !currentUser.shop_id;
@@ -29,8 +33,9 @@ const Sidebar = () => {
     { icon: <PieChart size={20} />, label: 'Stock Report', path: '/reports/stock' },
     { icon: <Users size={20} />, label: 'Manage Users', path: '/users' },
     // Only System Admin or Shop Owners can manage shops
-    ...(currentUser?.role === 'admin' ? [{ icon: <Store size={20} />, label: 'Manage Shops', path: '/shops' }] : []),
-    { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
+    ...(currentUser?.role === 'admin' ? [
+      { icon: <Store size={20} />, label: 'Manage Shops', path: '/shops' }
+    ] : []),
   ];
 
   const handleLogout = () => {
@@ -70,6 +75,41 @@ const Sidebar = () => {
             <span>{item.label}</span>
           </NavLink>
         ))}
+
+        {/* Collapsible Settings Menu */}
+        <div className="settings-menu-group">
+          <div 
+            className={`nav-item ${settingsOpen ? 'active' : ''}`} 
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Settings size={20} />
+              </div>
+              <span>Settings</span>
+            </div>
+            {settingsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </div>
+          
+          {settingsOpen && (
+            <div className="submenu" style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+              {currentUser?.role === 'admin' && (
+                <NavLink 
+                  to="/exchange-rates" 
+                  className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                  style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Coins size={18} />
+                  </div>
+                  <span>Exchange Rates</span>
+                </NavLink>
+              )}
+              {/* Add more settings here if needed */}
+            </div>
+          )}
+        </div>
       </nav>
 
       <div style={{ 
@@ -93,10 +133,41 @@ const Sidebar = () => {
           <span>Logout</span>
         </button>
       </div>
+
+      <style>{`
+        .submenu-item {
+          opacity: 0.8;
+          transform: scale(0.95);
+          margin-left: 10px;
+        }
+        .submenu-item.active {
+          opacity: 1;
+          transform: scale(1);
+          background: rgba(16, 185, 129, 0.1) !important;
+          color: var(--primary) !important;
+        }
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 14px 18px;
+          border-radius: 12px;
+          color: #64748b;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .nav-item:hover {
+          background: #f1f5f9;
+          color: var(--primary);
+        }
+        .nav-item.active {
+          background: var(--primary);
+          color: white;
+        }
+      `}</style>
     </div>
   );
 };
 
-
 export default Sidebar;
-

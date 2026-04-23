@@ -5,6 +5,7 @@ import 'package:ipos/sync_screen.dart';
 import 'package:ipos/sales_report_screen.dart';
 import 'package:ipos/settings_screen.dart';
 import 'package:ipos/printer_screen.dart';
+import 'package:ipos/exchange_rate_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainDrawer extends StatefulWidget {
@@ -179,6 +180,17 @@ class _MainDrawerState extends State<MainDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.currency_exchange_rounded,
+                  label: 'ອັດຕາແລກປ່ຽນ',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ExchangeRateScreen()),
                     );
                   },
                 ),
