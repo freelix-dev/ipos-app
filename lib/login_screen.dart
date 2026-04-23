@@ -19,8 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
   bool _isLoading = false;
   
-  final Color primaryGreen = const Color(0xFF10B981);
-  final Color darkSlate = const Color(0xFF0F172A);
+  final Color primaryGreen = const Color(0xFF76A258);
+  final Color bgGreen = const Color(0xFF86AB68);
 
   @override
   void initState() {
@@ -113,149 +113,156 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkSlate,
-      body: Stack(
-        children: [
-          // Background Gradient Ornament
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryGreen.withOpacity(0.15),
-              ),
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgGreen, bgGreen.withOpacity(0.8)],
           ),
-          
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Elite Logo
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withOpacity(0.1)),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: primaryGreen,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryGreen.withOpacity(0.4),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.layers_rounded, size: 50, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      const Text(
-                        'iPOS PRO',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -1.5,
-                        ),
-                      ),
-                      Text(
-                        'Next-Gen POS Intelligence'.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: primaryGreen,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                      
-                      // Modern Login Inputs
-                      _buildModernTextField(
-                        controller: _emailController,
-                        hint: 'Access Identifier (Email)',
-                        icon: Icons.alternate_email_rounded,
-                      ),
-                      const SizedBox(height: 20),
-                      _buildModernTextField(
-                        controller: _passwordController,
-                        hint: 'Security Credential',
-                        icon: Icons.lock_outline_rounded,
-                        isPassword: true,
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Theme(
-                            data: ThemeData(unselectedWidgetColor: Colors.white30),
-                            child: Checkbox(
-                              value: _rememberMe,
-                              activeColor: primaryGreen,
-                              onChanged: (value) => setState(() => _rememberMe = value ?? false),
-                            ),
-                          ),
-                          const Text(
-                            'Remember Terminal Access',
-                            style: TextStyle(color: Colors.white60, fontSize: 13, fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      
-                      // Premium Login Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                                )
-                              : const Text(
-                                  'AUTHENTICATE',
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, letterSpacing: 1.5),
-                                ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 40),
-                      Text(
-                        '© 2026 IPOS INTEL SYSTEMS'.toUpperCase(),
-                        style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
-                      ),
-                    ],
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Icon Logo
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.shopping_cart_checkout_rounded, size: 50, color: primaryGreen),
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'iPOS System',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Text(
+                    'ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບຈັດການການຂາຍ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  // Login Card
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F4EE),
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          ' ອີເມວ (Email)',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildModernTextField(
+                          controller: _emailController,
+                          hint: 'cashier_kkt1@kkt.com',
+                          icon: Icons.email_outlined,
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          ' ລະຫັດຜ່ານ (Password)',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildModernTextField(
+                          controller: _passwordController,
+                          hint: '...',
+                          icon: Icons.lock_outline_rounded,
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: Checkbox(
+                                value: _rememberMe,
+                                activeColor: primaryGreen,
+                                onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'ຈົດຈຳຂ້ອຍ',
+                              style: TextStyle(color: Color(0xFF6B7280), fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 60,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryGreen,
+                              foregroundColor: Colors.white,
+                              elevation: 4,
+                              shadowColor: Colors.black26,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                                  )
+                                : const Text(
+                                    'ເຂົ້າສູ່ລະບົບ',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Center(
+                          child: Text(
+                            'ລືມລະຫັດຜ່ານ?',
+                            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Text(
+                    '© 2026 iPOS Solution. All Rights Reserved.',
+                    style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -268,23 +275,22 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        color: Colors.grey.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword && !_isPasswordVisible,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontWeight: FontWeight.w500),
-          prefixIcon: Icon(icon, color: Colors.white38, size: 22),
+          hintStyle: TextStyle(color: Colors.black26, fontWeight: FontWeight.w500),
+          prefixIcon: Icon(icon, color: primaryGreen, size: 22),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
                     _isPasswordVisible ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-                    color: Colors.white38,
+                    color: Colors.black26,
                     size: 20,
                   ),
                   onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),

@@ -99,6 +99,30 @@ class _PosScreenState extends State<PosScreen> {
     return priceInLak / rate;
   }
 
+  String _getImageUrl(String? path) {
+    if (path == null || path.trim().isEmpty) {
+      return '${ApiConfig.baseUrl}/assets/images/default.png';
+    }
+    
+    if (path.startsWith('http')) return path;
+    
+    String normalizedPath = path.trim();
+    if (normalizedPath.startsWith('/')) {
+      normalizedPath = normalizedPath.substring(1);
+    }
+    
+    // If it's just a filename or missing the root folder, assume assets/images/
+    if (!normalizedPath.startsWith('assets/') && 
+        !normalizedPath.startsWith('public/') && 
+        !normalizedPath.startsWith('uploads/')) {
+       normalizedPath = 'assets/images/$normalizedPath';
+    }
+    
+    // Add cache busting timestamp
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '${ApiConfig.baseUrl}/$normalizedPath?t=$timestamp';
+  }
+
   String formatPrice(double price) {
     return price
         .toStringAsFixed(0)
@@ -222,11 +246,12 @@ class _PosScreenState extends State<PosScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Image.network(
-                                  item.product.imagePath.startsWith('http') 
-                                      ? item.product.imagePath 
-                                      : '${ApiConfig.baseUrl}/${item.product.imagePath}',
+                                  _getImageUrl(item.product.imagePath),
                                   fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 24),
+                                  errorBuilder: (context, error, stackTrace) => Image.network(
+                                    '${ApiConfig.baseUrl}/assets/images/default.png',
+                                    errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 24),
+                                  ),
                                 ),
                               ),
                               title: Text(
@@ -356,8 +381,9 @@ class _PosScreenState extends State<PosScreen> {
     super.dispose();
   }
 
-  final Color primaryGreen = const Color(0xFF10B981);
-  final Color darkSlate = const Color(0xFF0F172A);
+  final Color primaryGreen = const Color(0xFF76A258);
+  final Color darkSlate = const Color(0xFF1E293B);
+  final Color orangeColor = const Color(0xFFF59E0B);
 
   @override
   Widget build(BuildContext context) {
@@ -370,70 +396,59 @@ class _PosScreenState extends State<PosScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       drawer: MainDrawer(primaryGreen: primaryGreen, onSyncComplete: _loadData),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: primaryGreen,
         elevation: 0,
         centerTitle: true,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu_rounded, color: darkSlate),
+            icon: const Icon(Icons.menu_rounded, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: Text(
-          shopName.toUpperCase(),
-          style: TextStyle(
-            color: darkSlate,
-            fontWeight: FontWeight.w900,
-            fontSize: 16,
-            letterSpacing: 1.2,
-          ),
+        title: Column(
+          children: [
+            Text(
+              shopName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            const Text(
+              'Namkhong Vientiane',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: PopupMenuButton<String>(
-              onSelected: (String value) =>
-                  setState(() => selectedCurrency = value),
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'LAK',
-                  child: Text('LAK (₭)'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'THB',
-                  child: Text('THB (฿)'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'USD',
-                  child: Text('USD (\$)'),
-                ),
-              ],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          Row(
+            children: [
+              PopupMenuButton<String>(
+                onSelected: (String value) => setState(() => selectedCurrency = value),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(value: 'LAK', child: Text('LAK (₭)')),
+                  const PopupMenuItem<String>(value: 'THB', child: Text('THB (฿)')),
+                ],
                 child: Row(
                   children: [
                     Text(
                       selectedCurrency,
-                      style: TextStyle(
-                        color: darkSlate,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                    Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: darkSlate,
-                      size: 18,
-                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.white),
                   ],
                 ),
               ),
-            ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.white),
+                onPressed: () => setState(() => cartItems.clear()),
+              ),
+            ],
           ),
         ],
       ),
@@ -462,7 +477,7 @@ class _PosScreenState extends State<PosScreen> {
                       onChanged: (value) => setState(() => searchQuery = value),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
-                        hintText: 'Search intelligence...',
+                        hintText: 'ລະຫັດສິນຄ້າ',
                         hintStyle: TextStyle(
                           color: Colors.grey.shade400,
                           fontWeight: FontWeight.w500,
@@ -506,7 +521,7 @@ class _PosScreenState extends State<PosScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                _buildCategoryChip('All Products', true),
+                _buildCategoryChip('ທົ່ວໄປ', true),
                 _buildCategoryChip('Beverages', false),
                 _buildCategoryChip('Snacks', false),
                 _buildCategoryChip('Other', false),
@@ -710,18 +725,39 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   int quantity = 1;
 
+  String _getImageUrl(String? path) {
+    if (path == null || path.trim().isEmpty) {
+      return '${ApiConfig.baseUrl}/assets/images/default.png';
+    }
+    if (path.startsWith('http')) return path;
+    
+    String normalizedPath = path.trim();
+    if (normalizedPath.startsWith('/')) {
+      normalizedPath = normalizedPath.substring(1);
+    }
+    
+    if (!normalizedPath.startsWith('assets/') && 
+        !normalizedPath.startsWith('public/') && 
+        !normalizedPath.startsWith('uploads/')) {
+       normalizedPath = 'assets/images/$normalizedPath';
+    }
+    
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '${ApiConfig.baseUrl}/$normalizedPath?t=$timestamp';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -740,74 +776,78 @@ class _ProductCardState extends State<ProductCard> {
       children: [
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Image.network(
-              widget.product.imagePath.startsWith('http') 
-                  ? widget.product.imagePath 
-                  : '${ApiConfig.baseUrl}/${widget.product.imagePath}',
+              _getImageUrl(widget.product.imagePath),
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+              errorBuilder: (context, error, stackTrace) => Image.network(
+                '${ApiConfig.baseUrl}/assets/images/default.png',
+                errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+              ),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 widget.product.name,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'STOCK: ${widget.product.stock}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  Text(
-                    widget.product.unit.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: widget.primaryGreen,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
+              Text(
+                'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFFF59E0B),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${widget.displayPrice} ${widget.selectedCurrency == 'LAK' ? 'ກີບ' : 'ບາດ'}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    widget.displayPrice,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 17,
+                  _qtyButton(Icons.remove, Colors.redAccent, () {
+                    if (quantity > 1) setState(() => quantity--);
+                  }),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      '$quantity',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: widget.primaryGreen.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add_rounded,
-                      color: widget.primaryGreen,
-                      size: 20,
+                  _qtyButton(Icons.add, const Color(0xFF76A258), () {
+                    setState(() => quantity++);
+                  }),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => widget.onAdd(quantity),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF76A258),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'ເພີ່ມ',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ],
@@ -826,16 +866,17 @@ class _ProductCardState extends State<ProductCard> {
           width: 100,
           padding: const EdgeInsets.all(12),
           child: Image.network(
-            widget.product.imagePath.startsWith('http') 
-                ? widget.product.imagePath 
-                : '${ApiConfig.baseUrl}/${widget.product.imagePath}',
+            _getImageUrl(widget.product.imagePath),
             fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 30),
+            errorBuilder: (context, error, stackTrace) => Image.network(
+              '${ApiConfig.baseUrl}/assets/images/default.png',
+              errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+            ),
           ),
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -843,17 +884,26 @@ class _ProductCardState extends State<ProductCard> {
                 Text(
                   widget.product.name,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                   maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  'AVAILABLE STOCK: ${widget.product.stock} ${widget.product.unit}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade500,
+                  'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFFF59E0B),
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${widget.displayPrice} ${widget.selectedCurrency == 'LAK' ? 'ກີບ' : 'ບາດ'}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
                   ),
                 ),
               ],
@@ -861,32 +911,35 @@ class _ProductCardState extends State<ProductCard> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          padding: const EdgeInsets.only(right: 12),
+          child: Row(
             children: [
-              Text(
-                widget.displayPrice,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18,
+              _qtyButton(Icons.remove, Colors.redAccent, () {
+                if (quantity > 1) setState(() => quantity--);
+              }),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '$quantity',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: widget.primaryGreen,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  color: Colors.white,
-                  size: 20,
+              _qtyButton(Icons.add, const Color(0xFF76A258), () {
+                setState(() => quantity++);
+              }),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => widget.onAdd(quantity),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF76A258),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'ເພີ່ມ',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                 ),
               ),
             ],
@@ -895,27 +948,18 @@ class _ProductCardState extends State<ProductCard> {
       ],
     );
   }
-}
 
-Widget _circularButton(
-  IconData icon,
-  Color color,
-  Color iconColor,
-  VoidCallback onTap,
-) {
-  return Material(
-    color: color,
-    borderRadius: BorderRadius.circular(8),
-    elevation: 1,
-    child: InkWell(
+  Widget _qtyButton(IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
       child: Container(
-        width: 28,
-        height: 28,
-        alignment: Alignment.center,
-        child: Icon(icon, color: iconColor, size: 14),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
-    ),
-  );
+    );
+  }
 }
