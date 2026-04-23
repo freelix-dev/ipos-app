@@ -37,11 +37,28 @@ exports.syncOrders = exports.getOrders = void 0;
 const orderService = __importStar(require("../services/order.service"));
 const getOrders = async (req, res) => {
     try {
-        const orders = await orderService.getAllOrders();
+        const user = req.user;
+        const shopId = req.query.shopId;
+        let ownerId;
+        let userId;
+        const isSystemAdmin = user && !user.shop_id && !user.owner_id;
+        if (!isSystemAdmin && user) {
+            if (!user.owner_id) {
+                // Owner view: see everything they own
+                ownerId = user.id;
+                userId = undefined;
+            }
+            else {
+                // Staff view: restricted
+                ownerId = user.owner_id;
+                userId = user.id;
+            }
+        }
+        const orders = await orderService.getAllOrders(shopId, ownerId, userId);
         res.json(orders);
     }
-    catch (e) {
-        console.error(e);
+    catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Database error' });
     }
 };

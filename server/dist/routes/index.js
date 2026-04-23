@@ -9,12 +9,15 @@ const user_routes_1 = __importDefault(require("./user.routes"));
 const product_routes_1 = __importDefault(require("./product.routes"));
 const order_routes_1 = __importDefault(require("./order.routes"));
 const exchange_rate_routes_1 = __importDefault(require("./exchange-rate.routes"));
+const shop_routes_1 = __importDefault(require("./shop.routes"));
+const auth_middleware_1 = require("../middlewares/auth.middleware");
 const router = (0, express_1.Router)();
 router.use('/', auth_routes_1.default);
-router.use('/users', user_routes_1.default);
-router.use('/products', product_routes_1.default);
-router.use('/orders', order_routes_1.default);
-router.use('/exchange-rates', exchange_rate_routes_1.default);
+router.use('/users', auth_middleware_1.authenticateToken, user_routes_1.default);
+router.use('/products', auth_middleware_1.authenticateToken, product_routes_1.default);
+router.use('/orders', auth_middleware_1.authenticateToken, order_routes_1.default);
+router.use('/exchange-rates', auth_middleware_1.authenticateToken, exchange_rate_routes_1.default);
+router.use('/shops', shop_routes_1.default); // Note: /shops/register must stay public
 // For compatibility with the original /api/upload which I moved inside /api/products/upload in my initial thought
 // but looking back at index.ts it was /api/upload. Let's keep it consistent or redirect.
 // Actually, I'll just add it here directly or keep it in products.

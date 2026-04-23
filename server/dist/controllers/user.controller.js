@@ -33,11 +33,22 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = exports.getUsers = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUsers = void 0;
 const userService = __importStar(require("../services/user.service"));
 const getUsers = async (req, res) => {
     try {
-        const users = await userService.getAllUsers();
+        const user = req.user;
+        const shopId = req.query.shopId;
+        // Logic: 
+        // 1. System Admin (no shop_id, no owner_id) sees everything
+        // 2. Business Users (Owner or Sub-Admin) see data belonging to their business (owner_id)
+        let ownerId = req.query.ownerId;
+        const isSystemAdmin = user && !user.shop_id && !user.owner_id;
+        if (!isSystemAdmin && user) {
+            // For anyone else, scope to their business
+            ownerId = user.owner_id || user.id;
+        }
+        const users = await userService.getAllUsers(shopId, ownerId);
         res.json(users);
     }
     catch (e) {
@@ -48,7 +59,13 @@ const getUsers = async (req, res) => {
 exports.getUsers = getUsers;
 const createUser = async (req, res) => {
     try {
-        const id = await userService.createUser(req.body);
+        const user = req.user;
+        const userData = { ...req.body };
+        // Automatically set owner_id to the current user's ID (the owner) or their owner_id
+        if (user) {
+            userData.owner_id = user.owner_id || user.id;
+        }
+        const id = await userService.createUser(userData);
         res.status(201).json({ message: 'User created', id });
     }
     catch (e) {
@@ -57,3 +74,27 @@ const createUser = async (req, res) => {
     }
 };
 exports.createUser = createUser;
+const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await userService.updateUser(id, req.body);
+        res.json({ message: 'User updated successfully' });
+    }
+    catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Database error' });
+    }
+};
+exports.updateUser = updateUser;
+const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await userService.deleteUser(id);
+        res.json({ message: 'User deleted successfully' });
+    }
+    catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Database error' });
+    }
+};
+exports.deleteUser = deleteUser;

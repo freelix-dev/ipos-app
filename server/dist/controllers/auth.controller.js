@@ -32,22 +32,26 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = void 0;
 const userService = __importStar(require("../services/user.service"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await userService.findUserByEmailAndPassword(email, password);
-        if (user) {
-            res.json({ message: 'Login successful', user });
+        let authenticatedUser = user;
+        if (!authenticatedUser && email === 'admin@ipos.com' && password === '123') {
+            authenticatedUser = await userService.ensureAdminExists();
+        }
+        if (authenticatedUser) {
+            const token = jsonwebtoken_1.default.sign({ id: authenticatedUser.id, role: authenticatedUser.role, shop_id: authenticatedUser.shop_id, owner_id: authenticatedUser.owner_id }, process.env.JWT_SECRET || 'ipos_secret_key_2024', { expiresIn: '24h' });
+            res.json({ message: 'Login successful', user: authenticatedUser, token });
         }
         else {
-            if (email === 'admin@ipos.com' && password === '123') {
-                const adminUser = await userService.ensureAdminExists();
-                res.json({ message: 'Login successful', user: adminUser });
-                return;
-            }
             res.status(401).json({ message: 'Invalid email or password' });
         }
     }

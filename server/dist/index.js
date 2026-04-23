@@ -17,6 +17,7 @@ app.use(express_1.default.json());
 // Serve static assets from the server's public directory
 app.use('/assets', express_1.default.static(path_1.default.join(__dirname, '../public/assets')));
 app.use('/public', express_1.default.static(path_1.default.join(__dirname, '../public')));
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../public/uploads')));
 // Initialize DB
 (0, db_1.initDb)();
 // API Routes

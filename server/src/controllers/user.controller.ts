@@ -47,7 +47,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await userService.updateUser(id, req.body);
+    await userService.updateUser(id as string, req.body);
     res.json({ message: 'User updated successfully' });
   } catch (e) {
     console.error(e);
@@ -58,7 +58,7 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await userService.deleteUser(id);
+    await userService.deleteUser(id as string);
     res.json({ message: 'User deleted successfully' });
   } catch (e) {
     console.error(e);

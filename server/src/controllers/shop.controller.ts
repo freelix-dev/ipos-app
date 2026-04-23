@@ -78,7 +78,7 @@ export const uploadShopLogo = async (req: Request, res: Response) => {
     const shopId = req.params.id;
     // Build the public URL path for the uploaded file
     const logoPath = `/uploads/logos/${req.file.filename}`;
-    await shopService.updateShop(shopId, { logoPath });
+    await shopService.updateShop(shopId as string, { logoPath });
     res.json({ message: 'Logo uploaded successfully', logoPath });
   } catch (error) {
     res.status(500).json({ message: 'Error uploading logo', error });

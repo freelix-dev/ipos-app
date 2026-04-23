@@ -71,6 +71,28 @@ class _SyncScreenState extends State<SyncScreen> {
         await DatabaseHelper().updateExchangeRates(rateData);
       }
 
+      // 3. Download Shop Information
+      setState(() {
+        _status = 'ດາວໂຫລດຂໍ້ມູນຮ້ານ...';
+        _progress = 0.95;
+      });
+
+      if (shopId.isNotEmpty) {
+        final shopUrl = Uri.parse('${ApiConfig.shopsUrl}/$shopId');
+        final shopRes = await http.get(
+          shopUrl,
+          headers: {'Authorization': 'Bearer $token'},
+        ).timeout(const Duration(seconds: 30));
+        
+        if (shopRes.statusCode == 200) {
+          final shopData = json.decode(shopRes.body);
+          await prefs.setString('shop_name', shopData['name'] ?? '');
+          await prefs.setString('shop_address', shopData['address'] ?? '');
+          await prefs.setString('shop_phone', shopData['phone'] ?? '');
+          await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
+        }
+      }
+
       setState(() {
         _status = 'ສຳເລັດແລ້ວ!';
         _progress = 1.0;
@@ -237,9 +259,32 @@ class _SyncScreenState extends State<SyncScreen> {
         rateUrl,
         headers: {'Authorization': 'Bearer $token'},
       ).timeout(const Duration(seconds: 30));
+
       if (rateRes.statusCode == 200) {
         Map<String, dynamic> rateData = json.decode(rateRes.body);
         await DatabaseHelper().updateExchangeRates(rateData);
+      }
+
+      // 4. Download Shop Information
+      setState(() {
+        _status = 'ດາວໂຫລດຂໍ້ມູນຮ້ານ...';
+        _progress = 0.95;
+      });
+
+      if (shopId.isNotEmpty) {
+        final shopUrl = Uri.parse('${ApiConfig.shopsUrl}/$shopId');
+        final shopRes = await http.get(
+          shopUrl,
+          headers: {'Authorization': 'Bearer $token'},
+        ).timeout(const Duration(seconds: 30));
+        
+        if (shopRes.statusCode == 200) {
+          final shopData = json.decode(shopRes.body);
+          await prefs.setString('shop_name', shopData['name'] ?? '');
+          await prefs.setString('shop_address', shopData['address'] ?? '');
+          await prefs.setString('shop_phone', shopData['phone'] ?? '');
+          await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
+        }
       }
 
       setState(() {

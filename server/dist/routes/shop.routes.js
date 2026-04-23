@@ -34,9 +34,15 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const exchangeRateController = __importStar(require("../controllers/exchange-rate.controller"));
+const shopController = __importStar(require("../controllers/shop.controller"));
+const upload_1 = require("../middlewares/upload");
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 const router = (0, express_1.Router)();
-router.get('/', exchangeRateController.getExchangeRates);
-router.post('/', auth_middleware_1.isAdmin, exchangeRateController.updateExchangeRates);
+router.get('/', auth_middleware_1.authenticateToken, shopController.getShops);
+router.get('/:id', auth_middleware_1.authenticateToken, shopController.getShop);
+router.post('/', auth_middleware_1.authenticateToken, auth_middleware_1.isAdmin, shopController.createShop);
+router.put('/:id', auth_middleware_1.authenticateToken, auth_middleware_1.isAdmin, shopController.updateShop);
+router.delete('/:id', auth_middleware_1.authenticateToken, auth_middleware_1.isAdmin, shopController.deleteShop);
+router.post('/register', shopController.registerShop);
+router.post('/:id/upload-logo', auth_middleware_1.authenticateToken, auth_middleware_1.isAdmin, upload_1.uploadLogo, shopController.uploadShopLogo);
 exports.default = router;

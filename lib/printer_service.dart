@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrinterService {
   static Future<void> printReceipt(Map<String, dynamic> order) async {
@@ -19,11 +20,24 @@ class PrinterService {
       print('PrinterService: Printer initialized');
       await Future.delayed(const Duration(milliseconds: 500));
 
+      // Load Shop Info from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final shopName = prefs.getString('shop_name') ?? 'Namkhong Vientiane';
+      final shopAddress = prefs.getString('shop_address') ?? 'Terminal POS System';
+      final shopPhone = prefs.getString('shop_phone') ?? '';
+
       await SunmiPrinter.lineWrap(1);
       
       // Header
-      await SunmiPrinter.printText('      Namkhong Vientiane\n');
-      await SunmiPrinter.printText('      Terminal POS System\n');
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      await SunmiPrinter.printText('$shopName\n');
+      if (shopAddress.isNotEmpty) {
+        await SunmiPrinter.printText('$shopAddress\n');
+      }
+      if (shopPhone.isNotEmpty) {
+        await SunmiPrinter.printText('Tel: $shopPhone\n');
+      }
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
       await SunmiPrinter.printText('--------------------------------\n');
 
       // Order Info

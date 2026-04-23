@@ -3,14 +3,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncOrders = exports.getAllOrders = void 0;
 const db_1 = require("../db");
 const uuid_1 = require("uuid");
-const getAllOrders = async () => {
-    const [orders] = await db_1.readPool.query(`
-    SELECT o.*, u.name as user_name 
+const getAllOrders = async (shopId, ownerId, userId) => {
+    let query = `
+    SELECT o.*, u.name as user_name, s.name as shop_name 
     FROM orders o 
     LEFT JOIN users u ON o.user_id = u.id 
-    ORDER BY o.date DESC 
-    LIMIT 100
-  `);
+    LEFT JOIN shops s ON o.shop_id = s.id
+  `;
+    const params = [];
+    const whereClauses = [];
+    if (shopId) {
+        whereClauses.push('o.shop_id = ?');
+        params.push(shopId);
+    }
+    if (ownerId) {
+        whereClauses.push('s.owner_id = ?');
+        params.push(ownerId);
+    }
+    if (userId) {
+        whereClauses.push(`(
+      o.shop_id IN (SELECT shop_id FROM user_shops WHERE user_id = ?) 
+      OR o.shop_id = (SELECT shop_id FROM users WHERE id = ?)
+    )`);
+        params.push(userId, userId);
+    }
+    if (whereClauses.length > 0) {
+        query += ' WHERE ' + whereClauses.join(' AND ');
+    }
+    query += ' ORDER BY o.date DESC LIMIT 100';
+    const [orders] = await db_1.readPool.query(query, params);
     return orders;
 };
 exports.getAllOrders = getAllOrders;
@@ -27,19 +48,24 @@ const syncOrders = async (ordersToProcess) => {
                 const id = (incomingOrder.id && incomingOrder.id.length >= 32) ? incomingOrder.id : (0, uuid_1.v4)();
                 const syncedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
                 let user_id = incomingOrder.user_id || incomingOrder.userId || null;
+                let shop_id = incomingOrder.shop_id || incomingOrder.shopId || null;
                 // Final foreign key safety check
                 if (user_id) {
-                    const [userExists] = await connection.query('SELECT id FROM users WHERE id = ?', [user_id]);
-                    if (userExists.length === 0) {
+                    const [userRows] = await connection.query('SELECT id, shop_id FROM users WHERE id = ?', [user_id]);
+                    if (userRows.length === 0) {
                         console.warn(`[order.service] Warning: User ${user_id} not found. Setting user_id to null for order ${id}`);
                         user_id = null;
                     }
+                    else if (!shop_id) {
+                        // Fallback to user's shop_id if not provided
+                        shop_id = userRows[0].shop_id;
+                    }
                 }
-                console.log(`[order.service] Processing order ${id} (Status: ${status}, User: ${user_id})`);
+                console.log(`[order.service] Processing order ${id} (Status: ${status}, Shop: ${shop_id}, User: ${user_id})`);
                 const [existing] = await connection.query('SELECT status FROM orders WHERE id = ?', [id]);
                 if (existing.length > 0) {
                     const oldStatus = existing[0].status;
-                    await connection.query(`UPDATE orders SET status = ?, remark = ?, user_id = ?, syncedAt = ? WHERE id = ?`, [status, remark || null, user_id, syncedAt, id]);
+                    await connection.query(`UPDATE orders SET status = ?, remark = ?, user_id = ?, shop_id = ?, syncedAt = ? WHERE id = ?`, [status, remark || null, user_id, shop_id, syncedAt, id]);
                     if (status === 'Cancelled' && oldStatus !== 'Cancelled') {
                         for (const item of parsedItems) {
                             await connection.query('UPDATE products SET stock = stock + ? WHERE id = ? OR name = ?', [item.quantity, item.id, item.name]);
@@ -47,7 +73,7 @@ const syncOrders = async (ordersToProcess) => {
                     }
                 }
                 else {
-                    await connection.query(`INSERT INTO orders (id, date, total, status, currency, paymentMethod, itemsJson, amountReceived, changeAmount, remark, user_id, syncedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, new Date(date), total, status, currency, paymentMethod, items, amountReceived || 0, changeAmount || 0, remark || null, user_id, new Date(syncedAt)]);
+                    await connection.query(`INSERT INTO orders (id, date, total, status, currency, paymentMethod, itemsJson, amountReceived, changeAmount, remark, user_id, shop_id, syncedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, new Date(date), total, status, currency, paymentMethod, items, amountReceived || 0, changeAmount || 0, remark || null, user_id, shop_id, new Date(syncedAt)]);
                     if (status === 'Completed') {
                         for (const item of parsedItems) {
                             await connection.query('UPDATE products SET stock = stock - ? WHERE id = ? OR name = ?', [item.quantity, item.id, item.name]);

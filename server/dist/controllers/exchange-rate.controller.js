@@ -33,11 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExchangeRates = void 0;
+exports.updateExchangeRates = exports.getExchangeRates = void 0;
 const exchangeRateService = __importStar(require("../services/exchange-rate.service"));
 const getExchangeRates = async (req, res) => {
     try {
-        const rates = await exchangeRateService.getExchangeRates();
+        const { shopId } = req.query;
+        const rates = await exchangeRateService.getExchangeRates(shopId);
         res.json(rates);
     }
     catch (e) {
@@ -46,3 +47,15 @@ const getExchangeRates = async (req, res) => {
     }
 };
 exports.getExchangeRates = getExchangeRates;
+const updateExchangeRates = async (req, res) => {
+    try {
+        const { shopId, rates } = req.body;
+        await exchangeRateService.updateExchangeRates(rates, shopId);
+        res.json({ message: 'Exchange rates updated successfully' });
+    }
+    catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Database error' });
+    }
+};
+exports.updateExchangeRates = updateExchangeRates;

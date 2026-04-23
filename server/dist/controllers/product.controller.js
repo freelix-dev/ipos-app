@@ -37,11 +37,28 @@ exports.uploadImage = exports.updateStock = exports.deleteProduct = exports.upda
 const productService = __importStar(require("../services/product.service"));
 const getProducts = async (req, res) => {
     try {
-        const products = await productService.getAllProducts();
+        const user = req.user;
+        const shopId = req.query.shopId;
+        let ownerId;
+        let userId;
+        const isSystemAdmin = user && !user.shop_id && !user.owner_id;
+        if (!isSystemAdmin && user) {
+            if (!user.owner_id) {
+                // This is a top-level owner, they should see everything they own
+                ownerId = user.id;
+                userId = undefined; // Don't restrict by assigned shops
+            }
+            else {
+                // This is a staff or manager, restrict to their owner and assigned shops
+                ownerId = user.owner_id;
+                userId = user.id;
+            }
+        }
+        const products = await productService.getAllProducts(shopId, ownerId, userId);
         res.json(products);
     }
     catch (e) {
-        console.error(e);
+        console.error('Error in getProducts:', e);
         res.status(500).json({ message: 'Database error' });
     }
 };
@@ -66,8 +83,8 @@ const createProduct = async (req, res) => {
         res.status(201).json({ message: 'Product created', id });
     }
     catch (e) {
-        console.error(e);
-        res.status(500).json({ message: 'Database error' });
+        console.error('CREATE PRODUCT ERROR:', e);
+        res.status(500).json({ message: `Database error: ${e.message}` });
     }
 };
 exports.createProduct = createProduct;

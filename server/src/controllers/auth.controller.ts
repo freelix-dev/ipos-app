@@ -6,7 +6,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
   try {
     const user = await userService.findUserByEmailAndPassword(email, password);
-    let authenticatedUser = user;
+    let authenticatedUser: any = user;
 
     if (!authenticatedUser && email === 'admin@ipos.com' && password === '123') {
       authenticatedUser = await userService.ensureAdminExists();
