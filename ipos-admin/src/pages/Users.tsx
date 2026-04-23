@@ -79,7 +79,8 @@ const Users = () => {
     }
   };
 
-  const isPasswordError = formData.confirmPassword && formData.password !== formData.confirmPassword;
+  const isPasswordError = !!(formData.confirmPassword && formData.password !== formData.confirmPassword);
+
 
   return (
     <>

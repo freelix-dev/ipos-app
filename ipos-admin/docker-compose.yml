@@ -1,8 +1,7 @@
 services:
   ipos-admin:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/freelix-dev/ipos-app-admin:latest
+
     ports:
       - "5173:80"
     environment:
