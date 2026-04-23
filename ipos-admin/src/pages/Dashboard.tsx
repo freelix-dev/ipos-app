@@ -21,17 +21,36 @@ const Dashboard = () => {
   });
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
+
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
+
+  useEffect(() => {
+    loadShops();
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [selectedShopId]);
+
+  const loadShops = async () => {
+    try {
+      const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
+      setShops(data);
+    } catch (error) {
+      console.error('Failed to load shops:', error);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
       const [orders, products] = await Promise.all([
-        api.getOrders(),
-        api.getProducts()
+        api.getOrders(isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id)),
+        api.getProducts(isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id))
       ]);
 
       const totalSales = orders.reduce((sum: number, order: any) => 
@@ -99,9 +118,42 @@ const Dashboard = () => {
           <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Store Intelligence</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Real-time performance metrics and operational tracing</p>
         </div>
-        <div style={{ background: '#fff', padding: '12px 24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="pulse-dot"></div>
-          <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em', color: 'var(--text-main)' }}>SYSTEM ONLINE</span>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          {/* Current Shop Logo Display */}
+          {selectedShopId && shops.find(s => s.id === selectedShopId)?.logoPath && (
+            <img 
+              src={`http://127.0.0.1:3000${shops.find(s => s.id === selectedShopId)?.logoPath}`} 
+              alt="Shop Logo" 
+              style={{ width: '50px', height: '50px', borderRadius: '14px', objectFit: 'cover', border: '1px solid var(--border-strong)' }} 
+            />
+          )}
+
+          {/* Shop Selector for System Admin & Owners */}
+          {(isSystemAdmin || (currentUser?.role === 'admin')) && (
+            <div style={{ position: 'relative', width: '220px' }}>
+              <select 
+                value={selectedShopId}
+                onChange={(e) => setSelectedShopId(e.target.value)}
+                style={{ 
+                  width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                  borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                  background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                  appearance: 'none', cursor: 'pointer', outline: 'none',
+                  color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                <option value="">{isSystemAdmin ? 'All Branches' : 'Current Store'}</option>
+                {shops.map(shop => (
+                  <option key={shop.id} value={shop.id}>{shop.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          <div style={{ background: '#fff', padding: '12px 24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', gap: '12px', height: '50px' }}>
+            <div className="pulse-dot"></div>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em', color: 'var(--text-main)' }}>SYSTEM ONLINE</span>
+          </div>
         </div>
       </div>
 

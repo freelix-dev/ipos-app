@@ -17,6 +17,9 @@ const Login = () => {
     try {
       const res = await api.login({ email, password });
       localStorage.setItem('user', JSON.stringify(res.user));
+      if (res.token) {
+        localStorage.setItem('token', res.token);
+      }
       window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Verification failed. Please check credentials.');

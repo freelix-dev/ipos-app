@@ -5,15 +5,16 @@ import productRoutes from './product.routes';
 import orderRoutes from './order.routes';
 import exchangeRateRoutes from './exchange-rate.routes';
 import shopRoutes from './shop.routes';
+import { authenticateToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 
 router.use('/', authRoutes);
-router.use('/users', userRoutes);
-router.use('/products', productRoutes);
-router.use('/orders', orderRoutes);
-router.use('/exchange-rates', exchangeRateRoutes);
-router.use('/shops', shopRoutes);
+router.use('/users', authenticateToken, userRoutes);
+router.use('/products', authenticateToken, productRoutes);
+router.use('/orders', authenticateToken, orderRoutes);
+router.use('/exchange-rates', authenticateToken, exchangeRateRoutes);
+router.use('/shops', shopRoutes); // Note: /shops/register must stay public
 
 // For compatibility with the original /api/upload which I moved inside /api/products/upload in my initial thought
 // but looking back at index.ts it was /api/upload. Let's keep it consistent or redirect.

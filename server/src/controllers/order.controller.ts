@@ -3,8 +3,20 @@ import * as orderService from '../services/order.service';
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
+    const user = (req as any).user;
     const shopId = req.query.shopId as string;
-    const orders = await orderService.getAllOrders(shopId);
+    
+    let ownerId: string | undefined;
+    let userId: string | undefined;
+
+    const isSystemAdmin = user && !user.shop_id && !user.owner_id;
+
+    if (!isSystemAdmin && user) {
+      ownerId = user.owner_id || user.id;
+      userId = user.id;
+    }
+
+    const orders = await orderService.getAllOrders(shopId, ownerId, userId);
     res.json(orders);
   } catch (error) {
     console.error(error);

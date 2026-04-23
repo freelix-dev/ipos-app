@@ -31,15 +31,13 @@ const Orders = () => {
   const isSystemAdmin = currentUser && !currentUser.shop_id;
 
   useEffect(() => {
-    if (isSystemAdmin) {
-      loadShops();
-    }
+    loadShops();
     loadOrders();
   }, [selectedShopId]);
 
   const loadShops = async () => {
     try {
-      const data = await api.getShops();
+      const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
       setShops(data);
     } catch (error) {
       console.error('Failed to load shops:', error);
@@ -49,7 +47,8 @@ const Orders = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data = await api.getOrders(isSystemAdmin ? selectedShopId : currentUser?.shop_id);
+      const effectiveShopId = isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id);
+      const data = await api.getOrders(effectiveShopId);
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -131,8 +130,8 @@ const Orders = () => {
               />
             </div>
 
-            {/* Shop Selector for System Admin */}
-            {isSystemAdmin && (
+            {/* Shop Selector for System Admin & Owners */}
+            {(isSystemAdmin || (currentUser?.role === 'admin')) && (
               <div style={{ position: 'relative', width: '220px' }}>
                 <select 
                   value={selectedShopId}

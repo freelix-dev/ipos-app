@@ -5,13 +5,33 @@ import fs from 'fs';
 
 const DEFAULT_IMAGES = ['beer_cans.png', 'beer_box.png', 'water_bottle.png', 'blue_cups.png', 'ice_bag.png', 'default.png'];
 
-export const getAllProducts = async (shopId?: string) => {
+export const getAllProducts = async (shopId?: string, ownerId?: string, userId?: string) => {
   let query = 'SELECT p.*, s.name as shop_name FROM products p LEFT JOIN shops s ON p.shop_id = s.id';
   const params: any[] = [];
+  const whereClauses: string[] = [];
 
   if (shopId) {
-    query += ' WHERE p.shop_id = ?';
+    whereClauses.push('p.shop_id = ?');
     params.push(shopId);
+  }
+
+  if (ownerId) {
+    whereClauses.push('s.owner_id = ?');
+    params.push(ownerId);
+  }
+
+  if (userId) {
+    // If a userId is provided, ensure they have access to the shop
+    // This handles both single shop_id (via subquery or join) and multi-shop (user_shops)
+    whereClauses.push(`(
+      p.shop_id IN (SELECT shop_id FROM user_shops WHERE user_id = ?) 
+      OR p.shop_id = (SELECT shop_id FROM users WHERE id = ?)
+    )`);
+    params.push(userId, userId);
+  }
+
+  if (whereClauses.length > 0) {
+    query += ' WHERE ' + whereClauses.join(' AND ');
   }
 
   const [products] = await readPool.query<RowDataPacket[]>(query, params);

@@ -17,6 +17,7 @@ app.use(express.json());
 // Serve static assets from the server's public directory
 app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
 app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Initialize DB
 initDb();

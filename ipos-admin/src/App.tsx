@@ -17,6 +17,8 @@ import RegisterShop from './pages/RegisterShop';
 function App() {
   const user = localStorage.getItem('user');
   const isAuthenticated = !!user;
+  const currentUser = user ? JSON.parse(user) : null;
+  const isAdmin = currentUser?.role === 'admin';
 
   return (
     <Routes>
@@ -29,15 +31,18 @@ function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="products" element={<Products />} />
-        <Route path="products/add" element={<AddProduct />} />
-        <Route path="products/edit/:id" element={<UpdateProduct />} />
+        
+        {/* Admin Only Routes */}
+        <Route path="products/add" element={isAdmin ? <AddProduct /> : <Navigate to="/dashboard" />} />
+        <Route path="products/edit/:id" element={isAdmin ? <UpdateProduct /> : <Navigate to="/dashboard" />} />
+        <Route path="users" element={isAdmin ? <Users /> : <Navigate to="/dashboard" />} />
+        <Route path="shops" element={isAdmin ? <Shops /> : <Navigate to="/dashboard" />} />
+        
         <Route path="stock" element={<StockManagement />} />
         <Route path="orders" element={<Orders />} />
-        <Route path="customers" element={<Users />} /> {/* Map Customers menu to Users for now or separate */}
-        <Route path="users" element={<Users />} />
+        <Route path="customers" element={<Users />} />
         <Route path="reports/sales" element={<SaleReports />} />
         <Route path="reports/stock" element={<StockReports />} />
-        <Route path="shops" element={<Shops />} />
         <Route path="*" element={<div>404 Page Not Found</div>} />
       </Route>
     </Routes>

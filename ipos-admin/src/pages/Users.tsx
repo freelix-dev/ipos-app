@@ -26,7 +26,8 @@ const Users = () => {
   const [selectedShopId, setSelectedShopId] = useState('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'user', shop_id: '' });
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'staff', shop_id: '', shop_ids: [] as string[] });
   
   // Filtering & Pagination State
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +36,7 @@ const Users = () => {
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
-  const isSystemAdmin = currentUser && !currentUser.shop_id;
+  const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
 
   useEffect(() => {
     loadUsers();
@@ -45,8 +46,8 @@ const Users = () => {
     try {
       setLoading(true);
       const [userData, shopData] = await Promise.all([
-        api.getUsers(isSystemAdmin ? selectedShopId : currentUser?.shop_id),
-        api.getShops()
+        api.getUsers(selectedShopId || undefined, isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id)),
+        api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id))
       ]);
       setUsers(userData);
       setShops(shopData);
@@ -57,11 +58,20 @@ const Users = () => {
     }
   };
 
+  const [activeTab, setActiveTab] = useState('All Members');
+
   // Filtering Logic
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesTab = activeTab === 'All Members' || 
+                      (activeTab === 'Managers' && user.role === 'admin') ||
+                      (activeTab === 'Staff' && user.role === 'staff') ||
+                      (activeTab === 'Inactive' && user.status === 'BLOCK');
+                      
+    return matchesSearch && matchesTab;
+  });
 
   // Pagination Logic
   const totalItems = filteredUsers.length;
@@ -75,19 +85,42 @@ const Users = () => {
     if (formData.password !== formData.confirmPassword) return;
 
     try {
-      const response = await api.addUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-        shop_id: isSystemAdmin ? formData.shop_id : currentUser?.shop_id
-      });
+      if (editingUser) {
+        await api.updateUser(editingUser.id, formData);
+      } else {
+        await api.addUser(formData);
+      }
       setIsModalOpen(false);
-      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'user', shop_id: '' });
+      setEditingUser(null);
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'staff', shop_id: '', shop_ids: [] });
       loadUsers();
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to add user. Email might already exist.';
-      alert(errorMsg);
+    } catch (err: any) {
+      alert(err.message || 'Failed to process request');
+    }
+  };
+
+  const handleEdit = (user: any) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name || '',
+      email: user.email || '',
+      password: '', // Don't pre-fill password for security
+      confirmPassword: '',
+      role: user.role || 'staff',
+      shop_id: user.shop_id || '',
+      shop_ids: user.assigned_shop_ids || []
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+      try {
+        await api.deleteUser(id);
+        loadUsers();
+      } catch (err: any) {
+        alert(err.message || 'Failed to delete user');
+      }
     }
   };
 
@@ -101,14 +134,20 @@ const Users = () => {
             <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Team Directory</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global access control and staff management</p>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-          >
-            <UserPlus size={20} />
-            <span>Add Team Member</span>
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button 
+              onClick={() => {
+                setEditingUser(null);
+                setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'staff', shop_id: '', shop_ids: [] });
+                setIsModalOpen(true);
+              }}
+              className="btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            >
+              <UserPlus size={20} />
+              <span>Add Team Member</span>
+            </button>
+          )}
         </div>
 
         <div className="table-container" style={{ border: 'none', boxShadow: 'var(--shadow-premium)', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
@@ -142,8 +181,8 @@ const Users = () => {
                 />
               </div>
 
-            {/* Shop Selector for System Admin */}
-            {isSystemAdmin && (
+            {/* Shop Selector for System Admin & Owners */}
+            {(isSystemAdmin || (currentUser?.role === 'admin')) && (
               <div style={{ position: 'relative', width: '220px' }}>
                 <select 
                   value={selectedShopId}
@@ -185,15 +224,16 @@ const Users = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
-                {['All Members', 'Administrators', 'Operators', 'Inactive'].map((t) => (
+                {['All Members', 'Managers', 'Staff', 'Inactive'].map((t) => (
                   <button 
                     key={t}
+                    onClick={() => { setActiveTab(t); setCurrentPage(1); }}
                     style={{
                       padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                      background: t === 'All Members' ? '#fff' : 'transparent',
-                      color: t === 'All Members' ? 'var(--primary)' : 'var(--text-muted)',
+                      background: t === activeTab ? '#fff' : 'transparent',
+                      color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
                       fontWeight: 800, fontSize: '0.85rem',
-                      boxShadow: t === 'All Members' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                      boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
@@ -262,7 +302,7 @@ const Users = () => {
                       </td>
                       <td>
                         <span className={`badge ${user.role === 'admin' ? 'badge-danger' : user.role === 'staff' ? 'badge-blue' : 'badge-success'}`}>
-                          {user.role.toUpperCase()}
+                          {user.role === 'admin' ? 'MANAGER' : user.role.toUpperCase()}
                         </span>
                       </td>
                       <td>
@@ -272,28 +312,38 @@ const Users = () => {
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '32px' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                          <button style={{ 
-                            padding: '10px', 
-                            borderRadius: '12px', 
-                            border: '1px solid var(--border-strong)', 
-                            background: '#fff', 
-                            color: 'var(--text-main)',
-                            cursor: 'pointer',
-                            transition: 'var(--transition)'
-                          }} className="row-action-btn">
-                            <Settings size={16} />
-                          </button>
-                          <button style={{ 
-                            padding: '10px', 
-                            borderRadius: '12px', 
-                            border: '1px solid #fee2e2', 
-                            background: '#fff', 
-                            color: '#dc2626', 
-                            cursor: 'pointer',
-                            transition: 'var(--transition)'
-                          }} className="row-delete-btn">
-                            <Trash2 size={16} />
-                          </button>
+                          {currentUser?.role === 'admin' ? (
+                            <>
+                              <button 
+                                onClick={() => handleEdit(user)}
+                                style={{ 
+                                  padding: '10px', 
+                                  borderRadius: '12px', 
+                                  border: '1px solid var(--border-strong)', 
+                                  background: '#fff', 
+                                  color: 'var(--text-main)',
+                                  cursor: 'pointer',
+                                  transition: 'var(--transition)'
+                                }} className="row-action-btn">
+                                <Settings size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete(user.id, user.name)}
+                                style={{ 
+                                  padding: '10px', 
+                                  borderRadius: '12px', 
+                                  border: '1px solid #fee2e2', 
+                                  background: '#fff', 
+                                  color: '#dc2626', 
+                                  cursor: 'pointer',
+                                  transition: 'var(--transition)'
+                                }} className="row-delete-btn">
+                                <Trash2 size={16} />
+                              </button>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>View only</span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -435,7 +485,7 @@ const Users = () => {
                   <UserPlus size={28} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>Onboard Member</h2>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingUser ? 'Update Team Member' : 'Onboard New Member'}</h2>
                   <p style={{ opacity: 0.5, fontSize: '0.9rem', fontWeight: 500 }}>Assign role and access scope</p>
                 </div>
                 <button 
@@ -480,7 +530,9 @@ const Users = () => {
                     <div className="form-group">
                       <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>SET PASSWORD</label>
                       <input 
-                        type="password" required value={formData.password}
+                        type="password" 
+                        required={!editingUser}
+                        value={formData.password}
                         placeholder="••••••••"
                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                         className="input-premium"
@@ -489,7 +541,9 @@ const Users = () => {
                     <div className="form-group">
                       <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: isPasswordError ? '#dc2626' : 'inherit' }}>CONFIRM PASSWORD</label>
                       <input 
-                        type="password" required value={formData.confirmPassword}
+                        type="password" 
+                        required={!editingUser}
+                        value={formData.confirmPassword}
                         placeholder="••••••••"
                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                         className="input-premium"
@@ -498,46 +552,102 @@ const Users = () => {
                     </div>
                   </div>
 
-                  {isSystemAdmin && (
-                    <div className="form-group">
-                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ASSIGN SHOP / BRANCH</label>
-                      <div style={{ position: 'relative' }}>
-                        <select 
-                          value={formData.shop_id}
-                          onChange={(e) => setFormData({...formData, shop_id: e.target.value})}
-                          className="input-premium"
-                          style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
-                        >
-                          <option value="">-- No Shop Assigned --</option>
-                          {shops.map(shop => (
-                            <option key={shop.id} value={shop.id}>{shop.name}</option>
-                          ))}
-                        </select>
-                        <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                          <Store size={16} color="var(--text-sidebar)" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ACCESS ROLE</label>
                     <div style={{ position: 'relative' }}>
                       <select 
                         value={formData.role}
-                        onChange={(e) => setFormData({...formData, role: e.target.value})}
+                        onChange={(e) => {
+                          setFormData({...formData, role: e.target.value, shop_ids: []});
+                        }}
                         className="input-premium"
                         style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
                       >
                         <option value="user">Standard User</option>
                         <option value="staff">Staff / Cashier</option>
-                        <option value="admin">System Administrator</option>
+                        <option value="admin">Manager / Business Admin</option>
                       </select>
                       <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                         <Filter size={16} color="var(--text-sidebar)" />
                       </div>
                     </div>
                   </div>
+
+                  {(isSystemAdmin || currentUser?.role === 'admin') && (
+                    <div className="form-group">
+                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '12px' }}>
+                        {formData.role === 'admin' ? 'ASSIGN ACCESSIBLE SHOPS (MULTI-SELECT)' : 'ASSIGN PRIMARY SHOP (SINGLE)'}
+                      </label>
+                      
+                      {formData.role === 'admin' ? (
+                        /* Multi-select for Admins */
+                        <div style={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: '1fr 1fr', 
+                          gap: '12px', 
+                          background: '#f8fafc', 
+                          padding: '20px', 
+                          borderRadius: '20px',
+                          border: '1px solid var(--border-strong)',
+                          maxHeight: '200px',
+                          overflowY: 'auto'
+                        }}>
+                          {shops.map(shop => (
+                            <label key={shop.id} style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '10px', 
+                              cursor: 'pointer',
+                              padding: '8px 12px',
+                              borderRadius: '12px',
+                              background: formData.shop_ids.includes(shop.id) ? '#fff' : 'transparent',
+                              boxShadow: formData.shop_ids.includes(shop.id) ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                              transition: 'var(--transition)'
+                            }}>
+                              <input 
+                                type="checkbox" 
+                                checked={formData.shop_ids.includes(shop.id)}
+                                onChange={(e) => {
+                                  const newIds = e.target.checked 
+                                    ? [...formData.shop_ids, shop.id]
+                                    : formData.shop_ids.filter(id => id !== shop.id);
+                                  setFormData({...formData, shop_ids: newIds});
+                                }}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                              />
+                              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: formData.shop_ids.includes(shop.id) ? 'var(--primary)' : 'var(--text-main)' }}>{shop.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        /* Single-select for Staff/Others */
+                        <div style={{ position: 'relative' }}>
+                          <select 
+                            value={formData.shop_ids[0] || ''}
+                            onChange={(e) => setFormData({...formData, shop_ids: e.target.value ? [e.target.value] : []})}
+                            className="input-premium"
+                            style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            <option value="">-- No Shop Assigned --</option>
+                            {shops.map(shop => (
+                              <option key={shop.id} value={shop.id}>{shop.name}</option>
+                            ))}
+                          </select>
+                          <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                            <Store size={16} color="var(--text-sidebar)" />
+                          </div>
+                        </div>
+                      )}
+
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>
+                        {formData.shop_ids.length === 0 
+                          ? '⚠️ No shops assigned (Visible to all your shops)' 
+                          : formData.role === 'admin' 
+                            ? `✓ Selected ${formData.shop_ids.length} shop(s)` 
+                            : `✓ Assigned to ${shops.find(s => s.id === formData.shop_ids[0])?.name}`}
+                      </p>
+                    </div>
+                  )}
 
                   <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
                     <button 
@@ -565,7 +675,7 @@ const Users = () => {
                       className="btn-primary"
                       style={{ flex: 1.8, justifyContent: 'center', opacity: isPasswordError ? 0.5 : 1, fontSize: '1rem' }}
                     >
-                      Create Account
+                      {editingUser ? 'Update Member' : 'Create Account'}
                     </button>
                   </div>
                 </div>

@@ -3,8 +3,20 @@ import * as productService from '../services/product.service';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
+    const user = (req as any).user;
     const shopId = req.query.shopId as string;
-    const products = await productService.getAllProducts(shopId);
+    
+    let ownerId: string | undefined;
+    let userId: string | undefined;
+
+    const isSystemAdmin = user && !user.shop_id && !user.owner_id;
+
+    if (!isSystemAdmin && user) {
+      ownerId = user.owner_id || user.id;
+      userId = user.id;
+    }
+
+    const products = await productService.getAllProducts(shopId, ownerId, userId);
     res.json(products);
   } catch (e) {
     console.error(e);

@@ -2,7 +2,7 @@ import { readPool, writePool } from '../db';
 import { RowDataPacket } from 'mysql2';
 import { v4 as uuidv4 } from 'uuid';
 
-export const getAllOrders = async (shopId?: string) => {
+export const getAllOrders = async (shopId?: string, ownerId?: string, userId?: string) => {
   let query = `
     SELECT o.*, u.name as user_name, s.name as shop_name 
     FROM orders o 
@@ -10,10 +10,28 @@ export const getAllOrders = async (shopId?: string) => {
     LEFT JOIN shops s ON o.shop_id = s.id
   `;
   const params: any[] = [];
+  const whereClauses: string[] = [];
 
   if (shopId) {
-    query += ' WHERE o.shop_id = ?';
+    whereClauses.push('o.shop_id = ?');
     params.push(shopId);
+  }
+
+  if (ownerId) {
+    whereClauses.push('s.owner_id = ?');
+    params.push(ownerId);
+  }
+
+  if (userId) {
+    whereClauses.push(`(
+      o.shop_id IN (SELECT shop_id FROM user_shops WHERE user_id = ?) 
+      OR o.shop_id = (SELECT shop_id FROM users WHERE id = ?)
+    )`);
+    params.push(userId, userId);
+  }
+
+  if (whereClauses.length > 0) {
+    query += ' WHERE ' + whereClauses.join(' AND ');
   }
 
   query += ' ORDER BY o.date DESC LIMIT 100';

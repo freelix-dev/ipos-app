@@ -27,18 +27,16 @@ const Products = () => {
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
-  const isSystemAdmin = currentUser && !currentUser.shop_id;
+  const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
 
   useEffect(() => {
-    if (isSystemAdmin) {
-      loadShops();
-    }
+    loadShops();
     loadProducts();
   }, [selectedShopId]);
 
   const loadShops = async () => {
     try {
-      const data = await api.getShops();
+      const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
       setShops(data);
     } catch (error) {
       console.error('Failed to load shops:', error);
@@ -48,7 +46,9 @@ const Products = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await api.getProducts(isSystemAdmin ? selectedShopId : currentUser?.shop_id);
+      // For sub-admins (no shop_id but has owner_id), they should use selectedShopId or see all their owner's products
+      const effectiveShopId = isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id);
+      const data = await api.getProducts(effectiveShopId);
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -100,14 +100,16 @@ const Products = () => {
           <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Catalog Hub</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global inventory synchronization and product management</p>
         </div>
-        <button 
-          onClick={() => navigate('/products/add')}
-          className="btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-        >
-          <Plus size={20} />
-          <span>Publish New Product</span>
-        </button>
+        {currentUser?.role === 'admin' && (
+          <button 
+            onClick={() => navigate('/products/add')}
+            className="btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <Plus size={20} />
+            <span>Publish New Product</span>
+          </button>
+        )}
       </div>
 
       <div className="table-container" style={{ border: 'none', boxShadow: 'var(--shadow-premium)', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
@@ -142,8 +144,8 @@ const Products = () => {
               />
             </div>
 
-            {/* Shop Selector for System Admin */}
-            {isSystemAdmin && (
+            {/* Shop Selector for System Admin & Owners */}
+            {(isSystemAdmin || (currentUser?.role === 'admin')) && (
               <div style={{ position: 'relative', width: '220px' }}>
                 <select 
                   value={selectedShopId}
@@ -268,20 +270,26 @@ const Products = () => {
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: '32px' }}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                        <button 
-                          onClick={() => navigate(`/products/edit/${product.id}`)}
-                          className="row-action-btn"
-                          style={{ padding: '10px', borderRadius: '12px', border: '1px solid var(--border-strong)', background: '#fff', color: 'var(--text-main)', cursor: 'pointer', transition: 'var(--transition)' }}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(product.id, product.name)}
-                          className="row-delete-btn"
-                          style={{ padding: '10px', borderRadius: '12px', border: '1px solid #fee2e2', background: '#fff', color: '#dc2626', cursor: 'pointer', transition: 'var(--transition)' }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {currentUser?.role === 'admin' ? (
+                          <>
+                            <button 
+                              onClick={() => navigate(`/products/edit/${product.id}`)}
+                              className="row-action-btn"
+                              style={{ padding: '10px', borderRadius: '12px', border: '1px solid var(--border-strong)', background: '#fff', color: 'var(--text-main)', cursor: 'pointer', transition: 'var(--transition)' }}
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(product.id, product.name)}
+                              className="row-delete-btn"
+                              style={{ padding: '10px', borderRadius: '12px', border: '1px solid #fee2e2', background: '#fff', color: '#dc2626', cursor: 'pointer', transition: 'var(--transition)' }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>View only</span>
+                        )}
                       </div>
                     </td>
                   </tr>

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  ShoppingCart, 
+  ShoppingBag, 
   Users, 
   Package, 
   Settings, 
@@ -10,7 +10,8 @@ import {
   Database,
   Layers,
   PieChart,
-  LineChart
+  TrendingUp,
+  Store
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -21,14 +22,15 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: <LayoutDashboard size={19} />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <ShoppingCart size={19} />, label: 'Orders', path: '/orders' },
-    { icon: <Package size={19} />, label: 'Products', path: '/products' },
-    { icon: <Database size={19} />, label: 'Stock', path: '/stock' },
-    { icon: <LineChart size={19} />, label: 'Sale Report', path: '/reports/sales' },
-    { icon: <PieChart size={19} />, label: 'Stock Report', path: '/reports/stock' },
-    ...(isSystemAdmin ? [{ icon: <Layers size={19} />, label: 'Manage Shops', path: '/shops' }] : []),
-    { icon: <Users size={19} />, label: 'Manage Users', path: '/users' },
-    { icon: <Settings size={19} />, label: 'Settings', path: '/settings' },
+    { icon: <ShoppingBag size={20} />, label: 'Orders', path: '/orders' },
+    { icon: <Package size={20} />, label: 'Products', path: '/products' },
+    { icon: <Layers size={20} />, label: 'Stock', path: '/stock' },
+    { icon: <TrendingUp size={20} />, label: 'Sale Report', path: '/reports/sales' },
+    { icon: <PieChart size={20} />, label: 'Stock Report', path: '/reports/stock' },
+    { icon: <Users size={20} />, label: 'Manage Users', path: '/users' },
+    // Only System Admin or Shop Owners can manage shops
+    ...(currentUser?.role === 'admin' ? [{ icon: <Store size={20} />, label: 'Manage Shops', path: '/shops' }] : []),
+    { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
   ];
 
   const handleLogout = () => {
