@@ -2,6 +2,7 @@ import { readPool, writePool } from '../db';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import path from 'path';
 import fs from 'fs';
+import { randomUUID } from 'crypto';
 
 const DEFAULT_IMAGES = ['beer_cans.png', 'beer_box.png', 'water_bottle.png', 'blue_cups.png', 'ice_bag.png', 'default.png'];
 
@@ -34,6 +35,9 @@ export const getAllProducts = async (shopId?: string, ownerId?: string, userId?:
     query += ' WHERE ' + whereClauses.join(' AND ');
   }
 
+  console.log('DEBUG SQL:', query);
+  console.log('DEBUG PARAMS:', params);
+
   const [products] = await readPool.query<RowDataPacket[]>(query, params);
   return products;
 };
@@ -45,20 +49,24 @@ export const getProductById = async (id: string) => {
 
 export const createProduct = async (productData: any) => {
   const { name, price, stock, unit, imagePath, shop_id } = productData;
-  const [result] = await writePool.query<ResultSetHeader>(
-    'INSERT INTO products (shop_id, name, price, stock, unit, imagePath) VALUES (?, ?, ?, ?, ?, ?)',
-    [shop_id || null, name, price, stock, unit || 'pcs', imagePath || 'assets/images/default.png']
+  const id = randomUUID();
+  console.log('Creating product in DB:', { id, name, price, stock, shop_id });
+  
+  await writePool.query<ResultSetHeader>(
+    'INSERT INTO products (id, shop_id, name, price, stock, unit, imagePath) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [id, shop_id || null, name, price, stock, unit || 'pcs', imagePath || 'assets/images/default.png']
   );
-  return result.insertId;
+  
+  return id;
 };
 
 export const updateProduct = async (id: string, productData: any) => {
-  const { name, price, stock, unit, imagePath } = productData;
+  const { name, price, stock, unit, imagePath, shop_id } = productData;
   const [oldProduct] = await readPool.query<RowDataPacket[]>('SELECT imagePath FROM products WHERE id = ?', [id]);
   
   await writePool.query(
-    'UPDATE products SET name = ?, price = ?, stock = ?, unit = ?, imagePath = ? WHERE id = ?',
-    [name, price, stock, unit, imagePath, id]
+    'UPDATE products SET name = ?, price = ?, stock = ?, unit = ?, imagePath = ?, shop_id = ? WHERE id = ?',
+    [name, price, stock, unit, imagePath, shop_id || null, id]
   );
 
   if (oldProduct.length > 0 && oldProduct[0].imagePath !== imagePath) {

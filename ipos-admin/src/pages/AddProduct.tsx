@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Package, Upload, ChevronLeft, Save, X } from 'lucide-react';
+import { Package, Upload, ChevronLeft, Save, X, Store, DollarSign, Box } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
@@ -10,16 +10,34 @@ const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [shops, setShops] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock: '',
-    unit: 'Pack',
-    description: ''
+    unit: '',
+    shop_id: ''
   });
 
-  const categories = ['Electronics', 'Food & Drinks', 'Clothing', 'Accessories', 'Furniture'];
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
+
+  React.useEffect(() => {
+    const loadShops = async () => {
+      try {
+        const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
+        setShops(data);
+        if (data.length > 0) {
+          setFormData(prev => ({ ...prev, shop_id: data[0].id }));
+        }
+      } catch (error) {
+        console.error('Failed to load shops:', error);
+      }
+    };
+    loadShops();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,219 +63,256 @@ const AddProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic Validation
+    if (!formData.shop_id) {
+      alert('Please select a branch first');
+      return;
+    }
+
+    const priceNum = parseFloat(formData.price);
+    const stockNum = parseInt(formData.stock);
+
+    if (isNaN(priceNum) || isNaN(stockNum)) {
+      alert('Please enter valid numeric values for price and stock');
+      return;
+    }
+
     try {
       setLoading(true);
-      
       let imagePath = 'assets/images/default.png';
       
-      // 1. Upload image if selected
       if (selectedFile) {
         const uploadRes = await api.uploadImage(selectedFile);
         imagePath = uploadRes.imagePath;
       }
 
-      // 2. Save product
-      await api.addProduct({
+      const response = await api.addProduct({
         name: formData.name,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
+        price: priceNum,
+        stock: stockNum,
         unit: formData.unit,
-        imagePath: imagePath
+        imagePath: imagePath,
+        shop_id: formData.shop_id
       });
       
-      alert('Product added successfully!');
+      console.log('Product added successfully:', response);
       navigate('/products');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding product:', error);
-      alert('Failed to add product');
+      const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
+      alert(`Failed to add product: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="animate-fade" onSubmit={handleSubmit}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <button 
-          type="button"
-          onClick={() => navigate('/products')}
-          style={{ 
-            padding: '8px', borderRadius: '50%', border: '1px solid var(--border)', 
-            background: '#fff', cursor: 'pointer', display: 'flex' 
-          }}
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h1 style={{ fontSize: '1.75rem' }}>Add New Product</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Create a new item for your inventory</p>
+    <div className="animate-slide-up" style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '100px' }}>
+      {/* Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button 
+            onClick={() => navigate('/products')}
+            style={{ 
+              width: '48px', height: '48px', borderRadius: '14px', border: '1px solid var(--border)', 
+              background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'var(--shadow-sm)', transition: 'all 0.2s'
+            }}
+          >
+            <ChevronLeft size={24} color="var(--text-main)" />
+          </button>
+          <div>
+            <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>New Product</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Deploy a new item to your active inventory</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            type="button"
+            onClick={() => navigate('/products')}
+            style={{ 
+              padding: '12px 24px', borderRadius: '12px', border: '1px solid var(--border)', 
+              background: '#fff', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' 
+            }}
+          >
+            Cancel
+          </button>
+          <button 
+            form="add-product-form"
+            type="submit"
+            disabled={loading}
+            className="btn-primary"
+            style={{ 
+              padding: '12px 32px', borderRadius: '12px', border: 'none', 
+              display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700
+            }}
+          >
+            {loading ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <><Save size={18} /> Publish Item</>}
+          </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
-        {/* Left Column - General Info */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="data-table-container" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem' }}>General Information</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form id="add-product-form" onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+        
+        {/* Left Side: General Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div className="card-premium" style={{ padding: '32px', height: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                <Package size={22} />
+              </div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Product Details</h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 600 }}>Product Name</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME</label>
                 <input 
                   type="text" 
                   name="name"
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g. Wireless Headphones"
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }}
+                  placeholder="e.g. Premium Lao Coffee"
+                  className="input-premium"
+                  style={{ fontSize: '1.1rem', padding: '16px 20px' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 600 }}>Description</label>
-                <textarea 
-                  name="description"
-                  value={formData.description}
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>UNIT OF MEASURE</label>
+                <input 
+                  type="text" 
+                  name="unit"
+                  required
+                  value={formData.unit}
                   onChange={handleChange}
-                  placeholder="Describe your product..."
-                  rows={6}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', resize: 'vertical' }}
-                ></textarea>
+                  placeholder="e.g. Bottle, Pack, Box"
+                  className="input-premium"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>TARGET BRANCH</label>
+                <div style={{ position: 'relative' }}>
+                  <select 
+                    name="shop_id"
+                    required
+                    value={formData.shop_id}
+                    onChange={handleChange}
+                    className="input-premium"
+                    style={{ appearance: 'none', background: '#fff', paddingRight: '40px' }}
+                  >
+                    {shops.map(shop => (
+                      <option key={shop.id} value={shop.id}>{shop.name}</option>
+                    ))}
+                  </select>
+                  <Store size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="data-table-container" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem' }}>Pricing & Stocks</h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {/* Right Side: Media & Pricing */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {/* Media Card */}
+          <div className="card-premium" style={{ padding: '32px', textAlign: 'center' }}>
+             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '24px', textAlign: 'left' }}>Product Media</h2>
+             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
+             {previewUrl ? (
+               <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                 <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '240px', objectFit: 'cover' }} />
+                 <button 
+                  type="button"
+                  onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                  style={{ position: 'absolute', top: '12px', right: '12px', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}
+                 >
+                   <X size={20} />
+                 </button>
+               </div>
+             ) : (
+               <div 
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={handleDrop}
+                style={{
+                  height: '240px', border: '2px dashed var(--border-strong)', borderRadius: '24px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  background: dragActive ? 'var(--primary-light)' : '#f8fafc',
+                  cursor: 'pointer', transition: 'all 0.3s'
+                }}
+               >
+                 <Upload size={32} color="var(--primary)" style={{ marginBottom: '16px' }} />
+                 <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>Drop image here</p>
+               </div>
+             )}
+          </div>
+
+          {/* Pricing & Inventory Card */}
+          <div className="card-premium" style={{ padding: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+                <DollarSign size={22} />
+              </div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Pricing & Inventory</h2>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 600 }}>Base Price (₭)</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>UNIT PRICE (₭)</label>
                 <input 
                   type="number" 
                   name="price"
                   required
                   value={formData.price}
                   onChange={handleChange}
-                  placeholder="0.00"
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 600 }}>Stock Quantity</label>
-                <input 
-                  type="number" 
-                  name="stock"
-                  required
-                  value={formData.stock}
-                  onChange={handleChange}
                   placeholder="0"
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }}
+                  className="input-premium"
+                  style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }}
                 />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Media & Category */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="data-table-container" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem' }}>Product Media</h3>
-            
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              style={{ display: 'none' }}
-            />
-
-            {previewUrl ? (
-              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                <button 
-                  type="button"
-                  onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
-                  style={{ position: 'absolute', top: '8px', right: '8px', padding: '4px', borderRadius: '50%', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', cursor: 'pointer' }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ) : (
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-                onDragLeave={() => setDragActive(false)}
-                onDrop={handleDrop}
-                style={{
-                  border: `2px dashed ${dragActive ? 'var(--primary)' : 'var(--border)'}`,
-                  borderRadius: '12px',
-                  padding: '40px 20px',
-                  textAlign: 'center',
-                  backgroundColor: dragActive ? 'var(--primary-light)' : 'var(--bg-main)',
-                  transition: 'var(--transition)',
-                  cursor: 'pointer'
-                }}
-              >
-                <div style={{ background: '#fff', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                  <Upload size={24} color="var(--primary)" />
-                </div>
-                <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '4px' }}>Click to upload or drag and drop</p>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PNG, JPG or WebP (max. 2MB)</p>
-              </div>
-            )}
-          </div>
-
-          <div className="data-table-container" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.1rem' }}>Organization</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 600 }}>Unit</label>
-                <select 
-                  name="unit"
-                  value={formData.unit}
-                  onChange={handleChange}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', background: '#fff' }}
-                >
-                  <option value="Pack">Pack</option>
-                  <option value="Bottle">Bottle</option>
-                  <option value="Unit">Unit</option>
-                  <option value="แທັດ">แທັດ</option>
-                  <option value="ถง">ถง</option>
-                </select>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>STOCK</label>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="number" 
+                    name="stock"
+                    required
+                    value={formData.stock}
+                    onChange={handleChange}
+                    placeholder="0"
+                    className="input-premium"
+                    style={{ fontWeight: 700 }}
+                  />
+                  <Box size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
-            <button 
-              type="button"
-              onClick={() => navigate('/products')}
-              style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', fontWeight: 600, cursor: 'pointer' }}
-            >
-              Discard
-            </button>
-            <button 
-              type="submit"
-              disabled={loading}
-              style={{ 
-                flex: 1, padding: '14px', borderRadius: '12px', border: 'none', 
-                background: 'var(--primary)', color: '#fff', fontWeight: 600, 
-                cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' 
-              }}
-            >
-              <Save size={18} />
-              {loading ? 'Saving...' : 'Save Product'}
-            </button>
-          </div>
         </div>
-      </div>
-    </form>
+      </form>
+
+      <style>{`
+        .card-premium {
+          background: #fff;
+          border-radius: 24px;
+          border: 1px solid var(--border);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+          transition: all 0.3s ease;
+        }
+        .spinner {
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top: 2px solid #fff;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      `}</style>
+    </div>
   );
 };
 

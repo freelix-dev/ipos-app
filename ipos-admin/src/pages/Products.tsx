@@ -20,6 +20,7 @@ const Products = () => {
   const [shops, setShops] = useState<any[]>([]);
   const [selectedShopId, setSelectedShopId] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All Products');
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,9 +47,12 @@ const Products = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      // For sub-admins (no shop_id but has owner_id), they should use selectedShopId or see all their owner's products
-      const effectiveShopId = isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id);
-      const data = await api.getProducts(effectiveShopId);
+      // Logic fix: If user is owner (no owner_id) or system admin, they can see all shops by selecting empty string.
+      // If they are staff (has owner_id), they are restricted to their assigned shop if none selected.
+      const isOwner = currentUser?.role === 'admin' && !currentUser?.owner_id;
+      const effectiveShopId = (isSystemAdmin || isOwner) ? selectedShopId : (selectedShopId || currentUser?.shop_id);
+      
+      const data = await api.getProducts(effectiveShopId || undefined);
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -79,14 +83,17 @@ const Products = () => {
     return 'badge-success';
   };
 
-  const getStatusLabel = (stock: number) => {
-    if (stock <= 0) return 'OUT OF STOCK';
-    if (stock < 10) return 'LOW STOCK';
-    return 'IN STOCK';
-  };
-
-  // Pagination Logic
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Filtering Logic
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let matchesTab = true;
+    if (activeTab === 'In Stock') matchesTab = p.stock > 10;
+    else if (activeTab === 'Low Stock') matchesTab = p.stock > 0 && p.stock <= 10;
+    else if (activeTab === 'Out of Stock') matchesTab = p.stock <= 0;
+    
+    return matchesSearch && matchesTab;
+  });
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -172,17 +179,7 @@ const Products = () => {
               </div>
             )}
 
-            {/* Category Module */}
-            <button style={{ 
-              height: '50px', padding: '0 24px', borderRadius: '16px', 
-              border: '1px solid var(--border-strong)', background: '#fff', 
-              color: 'var(--text-main)', display: 'flex', alignItems: 'center', 
-              gap: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem',
-              transition: 'var(--transition)'
-            }} className="btn-hover-premium">
-              <Filter size={18} />
-              <span>Global Categories</span>
-            </button>
+            {/* Category Module removed as requested */}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -190,12 +187,13 @@ const Products = () => {
               {['All Products', 'In Stock', 'Low Stock', 'Out of Stock'].map((t) => (
                 <button 
                   key={t}
+                  onClick={() => { setActiveTab(t); setCurrentPage(1); }}
                   style={{
                     padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                    background: t === 'All Products' ? '#fff' : 'transparent',
-                    color: t === 'All Products' ? 'var(--primary)' : 'var(--text-muted)',
+                    background: t === activeTab ? '#fff' : 'transparent',
+                    color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
                     fontWeight: 800, fontSize: '0.85rem',
-                    boxShadow: t === 'All Products' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
@@ -253,7 +251,7 @@ const Products = () => {
                         </div>
                         <div>
                           <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{product.name}</p>
-                          {isSystemAdmin && (
+                          {(selectedShopId === '' || isSystemAdmin) && (
                             <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{product.shop_name || 'System Catalog'}</p>
                           )}
                           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>ID: {product.id.toString().slice(-6).toUpperCase()}</p>
@@ -265,7 +263,7 @@ const Products = () => {
                     <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>{product.stock}</td>
                     <td>
                       <span className={`badge ${getStatusColor(product.stock)}`}>
-                        {getStatusLabel(product.stock)}
+                        {product.stock <= 0 ? 'OUT OF STOCK' : product.stock < 10 ? 'LOW STOCK' : 'IN STOCK'}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: '32px' }}>

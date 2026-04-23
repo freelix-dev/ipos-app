@@ -12,8 +12,15 @@ export const getOrders = async (req: Request, res: Response) => {
     const isSystemAdmin = user && !user.shop_id && !user.owner_id;
 
     if (!isSystemAdmin && user) {
-      ownerId = user.owner_id || user.id;
-      userId = user.id;
+      if (!user.owner_id) {
+        // Owner view: see everything they own
+        ownerId = user.id;
+        userId = undefined;
+      } else {
+        // Staff view: restricted
+        ownerId = user.owner_id;
+        userId = user.id;
+      }
     }
 
     const orders = await orderService.getAllOrders(shopId, ownerId, userId);

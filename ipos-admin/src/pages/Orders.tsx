@@ -47,8 +47,9 @@ const Orders = () => {
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const effectiveShopId = isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id);
-      const data = await api.getOrders(effectiveShopId);
+      const isOwner = currentUser?.role === 'admin' && !currentUser?.owner_id;
+      const effectiveShopId = (isSystemAdmin || isOwner) ? selectedShopId : (selectedShopId || currentUser?.shop_id);
+      const data = await api.getOrders(effectiveShopId || undefined);
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -276,7 +277,7 @@ const Orders = () => {
                       }}>
                         #{order.id.toUpperCase().substring(0, 12)}
                       </div>
-                      {isSystemAdmin && (
+                      {(selectedShopId === '' || isSystemAdmin) && (
                         <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800, marginTop: '4px' }}>
                           {order.shop_name}
                         </div>

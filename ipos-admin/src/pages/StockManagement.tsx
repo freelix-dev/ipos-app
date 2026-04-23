@@ -16,6 +16,9 @@ const StockManagement = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
+  const [activeTab, setActiveTab] = useState('Global Supply');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -23,14 +26,32 @@ const StockManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+
+  const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
+
   useEffect(() => {
+    loadShops();
     loadProducts();
-  }, []);
+  }, [selectedShopId]);
+
+  const loadShops = async () => {
+    try {
+      const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
+      setShops(data);
+    } catch (error) {
+      console.error('Failed to load shops:', error);
+    }
+  };
 
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await api.getProducts();
+      const isOwner = currentUser?.role === 'admin' && !currentUser?.owner_id;
+      const effectiveShopId = (isSystemAdmin || isOwner) ? selectedShopId : (selectedShopId || currentUser?.shop_id);
+      
+      const data = await api.getProducts(effectiveShopId || undefined);
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -65,8 +86,17 @@ const StockManagement = () => {
     return { color: '#10b981', label: 'OPTIMAL', badge: 'badge-success' };
   };
 
-  // Pagination Logic
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Filtering Logic
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let matchesTab = true;
+    if (activeTab === 'High Availability') matchesTab = p.stock > 20;
+    else if (activeTab === 'Critical Stock') matchesTab = p.stock > 0 && p.stock <= 10;
+    else if (activeTab === 'Depleted') matchesTab = p.stock <= 0;
+    
+    return matchesSearch && matchesTab;
+  });
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -128,17 +158,35 @@ const StockManagement = () => {
               />
             </div>
 
-            {/* Logistics Module */}
-            <button style={{ 
-              height: '50px', padding: '0 24px', borderRadius: '16px', 
-              border: '1px solid var(--border-strong)', background: '#fff', 
-              color: 'var(--text-main)', display: 'flex', alignItems: 'center', 
-              gap: '12px', cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem',
-              transition: 'var(--transition)'
-            }} className="btn-hover-premium">
-              <Package size={18} />
-              <span>Logistics Hub</span>
-            </button>
+            {/* Shop Selector for System Admin & Owners */}
+            {(isSystemAdmin || (currentUser?.role === 'admin')) && (
+              <div style={{ position: 'relative', width: '220px' }}>
+                <select 
+                  value={selectedShopId}
+                  onChange={(e) => {
+                    setSelectedShopId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{ 
+                    width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                    borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                    background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                    appearance: 'none', cursor: 'pointer', outline: 'none',
+                    color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <option value="">All Branches</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.name}</option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                   <Package size={16} style={{ color: 'var(--primary)' }} />
+                </div>
+              </div>
+            )}
+
+            {/* Logistics Module removed as requested */}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -146,12 +194,16 @@ const StockManagement = () => {
               {['Global Supply', 'High Availability', 'Critical Stock', 'Depleted'].map((t) => (
                 <button 
                   key={t}
+                  onClick={() => {
+                    setActiveTab(t);
+                    setCurrentPage(1);
+                  }}
                   style={{
                     padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                    background: t === 'Global Supply' ? '#fff' : 'transparent',
-                    color: t === 'Global Supply' ? 'var(--primary)' : 'var(--text-muted)',
+                    background: t === activeTab ? '#fff' : 'transparent',
+                    color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
                     fontWeight: 800, fontSize: '0.85rem',
-                    boxShadow: t === 'Global Supply' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
@@ -210,6 +262,9 @@ const StockManagement = () => {
                           </div>
                           <div>
                             <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{product.name}</p>
+                            {selectedShopId === '' && (
+                              <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800 }}>{product.shop_name}</p>
+                            )}
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>METRIC: {product.unit.toUpperCase()}</p>
                           </div>
                         </div>
@@ -223,36 +278,49 @@ const StockManagement = () => {
                       <td>
                         <input 
                           type="number" 
+                          disabled={currentUser?.role !== 'admin'}
                           value={product.stock}
                           onChange={(e) => handleStockChange(product.id, e.target.value)}
                           className="input-premium"
-                          style={{ height: '44px', textAlign: 'center', fontWeight: 900, color: 'var(--primary)', letterSpacing: '0.05em' }}
+                          style={{ 
+                            height: '44px', 
+                            textAlign: 'center', 
+                            fontWeight: 900, 
+                            color: 'var(--primary)', 
+                            letterSpacing: '0.05em',
+                            opacity: currentUser?.role !== 'admin' ? 0.6 : 1,
+                            cursor: currentUser?.role !== 'admin' ? 'not-allowed' : 'text'
+                          }}
                         />
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '32px' }}>
-                        <button 
-                          onClick={() => handleUpdateStock(product.id, product.stock)}
-                          disabled={savingId === product.id}
-                          className="btn-primary"
-                          style={{ 
-                            padding: '10px 24px', 
-                            borderRadius: '12px', 
-                            fontSize: '0.85rem',
-                            background: savingId === product.id ? 'var(--text-muted)' : 'var(--primary)',
-                            boxShadow: savingId === product.id ? 'none' : 'var(--shadow-md)',
-                            cursor: savingId === product.id ? 'wait' : 'pointer',
-                            display: 'inline-flex',
-                            width: '120px',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          {savingId === product.id ? <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }}></div> : (
-                            <>
-                              <Save size={16} />
-                              <span style={{ marginLeft: '8px' }}>SYNC</span>
-                            </>
-                          )}
-                        </button>
+                        {currentUser?.role === 'admin' ? (
+                          <button 
+                            onClick={() => handleUpdateStock(product.id, product.stock)}
+                            disabled={savingId === product.id}
+                            className="btn-primary"
+                            style={{ 
+                              padding: '10px 24px', 
+                              borderRadius: '12px', 
+                              fontSize: '0.85rem',
+                              background: savingId === product.id ? 'var(--text-muted)' : 'var(--primary)',
+                              boxShadow: savingId === product.id ? 'none' : 'var(--shadow-md)',
+                              cursor: savingId === product.id ? 'wait' : 'pointer',
+                              display: 'inline-flex',
+                              width: '120px',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            {savingId === product.id ? <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }}></div> : (
+                              <>
+                                <Save size={16} />
+                                <span style={{ marginLeft: '8px' }}>SYNC</span>
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Authorized Only</span>
+                        )}
                       </td>
                     </tr>
                   );

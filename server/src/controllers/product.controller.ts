@@ -12,14 +12,21 @@ export const getProducts = async (req: Request, res: Response) => {
     const isSystemAdmin = user && !user.shop_id && !user.owner_id;
 
     if (!isSystemAdmin && user) {
-      ownerId = user.owner_id || user.id;
-      userId = user.id;
+      if (!user.owner_id) {
+        // This is a top-level owner, they should see everything they own
+        ownerId = user.id;
+        userId = undefined; // Don't restrict by assigned shops
+      } else {
+        // This is a staff or manager, restrict to their owner and assigned shops
+        ownerId = user.owner_id;
+        userId = user.id;
+      }
     }
 
     const products = await productService.getAllProducts(shopId, ownerId, userId);
     res.json(products);
   } catch (e) {
-    console.error(e);
+    console.error('Error in getProducts:', e);
     res.status(500).json({ message: 'Database error' });
   }
 };
@@ -39,9 +46,9 @@ export const createProduct = async (req: Request, res: Response) => {
   try {
     const id = await productService.createProduct(req.body);
     res.status(201).json({ message: 'Product created', id });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: 'Database error' });
+  } catch (e: any) {
+    console.error('CREATE PRODUCT ERROR:', e);
+    res.status(500).json({ message: `Database error: ${e.message}` });
   }
 };
 
