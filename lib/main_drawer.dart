@@ -120,10 +120,10 @@ class _MainDrawerState extends State<MainDrawer> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
               children: [
-                _buildGroupHeader('TERMINAL'),
+                _buildGroupHeader('ລະບົບຂາຍ'),
                 _buildMenuItem(
                   icon: Icons.sync,
-                  label: 'Sync Intelligence',
+                  label: 'ຊິງຂໍ້ມູນ (Sync)',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -136,7 +136,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 ),
                 _buildMenuItem(
                   icon: Icons.print_rounded,
-                  label: 'Printer Network',
+                  label: 'ຕັ້ງຄ່າເຄື່ອງພິມ',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -146,10 +146,10 @@ class _MainDrawerState extends State<MainDrawer> {
                   },
                 ),
                 const SizedBox(height: 15),
-                _buildGroupHeader('REPORTS'),
+                _buildGroupHeader('ລາຍງານ'),
                 _buildMenuItem(
                   icon: Icons.analytics_rounded,
-                  label: 'Sales Metrics',
+                  label: 'ຍອດຂາຍ',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -160,7 +160,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 ),
                 _buildMenuItem(
                   icon: Icons.history_edu_rounded,
-                  label: 'Transaction History',
+                  label: 'ປະຫວັດການຂາຍ',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -170,10 +170,10 @@ class _MainDrawerState extends State<MainDrawer> {
                   },
                 ),
                 const SizedBox(height: 15),
-                _buildGroupHeader('SYSTEM'),
+                _buildGroupHeader('ຕັ້ງຄ່າລະບົບ'),
                 _buildMenuItem(
                   icon: Icons.settings_suggest_rounded,
-                  label: 'Configuration',
+                  label: 'ກຳນົດຄ່າຕ່າງໆ',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -204,7 +204,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 },
                 leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                 title: const Text(
-                  'Terminate Session',
+                  'ອອກຈາກລະບົບ',
                   style: TextStyle(
                     color: Colors.redAccent,
                     fontWeight: FontWeight.bold,

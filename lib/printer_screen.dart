@@ -23,8 +23,25 @@ class _PrinterScreenState extends State<PrinterScreen> {
   @override
   void initState() {
     super.initState();
+    _loadPrinterSettings();
     _loadSavedPrinters();
     _initPrinter();
+  }
+
+  Future<void> _loadPrinterSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _autoPrint = prefs.getBool('auto_print') ?? true;
+      _paperSize = prefs.getString('paper_size') ?? '55/57/58mm';
+      _newLines = prefs.getString('new_lines') ?? '0';
+    });
+  }
+
+  Future<void> _savePrinterSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('auto_print', _autoPrint);
+    await prefs.setString('paper_size', _paperSize);
+    await prefs.setString('new_lines', _newLines);
   }
 
   Future<void> _initPrinter() async {
@@ -86,7 +103,10 @@ class _PrinterScreenState extends State<PrinterScreen> {
               value: _paperSize,
               items: ['55/57/58mm', '80mm'],
               onChanged: (val) {
-                if (val != null) setState(() => _paperSize = val);
+                if (val != null) {
+                  setState(() => _paperSize = val);
+                  _savePrinterSettings();
+                }
               },
             ),
             const SizedBox(height: 10),
@@ -95,7 +115,10 @@ class _PrinterScreenState extends State<PrinterScreen> {
               value: _newLines,
               items: ['0', '1', '2', '3', '4', '5'],
               onChanged: (val) {
-                if (val != null) setState(() => _newLines = val);
+                if (val != null) {
+                  setState(() => _newLines = val);
+                  _savePrinterSettings();
+                }
               },
             ),
             const SizedBox(height: 10),
@@ -104,6 +127,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
               value: _autoPrint,
               onChanged: (val) {
                 setState(() => _autoPrint = val);
+                _savePrinterSettings();
               },
             ),
             
@@ -132,7 +156,10 @@ class _PrinterScreenState extends State<PrinterScreen> {
               value: _printerType,
               items: ['Network', 'Bluetooth', 'USB'],
               onChanged: (val) {
-                if (val != null) setState(() => _printerType = val);
+                if (val != null) {
+                  setState(() => _printerType = val);
+                  _savePrinterSettings();
+                }
               },
             ),
             
@@ -149,7 +176,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _savePrinterSettings,
+                onPressed: _finalizeSettings,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryGreen,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -171,7 +198,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
     );
   }
 
-  void _savePrinterSettings() {
+  void _finalizeSettings() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('ບັນທຶກການຕັ້ງຄ່າເຄື່ອງພິມສຳເລັດແລ້ວ'),

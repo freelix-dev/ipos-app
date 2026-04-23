@@ -3,6 +3,7 @@ import 'package:ipos/payment_screen.dart';
 import 'package:ipos/database_helper.dart';
 import 'package:ipos/main_drawer.dart';
 import 'package:ipos/api_config.dart';
+import 'package:ipos/view_orders_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Product {
@@ -111,11 +112,14 @@ class _PosScreenState extends State<PosScreen> {
       normalizedPath = normalizedPath.substring(1);
     }
     
-    // If it's just a filename or missing the root folder, assume assets/images/
+    // If it's just a filename or missing the root folder, assume public/assets/images/
     if (!normalizedPath.startsWith('assets/') && 
         !normalizedPath.startsWith('public/') && 
         !normalizedPath.startsWith('uploads/')) {
-       normalizedPath = 'assets/images/$normalizedPath';
+       normalizedPath = 'public/assets/images/$normalizedPath';
+    } else if (!normalizedPath.startsWith('public/')) {
+       // If it starts with assets/ or uploads/, prepend public/
+       normalizedPath = 'public/$normalizedPath';
     }
     
     // Add cache busting timestamp
@@ -416,7 +420,7 @@ class _PosScreenState extends State<PosScreen> {
               ),
             ),
             const Text(
-              'Namkhong Vientiane',
+              'ນ້ຳຂອງ ວຽງຈັນ',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 12,
@@ -428,6 +432,15 @@ class _PosScreenState extends State<PosScreen> {
         actions: [
           Row(
             children: [
+              IconButton(
+                icon: const Icon(Icons.history, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ViewOrdersScreen()),
+                  );
+                },
+              ),
               PopupMenuButton<String>(
                 onSelected: (String value) => setState(() => selectedCurrency = value),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -558,9 +571,9 @@ class _PosScreenState extends State<PosScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: isGridView ? 2 : 1,
-                      childAspectRatio: isGridView ? 0.72 : 2.4,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                      childAspectRatio: isGridView ? 0.58 : 3.0,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
                     ),
                     itemCount: filteredProducts.length,
                     itemBuilder: (context, index) {
@@ -637,7 +650,7 @@ class _PosScreenState extends State<PosScreen> {
                                 ),
                               ),
                               const Text(
-                                'View Terminal Cart',
+                                'ເບິ່ງລາຍການໃນກະຕ່າ',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w800,
@@ -736,8 +749,12 @@ class _ProductCardState extends State<ProductCard> {
       normalizedPath = normalizedPath.substring(1);
     }
     
+    // Remove public/ if it's already there
+    if (normalizedPath.startsWith('public/')) {
+      normalizedPath = normalizedPath.substring(7);
+    }
+    
     if (!normalizedPath.startsWith('assets/') && 
-        !normalizedPath.startsWith('public/') && 
         !normalizedPath.startsWith('uploads/')) {
        normalizedPath = 'assets/images/$normalizedPath';
     }
@@ -776,19 +793,25 @@ class _ProductCardState extends State<ProductCard> {
       children: [
         Expanded(
           child: Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
             child: Image.network(
               _getImageUrl(widget.product.imagePath),
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) => Image.network(
                 '${ApiConfig.baseUrl}/assets/images/default.png',
+                fit: BoxFit.contain,
                 errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
               ),
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(5.0),
           child: Column(
             children: [
               Text(
@@ -826,27 +849,27 @@ class _ProductCardState extends State<ProductCard> {
                     if (quantity > 1) setState(() => quantity--);
                   }),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       '$quantity',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                   _qtyButton(Icons.add, const Color(0xFF76A258), () {
                     setState(() => quantity++);
                   }),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () => widget.onAdd(quantity),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       decoration: BoxDecoration(
                         color: const Color(0xFF76A258),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
                         'ເພີ່ມ',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
                   ),
@@ -863,13 +886,18 @@ class _ProductCardState extends State<ProductCard> {
     return Row(
       children: [
         Container(
-          width: 100,
-          padding: const EdgeInsets.all(12),
+          width: 160,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+          ),
           child: Image.network(
             _getImageUrl(widget.product.imagePath),
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Image.network(
               '${ApiConfig.baseUrl}/assets/images/default.png',
+              fit: BoxFit.contain,
               errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
             ),
           ),

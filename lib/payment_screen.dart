@@ -4,6 +4,7 @@ import 'package:ipos/database_helper.dart';
 import 'package:ipos/pos_screen.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ipos/printer_service.dart';
 
 class PaymentScreen extends StatefulWidget {
   final double totalAmount; // Base amount in LAK
@@ -256,7 +257,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           print('ERROR DURING STOCK DEDUCTION: $e');
                         }
                         
-                        _showSuccessDialog();
+                        _showSuccessDialog(order);
                       },
                 child: const Text(
                   'ຢືນຢັນການຊຳລະເງິນ',
@@ -336,7 +337,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(Map<String, dynamic> order) async {
+    final prefs = await SharedPreferences.getInstance();
+    bool autoPrint = prefs.getBool('auto_print') ?? true;
+    
+    if (autoPrint) {
+      PrinterService.printReceipt(order);
+    }
+
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -358,19 +367,35 @@ class _PaymentScreenState extends State<PaymentScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () => PrinterService.printReceipt(order),
+                    icon: const Icon(Icons.print),
+                    label: const Text('ພິມບິນ'),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context, true); // Back to POS with success flag
-                },
-                child: const Text('ຕົກລົງ', style: TextStyle(color: Colors.white)),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryGreen,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      Navigator.pop(context, true); // Back to POS with success flag
+                    },
+                    child: const Text('ຕົກລົງ', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ipos/database_helper.dart';
 import 'package:ipos/api_config.dart';
+import 'package:ipos/printer_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ViewOrdersScreen extends StatefulWidget {
@@ -35,6 +36,82 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
       orders = dbOrders;
       isLoading = false;
     });
+  }
+
+  void _printAllVisibleOrders() async {
+    final filteredOrders = _getFilteredOrders();
+    if (filteredOrders.isEmpty) return;
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ຢືນຢັນການພິມ'),
+        content: Text('ທ່ານຕ້ອງການພິມບິນທັງໝົດ ${filteredOrders.length} ບິນ ຫຼື ບໍ່?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ຍົກເລີກ'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('ຕົກລົງ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ກຳລັງພິມ ${filteredOrders.length} ບິນ...')),
+      );
+      for (var order in filteredOrders) {
+        if (order['status'] != 'Cancelled') {
+          await PrinterService.printReceipt(order);
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+    }
+  }
+
+  Future<void> _confirmCancelOrder(BuildContext context, String orderId) async {
+    final TextEditingController remarkController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('ຢືນຢັນການຍົກເລີກ', style: TextStyle(fontWeight: FontWeight.w900)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການຍົກເລີກລາຍການນີ້? ສະຕັອກສິນຄ້າຈະຖືກຄືນເຂົ້າລະບົບ.'),
+            const SizedBox(height: 20),
+            TextField(
+              controller: remarkController,
+              decoration: InputDecoration(
+                hintText: 'ເຫດຜົນການຍົກເລີກ...',
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ຍົກເລີກ')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+            child: const Text('ຢືນຢັນ'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await DatabaseHelper().cancelOrder(orderId, remark: remarkController.text.trim().isEmpty ? null : remarkController.text.trim());
+      _loadOrders();
+    }
   }
 
   Future<void> _syncOrders() async {
@@ -77,9 +154,8 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final filteredOrders = orders.where((o) {
+  List<Map<String, dynamic>> _getFilteredOrders() {
+    return orders.where((o) {
       String statusLabel = o['status'] == 'Completed'
           ? 'ຊຳລະເງິນແລ້ວ'
           : (o['status'] == 'Cancelled' ? 'ຍົກເລີກແລ້ວ' : o['status']);
@@ -93,10 +169,17 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
           String endDateStr = selectedDateRange!.end.toIso8601String().substring(0, 10);
           matchesDate = orderDateStr.compareTo(startDateStr) >= 0 && 
                         orderDateStr.compareTo(endDateStr) <= 0;
-        } catch (e) { matchesDate = true; }
+        } catch (e) {
+          matchesDate = true;
+        }
       }
       return matchesStatus && matchesDate;
     }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredOrders = _getFilteredOrders();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -105,7 +188,7 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'TRANSACTION HUB',
+          'ປະຫວັດການຂາຍ',
           style: TextStyle(
             color: darkSlate,
             fontWeight: FontWeight.w900,
@@ -124,6 +207,10 @@ class _ViewOrdersScreenState extends State<ViewOrdersScreen> {
               color: selectedDateRange != null ? primaryGreen : Colors.grey,
             ),
             onPressed: _selectDateRange,
+          ),
+          IconButton(
+            icon: Icon(Icons.print_rounded, color: darkSlate),
+            onPressed: _printAllVisibleOrders,
           ),
         ],
       ),
@@ -505,10 +592,10 @@ class OrderCard extends StatelessWidget {
                   children: [
                     const Spacer(),
                     TextButton.icon(
-                      onPressed: () => _confirmCancelOrder(context, order['id']),
+                      onPressed: () => _showCancelDialog(context, order['id']),
                       icon: const Icon(Icons.cancel_rounded, color: Colors.redAccent, size: 16),
                       label: const Text(
-                        'CANCEL TRANSACTION',
+                        'ຍົກເລີກ',
                         style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w900),
                       ),
                       style: TextButton.styleFrom(
@@ -526,22 +613,22 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmCancelOrder(BuildContext context, String orderId) async {
+  Future<void> _showCancelDialog(BuildContext context, String orderId) async {
     final TextEditingController remarkController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Confirm Termination', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: const Text('ຢືນຢັນການຍົກເລີກ', style: TextStyle(fontWeight: FontWeight.w900)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Are you sure you want to terminate this transaction? Inventory will be restored.'),
+            const Text('ທ່ານແນ່ໃຈຫຼືບໍ່ວ່າຕ້ອງການຍົກເລີກລາຍການນີ້? ສະຕັອກສິນຄ້າຈະຖືກຄືນເຂົ້າລະບົບ.'),
             const SizedBox(height: 20),
             TextField(
               controller: remarkController,
               decoration: InputDecoration(
-                hintText: 'Reason for termination...',
+                hintText: 'ເຫດຜົນການຍົກເລີກ...',
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
@@ -551,11 +638,11 @@ class OrderCard extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('DISMISS')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ຍົກເລີກ')),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-            child: const Text('CONFIRM'),
+            child: const Text('ຢືນຢັນ'),
           ),
         ],
       ),

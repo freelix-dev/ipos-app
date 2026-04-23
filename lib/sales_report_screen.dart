@@ -164,7 +164,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'SALES ANALYTICS',
+          'ວິເຄາະຍອດຂາຍ',
           style: TextStyle(
             color: darkSlate,
             fontWeight: FontWeight.w900,
@@ -199,9 +199,9 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
                     padding: const EdgeInsets.only(bottom: 24),
                     child: Row(
                       children: [
-                        _buildShortcutChip('TODAY', DateTime.now(), DateTime.now()),
-                        _buildShortcutChip('YESTERDAY', DateTime.now().subtract(const Duration(days: 1)), DateTime.now().subtract(const Duration(days: 1))),
-                        _buildShortcutChip('THIS MONTH', DateTime(DateTime.now().year, DateTime.now().month, 1), DateTime.now()),
+                        _buildShortcutChip('ມື້ນີ້', DateTime.now(), DateTime.now()),
+                        _buildShortcutChip('ມື້ວານນີ້', DateTime.now().subtract(const Duration(days: 1)), DateTime.now().subtract(const Duration(days: 1))),
+                        _buildShortcutChip('ເດືອນນີ້', DateTime(DateTime.now().year, DateTime.now().month, 1), DateTime.now()),
                       ],
                     ),
                   ),
@@ -243,12 +243,12 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
                   _buildCloseSaleButton(),
                   
                   const SizedBox(height: 40),
-                  _buildSectionHeader('PAYMENT DISTRIBUTION'),
+                  _buildSectionHeader('ຮູບແບບການຊຳລະ'),
                   const SizedBox(height: 16),
                   _buildMethodSection(),
                   
                   const SizedBox(height: 32),
-                  _buildSectionHeader('CURRENCY METRICS'),
+                  _buildSectionHeader('ສະກຸນເງິນ'),
                   const SizedBox(height: 16),
                   _buildCurrencySection(),
                   const SizedBox(height: 40),
@@ -292,7 +292,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
       child: Column(
         children: [
           Text(
-            'AGGREGATED REVENUE (LAK)',
+            'ຍອດຂາຍລວມທັງໝົດ (ກີບ)',
             style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
           ),
           const SizedBox(height: 12),
@@ -313,9 +313,9 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMiniStat('TOTAL TRANSACTIONS', '${_totalOrders} Orders'),
+              _buildMiniStat('ຈຳນວນບິນທັງໝົດ', '${_totalOrders} ບິນ'),
               Container(width: 1, height: 40, color: Colors.white.withOpacity(0.1)),
-              _buildMiniStat('CHANGE DISBURSED', '₭ ${formatPrice(_totalChangeAmountLAK)}'),
+              _buildMiniStat('ເງິນທອນທັງໝົດ', '₭ ${formatPrice(_totalChangeAmountLAK)}'),
             ],
           ),
         ],
@@ -364,7 +364,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
           : const Icon(Icons.auto_awesome_rounded),
         label: Text(
-          _isSyncing ? 'SYNCHRONIZING...' : 'CLOSE SESSION & SYNC ($_unsyncedCount)',
+          _isSyncing ? 'ກຳລັງຊິງຂໍ້ມູນ...' : 'ປິດຍອດ ແລະ ຊິງຂໍ້ມູນ ($_unsyncedCount)',
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1),
         ),
         onPressed: _isSyncing ? null : _syncOrdersToBackend,
@@ -375,9 +375,9 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
   Widget _buildMethodSection() {
     return Row(
       children: [
-        Expanded(child: _buildInfoBox('CASH FLOW', _salesByMethod['cash']!, Icons.payments_rounded, Colors.amber)),
+        Expanded(child: _buildInfoBox('ເງິນສົດ', _salesByMethod['cash']!, Icons.payments_rounded, Colors.amber)),
         const SizedBox(width: 16),
-        Expanded(child: _buildInfoBox('BANK TRANSFER', _salesByMethod['bank']!, Icons.account_balance_rounded, Colors.blueAccent)),
+        Expanded(child: _buildInfoBox('ໂອນທະນາຄານ', _salesByMethod['bank']!, Icons.account_balance_rounded, Colors.blueAccent)),
       ],
     );
   }
@@ -453,7 +453,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
               style: TextStyle(fontWeight: FontWeight.w800, color: darkSlate)
             ),
             subtitle: Text(
-              '${entry.value} COMPLETED ORDERS',
+              '${entry.value} ບິນທີ່ສຳເລັດ',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.grey.shade400),
             ),
             trailing: Text(

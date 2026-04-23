@@ -20,21 +20,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'ipos_database.db');
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
-      onOpen: (db) async {
-        // Safety check to ensure missing columns exist
-        try {
-          await db.execute('ALTER TABLE orders ADD COLUMN remark TEXT');
-        } catch (_) {}
-        try {
-          await db.execute('ALTER TABLE orders ADD COLUMN userId TEXT');
-        } catch (_) {}
-        try {
-          await db.execute('ALTER TABLE orders ADD COLUMN userName TEXT');
-        } catch (_) {}
-      },
     );
   }
 
@@ -64,7 +52,9 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE products ADD COLUMN unit TEXT');
     }
     if (oldVersion < 8) {
-      await db.execute('ALTER TABLE orders ADD COLUMN remark TEXT');
+      try {
+        await db.execute('ALTER TABLE orders ADD COLUMN remark TEXT');
+      } catch (_) {}
     }
     if (oldVersion < 9) {
       // Recreate products table with TEXT id to support UUID
@@ -79,6 +69,14 @@ class DatabaseHelper {
           unit TEXT
         )
       ''');
+    }
+    if (oldVersion < 11) {
+      try {
+        await db.execute('ALTER TABLE orders ADD COLUMN userId TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE orders ADD COLUMN userName TEXT');
+      } catch (_) {}
     }
   }
 
