@@ -4,6 +4,7 @@ import userRoutes from './user.routes';
 import productRoutes from './product.routes';
 import orderRoutes from './order.routes';
 import exchangeRateRoutes from './exchange-rate.routes';
+import shopRoutes from './shop.routes';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.use('/users', userRoutes);
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
 router.use('/exchange-rates', exchangeRateRoutes);
+router.use('/shops', shopRoutes);
 
 // For compatibility with the original /api/upload which I moved inside /api/products/upload in my initial thought
 // but looking back at index.ts it was /api/upload. Let's keep it consistent or redirect.

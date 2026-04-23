@@ -78,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
           if (userData['user'] != null) {
             await prefs.setString('user_id', userData['user']['id']?.toString() ?? '');
             await prefs.setString('user_name', userData['user']['name']?.toString() ?? '');
+            await prefs.setString('shop_id', userData['user']['shop_id']?.toString() ?? '');
+            await prefs.setString('shop_name', userData['user']['shop_name']?.toString() ?? 'iPOS Store');
           }
 
           Navigator.pushReplacement(

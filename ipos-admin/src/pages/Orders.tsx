@@ -15,6 +15,8 @@ import { api } from '../services/api';
 const Orders = () => {
   const [filter, setFilter] = useState('All');
   const [orders, setOrders] = useState<any[]>([]);
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -24,14 +26,30 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id;
+
   useEffect(() => {
+    if (isSystemAdmin) {
+      loadShops();
+    }
     loadOrders();
-  }, []);
+  }, [selectedShopId]);
+
+  const loadShops = async () => {
+    try {
+      const data = await api.getShops();
+      setShops(data);
+    } catch (error) {
+      console.error('Failed to load shops:', error);
+    }
+  };
 
   const loadOrders = async () => {
     try {
       setLoading(true);
-      const data = await api.getOrders();
+      const data = await api.getOrders(isSystemAdmin ? selectedShopId : currentUser?.shop_id);
       setOrders(data);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -112,6 +130,34 @@ const Orders = () => {
                 className="filter-input-focus"
               />
             </div>
+
+            {/* Shop Selector for System Admin */}
+            {isSystemAdmin && (
+              <div style={{ position: 'relative', width: '220px' }}>
+                <select 
+                  value={selectedShopId}
+                  onChange={(e) => {
+                    setSelectedShopId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{ 
+                    width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                    borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                    background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                    appearance: 'none', cursor: 'pointer', outline: 'none',
+                    color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <option value="">All Branches</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.name}</option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                   <Filter size={16} />
+                </div>
+              </div>
+            )}
 
             {/* Date Range Module */}
             <div style={{ 
@@ -231,6 +277,11 @@ const Orders = () => {
                       }}>
                         #{order.id.toUpperCase().substring(0, 12)}
                       </div>
+                      {isSystemAdmin && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800, marginTop: '4px' }}>
+                          {order.shop_name}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>

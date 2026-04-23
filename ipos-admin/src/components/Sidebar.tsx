@@ -15,6 +15,10 @@ import {
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id;
+
   const menuItems = [
     { icon: <LayoutDashboard size={19} />, label: 'Dashboard', path: '/dashboard' },
     { icon: <ShoppingCart size={19} />, label: 'Orders', path: '/orders' },
@@ -22,6 +26,7 @@ const Sidebar = () => {
     { icon: <Database size={19} />, label: 'Stock', path: '/stock' },
     { icon: <LineChart size={19} />, label: 'Sale Report', path: '/reports/sales' },
     { icon: <PieChart size={19} />, label: 'Stock Report', path: '/reports/stock' },
+    ...(isSystemAdmin ? [{ icon: <Layers size={19} />, label: 'Manage Shops', path: '/shops' }] : []),
     { icon: <Users size={19} />, label: 'Manage Users', path: '/users' },
     { icon: <Settings size={19} />, label: 'Settings', path: '/settings' },
   ];

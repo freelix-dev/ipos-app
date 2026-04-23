@@ -11,6 +11,8 @@ import Users from './pages/Users';
 import Login from './pages/Login';
 import SaleReports from './pages/SaleReports';
 import StockReports from './pages/StockReports';
+import Shops from './pages/Shops';
+import RegisterShop from './pages/RegisterShop';
 
 function App() {
   const user = localStorage.getItem('user');
@@ -20,6 +22,7 @@ function App() {
     <Routes>
       {/* Auth Route */}
       <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} />
+      <Route path="/register-shop" element={<RegisterShop />} />
 
       {/* Protected Routes */}
       <Route path="/" element={isAuthenticated ? <Layout /> : <Navigate to="/login" />}>
@@ -34,6 +37,7 @@ function App() {
         <Route path="users" element={<Users />} />
         <Route path="reports/sales" element={<SaleReports />} />
         <Route path="reports/stock" element={<StockReports />} />
+        <Route path="shops" element={<Shops />} />
         <Route path="*" element={<div>404 Page Not Found</div>} />
       </Route>
     </Routes>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ipos/payment_screen.dart';
 import 'package:ipos/database_helper.dart';
 import 'package:ipos/main_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Product {
   final String id;
@@ -43,6 +44,7 @@ class _PosScreenState extends State<PosScreen> {
   List<CartItem> cartItems = [];
   String searchQuery = '';
   String selectedCurrency = 'LAK';
+  String shopName = 'Namkhong Beer';
   final TextEditingController _searchController = TextEditingController();
   Map<String, double> exchangeRates = {'LAK': 1.0};
   bool _isLoading = true;
@@ -58,6 +60,8 @@ class _PosScreenState extends State<PosScreen> {
     setState(() => _isLoading = true);
     final localProducts = await DatabaseHelper().getProducts();
     final localRates = await DatabaseHelper().getExchangeRates();
+    final prefs = await SharedPreferences.getInstance();
+    final savedShopName = prefs.getString('shop_name') ?? 'Namkhong Beer';
 
     setState(() {
       products = localProducts
@@ -78,6 +82,7 @@ class _PosScreenState extends State<PosScreen> {
           exchangeRates[key] = value;
         });
       }
+      shopName = savedShopName;
       _isLoading = false;
     });
   }
@@ -316,13 +321,9 @@ class _PosScreenState extends State<PosScreen> {
         ),
         title: Column(
           children: [
-            const Text(
-              'Namkhong Beer',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-            ),
             Text(
-              'Namkhong Vientiane',
-              style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+              shopName,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ],
         ),

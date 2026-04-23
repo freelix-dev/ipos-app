@@ -3,7 +3,8 @@ import * as userService from '../services/user.service';
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await userService.getAllUsers();
+    const shopId = req.query.shopId as string;
+    const users = await userService.getAllUsers(shopId);
     res.json(users);
   } catch (e) {
     console.error(e);

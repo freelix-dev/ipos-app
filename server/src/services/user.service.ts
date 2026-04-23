@@ -2,24 +2,35 @@ import { readPool, writePool } from '../db';
 import { RowDataPacket } from 'mysql2';
 import { v4 as uuidv4 } from 'uuid';
 
-export const getAllUsers = async () => {
-  const [users] = await readPool.query<RowDataPacket[]>('SELECT id, email, name, role FROM users');
+export const getAllUsers = async (shopId?: string) => {
+  let query = 'SELECT u.id, u.shop_id, u.email, u.name, u.role, s.name as shop_name FROM users u LEFT JOIN shops s ON u.shop_id = s.id';
+  const params: any[] = [];
+
+  if (shopId) {
+    query += ' WHERE u.shop_id = ?';
+    params.push(shopId);
+  }
+
+  const [users] = await readPool.query<RowDataPacket[]>(query, params);
   return users;
 };
 
 export const createUser = async (userData: any) => {
-  const { name, email, password, role } = userData;
+  const { name, email, password, role, shop_id } = userData;
   const id = uuidv4();
   await writePool.query(
-    'INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-    [id, name, email, password, role || 'user']
+    'INSERT INTO users (id, shop_id, name, email, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+    [id, shop_id || null, name, email, password, role || 'user']
   );
   return id;
 };
 
 export const findUserByEmailAndPassword = async (email: string, password: string) => {
   const [users] = await readPool.query<RowDataPacket[]>(
-    'SELECT id, email, name, role FROM users WHERE email = ? AND password = ? LIMIT 1',
+    `SELECT u.id, u.shop_id, u.email, u.name, u.role, s.name as shop_name 
+     FROM users u 
+     LEFT JOIN shops s ON u.shop_id = s.id 
+     WHERE u.email = ? AND u.password = ? LIMIT 1`,
     [email, password]
   );
   return users[0] || null;

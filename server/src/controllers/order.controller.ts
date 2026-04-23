@@ -3,10 +3,11 @@ import * as orderService from '../services/order.service';
 
 export const getOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await orderService.getAllOrders();
+    const shopId = req.query.shopId as string;
+    const orders = await orderService.getAllOrders(shopId);
     res.json(orders);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Database error' });
   }
 };

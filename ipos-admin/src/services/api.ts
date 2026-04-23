@@ -2,8 +2,9 @@ const API_BASE_URL = 'http://127.0.0.1:3000/api';
 
 export const api = {
   // Products
-  getProducts: async () => {
-    const response = await fetch(`${API_BASE_URL}/products`);
+  getProducts: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/products?shopId=${shopId}` : `${API_BASE_URL}/products`;
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch products');
     return response.json();
   },
@@ -75,8 +76,9 @@ export const api = {
   },
 
   // Users
-  getUsers: async () => {
-    const response = await fetch(`${API_BASE_URL}/users`);
+  getUsers: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/users?shopId=${shopId}` : `${API_BASE_URL}/users`;
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch users');
     return response.json();
   },
@@ -92,12 +94,58 @@ export const api = {
   },
 
   // Orders
-  getOrders: async () => {
-    const response = await fetch(`${API_BASE_URL}/orders`);
+  getOrders: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/orders?shopId=${shopId}` : `${API_BASE_URL}/orders`;
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch orders');
     return response.json();
   },
   
+  // Shops
+  getShops: async () => {
+    const response = await fetch(`${API_BASE_URL}/shops`);
+    if (!response.ok) throw new Error('Failed to fetch shops');
+    return response.json();
+  },
+
+  addShop: async (shop: any) => {
+    const response = await fetch(`${API_BASE_URL}/shops`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(shop),
+    });
+    if (!response.ok) throw new Error('Failed to add shop');
+    return response.json();
+  },
+
+  updateShop: async (id: string, shop: any) => {
+    const response = await fetch(`${API_BASE_URL}/shops/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(shop),
+    });
+    if (!response.ok) throw new Error('Failed to update shop');
+    return response.json();
+  },
+
+  deleteShop: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/shops/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete shop');
+    return response.json();
+  },
+
+  registerShop: async (data: any) => {
+    const response = await fetch(`${API_BASE_URL}/shops/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to register shop');
+    return response.json();
+  },
+
   // Exchange Rates
   getExchangeRates: async () => {
     const response = await fetch(`${API_BASE_URL}/exchange-rates`);

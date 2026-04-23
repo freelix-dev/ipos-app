@@ -12,6 +12,7 @@ import {
   Search,
   Filter,
   Settings,
+  Store,
   ChevronLeft,
   ChevronRight,
   ChevronLast,
@@ -21,24 +22,34 @@ import { api } from '../services/api';
 
 const Users = () => {
   const [users, setUsers] = useState<any[]>([]);
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'user' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'user', shop_id: '' });
   
   // Filtering & Pagination State
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id;
+
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [selectedShopId]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await api.getUsers();
-      setUsers(data);
+      const [userData, shopData] = await Promise.all([
+        api.getUsers(isSystemAdmin ? selectedShopId : currentUser?.shop_id),
+        api.getShops()
+      ]);
+      setUsers(userData);
+      setShops(shopData);
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -68,10 +79,11 @@ const Users = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role
+        role: formData.role,
+        shop_id: isSystemAdmin ? formData.shop_id : currentUser?.shop_id
       });
       setIsModalOpen(false);
-      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'user' });
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'user', shop_id: '' });
       loadUsers();
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || 'Failed to add user. Email might already exist.';
@@ -130,7 +142,35 @@ const Users = () => {
                 />
               </div>
 
-              {/* Identity Filter Module */}
+            {/* Shop Selector for System Admin */}
+            {isSystemAdmin && (
+              <div style={{ position: 'relative', width: '220px' }}>
+                <select 
+                  value={selectedShopId}
+                  onChange={(e) => {
+                    setSelectedShopId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{ 
+                    width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                    borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                    background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                    appearance: 'none', cursor: 'pointer', outline: 'none',
+                    color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <option value="">All Branches</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.name}</option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                   <Filter size={16} />
+                </div>
+              </div>
+            )}
+
+            {/* Identity Filter Module */}
               <button style={{ 
                 height: '50px', padding: '0 24px', borderRadius: '16px', 
                 border: '1px solid var(--border-strong)', background: '#fff', 
@@ -207,6 +247,9 @@ const Users = () => {
                           </div>
                           <div>
                             <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{user.name}</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>
+                              {shops.find(s => s.id === user.shop_id)?.name || 'No Shop Assigned'}
+                            </p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>UID: {user.id.toString().slice(-6)}</p>
                           </div>
                         </div>
@@ -454,6 +497,28 @@ const Users = () => {
                       />
                     </div>
                   </div>
+
+                  {isSystemAdmin && (
+                    <div className="form-group">
+                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ASSIGN SHOP / BRANCH</label>
+                      <div style={{ position: 'relative' }}>
+                        <select 
+                          value={formData.shop_id}
+                          onChange={(e) => setFormData({...formData, shop_id: e.target.value})}
+                          className="input-premium"
+                          style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          <option value="">-- No Shop Assigned --</option>
+                          {shops.map(shop => (
+                            <option key={shop.id} value={shop.id}>{shop.name}</option>
+                          ))}
+                        </select>
+                        <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                          <Store size={16} color="var(--text-sidebar)" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ACCESS ROLE</label>

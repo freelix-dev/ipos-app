@@ -17,20 +17,38 @@ const Products = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
+  const [shops, setShops] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState('');
   const [loading, setLoading] = useState(true);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  const userJson = localStorage.getItem('user');
+  const currentUser = userJson ? JSON.parse(userJson) : null;
+  const isSystemAdmin = currentUser && !currentUser.shop_id;
+
   useEffect(() => {
+    if (isSystemAdmin) {
+      loadShops();
+    }
     loadProducts();
-  }, []);
+  }, [selectedShopId]);
+
+  const loadShops = async () => {
+    try {
+      const data = await api.getShops();
+      setShops(data);
+    } catch (error) {
+      console.error('Failed to load shops:', error);
+    }
+  };
 
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await api.getProducts();
+      const data = await api.getProducts(isSystemAdmin ? selectedShopId : currentUser?.shop_id);
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -124,6 +142,34 @@ const Products = () => {
               />
             </div>
 
+            {/* Shop Selector for System Admin */}
+            {isSystemAdmin && (
+              <div style={{ position: 'relative', width: '220px' }}>
+                <select 
+                  value={selectedShopId}
+                  onChange={(e) => {
+                    setSelectedShopId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  style={{ 
+                    width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                    borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                    background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                    appearance: 'none', cursor: 'pointer', outline: 'none',
+                    color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
+                  }}
+                >
+                  <option value="">All Branches</option>
+                  {shops.map(shop => (
+                    <option key={shop.id} value={shop.id}>{shop.name}</option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                   <Filter size={16} />
+                </div>
+              </div>
+            )}
+
             {/* Category Module */}
             <button style={{ 
               height: '50px', padding: '0 24px', borderRadius: '16px', 
@@ -205,6 +251,9 @@ const Products = () => {
                         </div>
                         <div>
                           <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{product.name}</p>
+                          {isSystemAdmin && (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{product.shop_name || 'System Catalog'}</p>
+                          )}
                           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>ID: {product.id.toString().slice(-6).toUpperCase()}</p>
                         </div>
                       </div>

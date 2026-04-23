@@ -142,7 +142,7 @@ const Login = () => {
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '40px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-          Missing credentials? <span style={{ color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Help Center</span>
+          New here? <span onClick={() => window.location.href='/register-shop'} style={{ color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Register Your Shop</span>
         </p>
       </div>
 

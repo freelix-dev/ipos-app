@@ -5,8 +5,16 @@ import fs from 'fs';
 
 const DEFAULT_IMAGES = ['beer_cans.png', 'beer_box.png', 'water_bottle.png', 'blue_cups.png', 'ice_bag.png', 'default.png'];
 
-export const getAllProducts = async () => {
-  const [products] = await readPool.query<RowDataPacket[]>('SELECT * FROM products');
+export const getAllProducts = async (shopId?: string) => {
+  let query = 'SELECT p.*, s.name as shop_name FROM products p LEFT JOIN shops s ON p.shop_id = s.id';
+  const params: any[] = [];
+
+  if (shopId) {
+    query += ' WHERE p.shop_id = ?';
+    params.push(shopId);
+  }
+
+  const [products] = await readPool.query<RowDataPacket[]>(query, params);
   return products;
 };
 
@@ -16,10 +24,10 @@ export const getProductById = async (id: string) => {
 };
 
 export const createProduct = async (productData: any) => {
-  const { name, price, stock, unit, imagePath } = productData;
+  const { name, price, stock, unit, imagePath, shop_id } = productData;
   const [result] = await writePool.query<ResultSetHeader>(
-    'INSERT INTO products (name, price, stock, unit, imagePath) VALUES (?, ?, ?, ?, ?)',
-    [name, price, stock, unit || 'pcs', imagePath || 'assets/images/default.png']
+    'INSERT INTO products (shop_id, name, price, stock, unit, imagePath) VALUES (?, ?, ?, ?, ?, ?)',
+    [shop_id || null, name, price, stock, unit || 'pcs', imagePath || 'assets/images/default.png']
   );
   return result.insertId;
 };
