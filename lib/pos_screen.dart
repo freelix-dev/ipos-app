@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ipos/payment_screen.dart';
 import 'package:ipos/database_helper.dart';
 import 'package:ipos/main_drawer.dart';
+import 'package:ipos/api_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Product {
@@ -154,7 +155,10 @@ class _PosScreenState extends State<PosScreen> {
                       children: [
                         const Text(
                           'ກະຕ່າຂອງທ່ານ',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Row(
                           children: [
@@ -164,8 +168,15 @@ class _PosScreenState extends State<PosScreen> {
                                   setState(() => cartItems.clear());
                                   setModalState(() {});
                                 },
-                                icon: const Icon(Icons.delete_sweep, color: Colors.red, size: 20),
-                                label: const Text('ລ້າງກະຕ່າ', style: TextStyle(color: Colors.red)),
+                                icon: const Icon(
+                                  Icons.delete_sweep,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                                label: const Text(
+                                  'ລ້າງກະຕ່າ',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
                             IconButton(
                               icon: const Icon(Icons.close),
@@ -181,9 +192,16 @@ class _PosScreenState extends State<PosScreen> {
                         padding: EdgeInsets.symmetric(vertical: 40.0),
                         child: Column(
                           children: [
-                            Icon(Icons.shopping_cart_outlined, size: 60, color: Colors.grey),
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 60,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 10),
-                            Text('ກະຕ່າວ່າງເປົ່າ', style: TextStyle(color: Colors.grey)),
+                            Text(
+                              'ກະຕ່າວ່າງເປົ່າ',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ],
                         ),
                       )
@@ -203,9 +221,20 @@ class _PosScreenState extends State<PosScreen> {
                                   color: Colors.grey.shade100,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Image.asset(item.product.imagePath, fit: BoxFit.contain),
+                                child: Image.network(
+                                  item.product.imagePath.startsWith('http') 
+                                      ? item.product.imagePath 
+                                      : '${ApiConfig.baseUrl}/${item.product.imagePath}',
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 24),
+                                ),
                               ),
-                              title: Text(item.product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              title: Text(
+                                item.product.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               subtitle: Text(
                                 '${item.product.price.toStringAsFixed(0)} x ${item.quantity} ${item.product.unit}',
                                 style: TextStyle(color: Colors.grey.shade600),
@@ -214,12 +243,22 @@ class _PosScreenState extends State<PosScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    formatPrice(_convertPrice(item.product.price * item.quantity)),
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    formatPrice(
+                                      _convertPrice(
+                                        item.product.price * item.quantity,
+                                      ),
+                                    ),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      color: Colors.red,
+                                    ),
                                     onPressed: () {
                                       setState(() => cartItems.removeAt(index));
                                       setModalState(() {});
@@ -237,12 +276,26 @@ class _PosScreenState extends State<PosScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('ລວມທັງໝົດ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          const Text(
+                            'ລວມທັງໝົດ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Flexible(
                             child: Text(
-                              '${formatPrice(_convertPrice(cartTotal))} ${selectedCurrency == 'LAK' ? 'ກີບ' : selectedCurrency == 'THB' ? 'ບາດ' : "\$"}',
-                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: primaryGreen),
+                              '${formatPrice(_convertPrice(cartTotal))} ${selectedCurrency == 'LAK'
+                                  ? 'ກີບ'
+                                  : selectedCurrency == 'THB'
+                                  ? 'ບາດ'
+                                  : "\$"}',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: primaryGreen,
+                              ),
                               textAlign: TextAlign.right,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -257,7 +310,9 @@ class _PosScreenState extends State<PosScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryGreen,
                           padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: cartItems.isEmpty
                             ? null
@@ -279,7 +334,10 @@ class _PosScreenState extends State<PosScreen> {
                                   setState(() => cartItems.clear());
                                 }
                               },
-                        child: const Text('ຊຳລະເງິນ', style: TextStyle(color: Colors.white, fontSize: 18)),
+                        child: const Text(
+                          'ຊຳລະເງິນ',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
                       ),
                     ),
                   ],
@@ -298,7 +356,8 @@ class _PosScreenState extends State<PosScreen> {
     super.dispose();
   }
 
-  final Color primaryGreen = const Color(0xFF76A258);
+  final Color primaryGreen = const Color(0xFF10B981);
+  final Color darkSlate = const Color(0xFF0F172A);
 
   @override
   Widget build(BuildContext context) {
@@ -308,161 +367,319 @@ class _PosScreenState extends State<PosScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       drawer: MainDrawer(primaryGreen: primaryGreen, onSyncComplete: _loadData),
       appBar: AppBar(
-        backgroundColor: primaryGreen,
+        backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
+            icon: Icon(Icons.menu_rounded, color: darkSlate),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: Column(
-          children: [
-            Text(
-              shopName,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ],
+        title: Text(
+          shopName.toUpperCase(),
+          style: TextStyle(
+            color: darkSlate,
+            fontWeight: FontWeight.w900,
+            fontSize: 16,
+            letterSpacing: 1.2,
+          ),
         ),
-        centerTitle: true,
         actions: [
-          PopupMenuButton<String>(
-            onSelected: (String value) => setState(() => selectedCurrency = value),
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(value: 'LAK', child: Text('LAK (Lao Kip)')),
-              const PopupMenuItem<String>(value: 'THB', child: Text('THB (Thai Baht)')),
-              const PopupMenuItem<String>(value: 'USD', child: Text('USD (US Dollar)')),
-            ],
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Row(
-                children: [
-                  Text(selectedCurrency, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                  const Icon(Icons.arrow_drop_down, color: Colors.white),
-                ],
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: PopupMenuButton<String>(
+              onSelected: (String value) =>
+                  setState(() => selectedCurrency = value),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'LAK',
+                  child: Text('LAK (₭)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'THB',
+                  child: Text('THB (฿)'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'USD',
+                  child: Text('USD (\$)'),
+                ),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Row(
+                  children: [
+                    Text(
+                      selectedCurrency,
+                      style: TextStyle(
+                        color: darkSlate,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: darkSlate,
+                      size: 18,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white),
-            onPressed: () => setState(() => cartItems.clear()),
           ),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
-                    height: 50,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: TextField(
                       controller: _searchController,
                       onChanged: (value) => setState(() => searchQuery = value),
-                      decoration: const InputDecoration(
-                        hintText: 'ລະຫັດສິນຄ້າ',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      decoration: InputDecoration(
+                        hintText: 'Search intelligence...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: Colors.grey.shade400,
+                        ),
                         border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Material(
-                  color: primaryGreen,
-                  borderRadius: BorderRadius.circular(4),
-                  child: InkWell(
-                    onTap: () => setState(() => isGridView = !isGridView),
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      alignment: Alignment.center,
-                      child: Icon(isGridView ? Icons.view_list : Icons.grid_view, color: Colors.white),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => setState(() => isGridView = !isGridView),
+                  child: Container(
+                    height: 52,
+                    width: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Icon(
+                      isGridView
+                          ? Icons.grid_view_rounded
+                          : Icons.view_list_rounded,
+                      color: darkSlate,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Material(
-                color: primaryGreen,
-                borderRadius: BorderRadius.circular(4),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: const Text(
-                    'ທົ່ວໄປ',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                _buildCategoryChip('All Products', true),
+                _buildCategoryChip('Beverages', false),
+                _buildCategoryChip('Snacks', false),
+                _buildCategoryChip('Other', false),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : products.isEmpty
-                    ? const Center(child: Text('ບໍ່ມີຂໍ້ມູນສິນຄ້າ\nກະລຸນາຊິງຂໍ້ມູນຈາກ Backend', textAlign: TextAlign.center))
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(8),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isGridView ? 2 : 1,
-                          childAspectRatio: isGridView ? 0.70 : 2.2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 64,
+                          color: Colors.grey.shade300,
                         ),
-                        itemCount: filteredProducts.length,
-                        itemBuilder: (context, index) {
-                          final product = filteredProducts[index];
-                          final displayPrice = formatPrice(_convertPrice(product.price));
-                          return ProductCard(
-                            product: product,
-                            primaryGreen: primaryGreen,
-                            selectedCurrency: selectedCurrency,
-                            displayPrice: displayPrice,
-                            isGridView: isGridView,
-                            onAdd: (qty) => addToCart(product, qty),
-                          );
-                        },
-                      ),
-          ),
-          InkWell(
-            onTap: _showCartSheet,
-            child: Container(
-              color: primaryGreen,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('ກະຕ່າສິນຄ້າ', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      '${formatPrice(_convertPrice(cartTotal))} ${selectedCurrency == 'LAK' ? 'ກີບ' : selectedCurrency == 'THB' ? 'ບາດ' : "\$"}',
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
-                      overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 16),
+                        Text(
+                          'No products found\nPlease sync with intelligence hub',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isGridView ? 2 : 1,
+                      childAspectRatio: isGridView ? 0.72 : 2.4,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = filteredProducts[index];
+                      final displayPrice = formatPrice(
+                        _convertPrice(product.price),
+                      );
+                      return ProductCard(
+                        product: product,
+                        primaryGreen: primaryGreen,
+                        selectedCurrency: selectedCurrency,
+                        displayPrice: displayPrice,
+                        isGridView: isGridView,
+                        onAdd: (qty) => addToCart(product, qty),
+                      );
+                    },
+                  ),
+          ),
+          if (cartItems.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
                   ),
                 ],
               ),
+              child: GestureDetector(
+                onTap: _showCartSheet,
+                child: Container(
+                  height: 64,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [primaryGreen, const Color(0xFF059669)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryGreen.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.shopping_basket_rounded,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${cartItems.length} ITEMS',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const Text(
+                                'View Terminal Cart',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${formatPrice(_convertPrice(cartTotal))} ${selectedCurrency == 'LAK'
+                            ? '₭'
+                            : selectedCurrency == 'THB'
+                            ? '฿'
+                            : "\$"}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String label, bool isActive) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: isActive ? darkSlate : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isActive ? darkSlate : Colors.grey.shade200),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: darkSlate.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isActive ? Colors.white : Colors.grey.shade600,
+          fontWeight: FontWeight.w800,
+          fontSize: 13,
+        ),
       ),
     );
   }
@@ -495,166 +712,105 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isGridView) {
-      return Card(
-        color: Colors.white,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200),
-        ),
-        child: _buildOldVertical(),
-      );
-    }
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 15,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: InkWell(
-        onTap: () => setState(() => quantity++),
-        borderRadius: BorderRadius.circular(20),
-        child: _buildPremiumHorizontal(),
+        onTap: () {
+          widget.onAdd(1);
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: widget.isGridView ? _buildVertical() : _buildHorizontal(),
       ),
     );
   }
 
-  Widget _buildOldVertical() {
+  Widget _buildVertical() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          flex: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(child: Image.asset(widget.product.imagePath, fit: BoxFit.contain)),
-          ),
-        ),
-        Text(widget.product.name, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1),
-        Text(
-          'ຄົງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
-          style: TextStyle(fontSize: 11, color: Colors.orange.shade800, fontWeight: FontWeight.w600),
-        ),
-        Text(
-          '${widget.displayPrice} ${widget.selectedCurrency == 'LAK' ? 'ກີບ' : widget.selectedCurrency == 'THB' ? 'ບາດ' : '\$'}',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        const SizedBox(height: 8),
-        _buildSimpleControls(),
-      ],
-    );
-  }
-
-  Widget _buildSimpleControls() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _circularButton(Icons.remove, Colors.red.shade400, Colors.white, () {
-            if (quantity > 1) setState(() => quantity--);
-          }),
-          Expanded(child: Center(child: Text('$quantity', style: const TextStyle(fontWeight: FontWeight.bold)))),
-          _circularButton(Icons.add, widget.primaryGreen, Colors.white, () => setState(() => quantity++)),
-          const SizedBox(width: 4),
-          ElevatedButton(
-            onPressed: () {
-              widget.onAdd(quantity);
-              setState(() => quantity = 1);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: widget.primaryGreen,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              minimumSize: const Size(36, 32),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Image.network(
+              widget.product.imagePath.startsWith('http') 
+                  ? widget.product.imagePath 
+                  : '${ApiConfig.baseUrl}/${widget.product.imagePath}',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
             ),
-            child: const Text('ເພີ່ມ', style: TextStyle(color: Colors.white, fontSize: 11)),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumHorizontal() {
-    return Row(
-      children: [
-        Container(
-          width: 120,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
-          ),
-          child: Padding(padding: const EdgeInsets.all(12.0), child: Image.asset(widget.product.imagePath, fit: BoxFit.contain)),
         ),
-        Expanded(child: Padding(padding: const EdgeInsets.all(12.0), child: _buildInfoContent())),
-      ],
-    );
-  }
-
-  Widget _buildInfoContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.product.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-            Text(
-              'ຄົງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
-              style: TextStyle(fontSize: 12, color: Colors.orange.shade800, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(child: Text(widget.displayPrice, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: widget.primaryGreen), overflow: TextOverflow.ellipsis)),
-            Text(widget.selectedCurrency == 'LAK' ? 'ກີບ' : widget.selectedCurrency == 'THB' ? 'ບາດ' : '\$', style: TextStyle(fontSize: 12, color: widget.primaryGreen, fontWeight: FontWeight.w700)),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)),
-          child: Row(
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _circularButton(Icons.remove, Colors.white, Colors.black54, () {
-                if (quantity > 1) setState(() => quantity--);
-              }),
-              const SizedBox(width: 2),
-              Expanded(child: Center(child: Text('$quantity', style: const TextStyle(fontWeight: FontWeight.w900)))),
-              const SizedBox(width: 2),
-              _circularButton(Icons.add, Colors.white, Colors.black54, () => setState(() => quantity++)),
-              const SizedBox(width: 4),
-              Material(
-                color: widget.primaryGreen,
-                borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  onTap: () {
-                    widget.onAdd(quantity);
-                    setState(() => quantity = 1);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add_shopping_cart, color: Colors.white, size: 16),
-                        SizedBox(width: 4),
-                        Text('ເພີ່ມ', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
+              Text(
+                widget.product.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'STOCK: ${widget.product.stock}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                ),
+                  Text(
+                    widget.product.unit.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: widget.primaryGreen,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.displayPrice,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 17,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: widget.primaryGreen.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add_rounded,
+                      color: widget.primaryGreen,
+                      size: 20,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -663,21 +819,103 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  Widget _circularButton(IconData icon, Color color, Color iconColor, VoidCallback onTap) {
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(8),
-      elevation: 1,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          child: Icon(icon, color: iconColor, size: 14),
+  Widget _buildHorizontal() {
+    return Row(
+      children: [
+        Container(
+          width: 100,
+          padding: const EdgeInsets.all(12),
+          child: Image.network(
+            widget.product.imagePath.startsWith('http') 
+                ? widget.product.imagePath 
+                : '${ApiConfig.baseUrl}/${widget.product.imagePath}',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 30),
+          ),
         ),
-      ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.product.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                ),
+                Text(
+                  'AVAILABLE STOCK: ${widget.product.stock} ${widget.product.unit}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                widget.displayPrice,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: widget.primaryGreen,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.add_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
+}
+
+Widget _circularButton(
+  IconData icon,
+  Color color,
+  Color iconColor,
+  VoidCallback onTap,
+) {
+  return Material(
+    color: color,
+    borderRadius: BorderRadius.circular(8),
+    elevation: 1,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 28,
+        height: 28,
+        alignment: Alignment.center,
+        child: Icon(icon, color: iconColor, size: 14),
+      ),
+    ),
+  );
 }

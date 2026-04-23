@@ -13,12 +13,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'iPOS',
+      title: 'iPOS PRO',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF76A258)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF10B981),
+          primary: const Color(0xFF10B981),
+          surface: const Color(0xFFF8FAFC),
+        ),
         useMaterial3: true,
-        textTheme: GoogleFonts.notoSansLaoTextTheme(),
+        textTheme: GoogleFonts.notoSansLaoTextTheme(
+          Theme.of(context).textTheme,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF0F172A),
+          elevation: 0,
+        ),
       ),
       home: const LoginScreen(),
     );

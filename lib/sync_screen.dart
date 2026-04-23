@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:ipos/database_helper.dart';
 import 'package:ipos/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SyncScreen extends StatefulWidget {
   const SyncScreen({super.key});
@@ -26,10 +27,14 @@ class _SyncScreenState extends State<SyncScreen> {
 
     try {
       // 1. Sync Products
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('user_token') ?? '';
+
       final productUrl = Uri.parse(ApiConfig.productsUrl);
-      final productRes = await http
-          .get(productUrl)
-          .timeout(const Duration(seconds: 30));
+      final productRes = await http.get(
+        productUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 30));
 
       if (productRes.statusCode == 200) {
         List<dynamic> productData = json.decode(productRes.body);
@@ -55,9 +60,10 @@ class _SyncScreenState extends State<SyncScreen> {
 
       // 2. Sync Exchange Rates
       final rateUrl = Uri.parse(ApiConfig.ratesUrl);
-      final rateRes = await http
-          .get(rateUrl)
-          .timeout(const Duration(seconds: 30));
+      final rateRes = await http.get(
+        rateUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 30));
 
       if (rateRes.statusCode == 200) {
         Map<String, dynamic> rateData = json.decode(rateRes.body);
@@ -112,10 +118,16 @@ class _SyncScreenState extends State<SyncScreen> {
         _progress = 0.5;
       });
 
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('user_token') ?? '';
+
       final orderUrl = Uri.parse(ApiConfig.ordersUrl);
       final res = await http.post(
         orderUrl,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
         body: json.encode(unsynced),
       ).timeout(const Duration(seconds: 30));
 
@@ -165,12 +177,18 @@ class _SyncScreenState extends State<SyncScreen> {
         _progress = 0.2;
       });
 
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('user_token') ?? '';
+
       final unsynced = await DatabaseHelper().getUnsyncedOrders();
       if (unsynced.isNotEmpty) {
         final orderUrl = Uri.parse(ApiConfig.ordersUrl);
         final res = await http.post(
           orderUrl,
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token'
+          },
           body: json.encode(unsynced),
         ).timeout(const Duration(seconds: 30));
 
@@ -189,7 +207,10 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       final productUrl = Uri.parse(ApiConfig.productsUrl);
-      final productRes = await http.get(productUrl).timeout(const Duration(seconds: 30));
+      final productRes = await http.get(
+        productUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 30));
       if (productRes.statusCode == 200) {
         List<dynamic> productData = json.decode(productRes.body);
         List<Map<String, dynamic>> productsArr = productData.map((item) => {
@@ -210,7 +231,10 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       final rateUrl = Uri.parse(ApiConfig.ratesUrl);
-      final rateRes = await http.get(rateUrl).timeout(const Duration(seconds: 30));
+      final rateRes = await http.get(
+        rateUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 30));
       if (rateRes.statusCode == 200) {
         Map<String, dynamic> rateData = json.decode(rateRes.body);
         await DatabaseHelper().updateExchangeRates(rateData);

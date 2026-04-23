@@ -5,68 +5,110 @@ import 'package:ipos/sync_screen.dart';
 import 'package:ipos/sales_report_screen.dart';
 import 'package:ipos/settings_screen.dart';
 import 'package:ipos/printer_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends StatefulWidget {
   final Color primaryGreen;
   final VoidCallback? onSyncComplete;
   
   const MainDrawer({super.key, required this.primaryGreen, this.onSyncComplete});
 
   @override
+  State<MainDrawer> createState() => _MainDrawerState();
+}
+
+class _MainDrawerState extends State<MainDrawer> {
+  String userName = 'Admin Operator';
+  String userRole = 'System Owner';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('user_name') ?? 'Admin Operator';
+      userRole = prefs.getString('user_role') ?? 'System Owner';
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
       child: Column(
         children: [
-          // Drawer Header
+          // Premium Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
+            padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 30),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  primaryGreen.withOpacity(0.8),
-                  primaryGreen,
+                  const Color(0xFF0F172A),
+                  const Color(0xFF1E293B),
                 ],
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Text(
-                      'B.POS',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: widget.primaryGreen,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.primaryGreen.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
+                      child: const Icon(Icons.layers, color: Colors.white, size: 24),
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      'by ບັນຊີ.la',
+                    const SizedBox(width: 15),
+                    const Text(
+                      'iPOS PRO',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'eh.dev9917@gmail.com',
-                  style: TextStyle(
+                const SizedBox(height: 30),
+                Text(
+                  userName,
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Version: 1.7.0+59',
+                  userRole.toUpperCase(),
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: widget.primaryGreen,
                     fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
                   ),
                 ),
               ],
@@ -76,25 +118,25 @@ class MainDrawer extends StatelessWidget {
           // Menu Items
           Expanded(
             child: ListView(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
               children: [
+                _buildGroupHeader('TERMINAL'),
                 _buildMenuItem(
                   icon: Icons.sync,
-                  label: 'ໂຫລດຂໍ້ມູນຈາກລະບົບ',
+                  label: 'Sync Intelligence',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const SyncScreen()),
                     ).then((_) {
-                      // Reload data in POS screen after returning from sync
-                      if (onSyncComplete != null) onSyncComplete!();
+                      if (widget.onSyncComplete != null) widget.onSyncComplete!();
                     });
                   },
                 ),
                 _buildMenuItem(
-                  icon: Icons.print,
-                  label: 'ເຊື່ອມຕໍ່ເຄື່ອງພິມ',
+                  icon: Icons.print_rounded,
+                  label: 'Printer Network',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -103,9 +145,11 @@ class MainDrawer extends StatelessWidget {
                     );
                   },
                 ),
+                const SizedBox(height: 15),
+                _buildGroupHeader('REPORTS'),
                 _buildMenuItem(
-                  icon: Icons.assignment,
-                  label: 'ການຂາຍ',
+                  icon: Icons.analytics_rounded,
+                  label: 'Sales Metrics',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -115,8 +159,8 @@ class MainDrawer extends StatelessWidget {
                   },
                 ),
                 _buildMenuItem(
-                  icon: Icons.history,
-                  label: 'ງວດການຂາຍ',
+                  icon: Icons.history_edu_rounded,
+                  label: 'Transaction History',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -125,17 +169,11 @@ class MainDrawer extends StatelessWidget {
                     );
                   },
                 ),
+                const SizedBox(height: 15),
+                _buildGroupHeader('SYSTEM'),
                 _buildMenuItem(
-                  icon: Icons.storefront,
-                  label: 'ສາງ',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Warehouse logic
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.settings,
-                  label: 'ການຕັ້ງຄ່າ',
+                  icon: Icons.settings_suggest_rounded,
+                  label: 'Configuration',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -144,22 +182,55 @@ class MainDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                const Divider(),
-                _buildMenuItem(
-                  icon: Icons.logout,
-                  label: 'ອອກຈາກລະບົບ',
-                  onTap: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  },
-                ),
               ],
             ),
           ),
+          
+          // Bottom Actions
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ListTile(
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
+                leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                title: const Text(
+                  'Terminate Session',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGroupHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, bottom: 10, top: 10),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          color: Colors.grey.withOpacity(0.5),
+          letterSpacing: 1.5,
+        ),
       ),
     );
   }
@@ -169,17 +240,28 @@ class MainDrawer extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.grey.shade700),
-      title: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: const Color(0xFF1E293B), size: 20),
         ),
+        title: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1E293B),
+          ),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        onTap: onTap,
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      onTap: onTap,
     );
   }
 }
