@@ -11,7 +11,7 @@ import {
   ChevronLast
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const Products = () => {
   const navigate = useNavigate();
@@ -243,10 +243,10 @@ const Products = () => {
                           overflow: 'hidden', boxShadow: 'var(--shadow-sm)', border: '1px solid #fff'
                         }}>
                           <img 
-                            src={`http://127.0.0.1:3000/${product.imagePath}`} 
+                            src={`${IMAGE_BASE_URL}/${product.imagePath}`} 
                             alt="" 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                            onError={(e: any) => { e.target.src = 'http://127.0.0.1:3000/assets/images/default.png'; }}
+                            onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }}
                           />
                         </div>
                         <div>

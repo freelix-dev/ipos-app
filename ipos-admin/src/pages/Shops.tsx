@@ -16,9 +16,9 @@ import {
   Upload,
   Image
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
-const API_BASE = 'http://127.0.0.1:3000';
+const API_BASE = IMAGE_BASE_URL;
 
 const Shops = () => {
   const [shops, setShops] = useState<any[]>([]);

@@ -10,7 +10,7 @@ import {
   ChevronFirst,
   ChevronLast
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const StockManagement = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -254,10 +254,10 @@ const StockManagement = () => {
                             overflow: 'hidden', border: '1px solid #fff', boxShadow: 'var(--shadow-sm)'
                           }}>
                             <img 
-                              src={`http://127.0.0.1:3000/${product.imagePath}`} 
+                              src={`${IMAGE_BASE_URL}/${product.imagePath}`} 
                               alt="" 
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={(e: any) => { e.target.src = 'http://127.0.0.1:3000/assets/images/default.png'; }}
+                              onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }}
                             />
                           </div>
                           <div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Package, Upload, ChevronLeft, Save, X, Store, DollarSign, Box, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const UpdateProduct = () => {
   const { id } = useParams();
@@ -45,7 +45,7 @@ const UpdateProduct = () => {
           imagePath: product.imagePath,
           shop_id: product.shop_id || ''
         });
-        setPreviewUrl(`http://127.0.0.1:3000/${product.imagePath}`);
+        setPreviewUrl(`${IMAGE_BASE_URL}/${product.imagePath}`);
       } catch (error) {
         console.error('Failed to load data:', error);
         alert('Product not found');
@@ -183,7 +183,7 @@ const UpdateProduct = () => {
              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
              {previewUrl ? (
                <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                 <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '240px', objectFit: 'cover' }} onError={(e: any) => { e.target.src = 'http://127.0.0.1:3000/assets/images/default.png'; }} />
+                 <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '240px', objectFit: 'cover' }} onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }} />
                  <button type="button" onClick={() => { setSelectedFile(null); setPreviewUrl(null); }} style={{ position: 'absolute', top: '12px', right: '12px', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
                    <Trash2 size={18} />
                  </button>

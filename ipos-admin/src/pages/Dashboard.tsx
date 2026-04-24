@@ -10,7 +10,7 @@ import {
   Shield,
   Database
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -122,7 +122,7 @@ const Dashboard = () => {
           {/* Current Shop Logo Display */}
           {selectedShopId && shops.find(s => s.id === selectedShopId)?.logoPath && (
             <img 
-              src={`http://127.0.0.1:3000${shops.find(s => s.id === selectedShopId)?.logoPath}`} 
+              src={`${IMAGE_BASE_URL}${shops.find(s => s.id === selectedShopId)?.logoPath}`} 
               alt="Shop Logo" 
               style={{ width: '50px', height: '50px', borderRadius: '14px', objectFit: 'cover', border: '1px solid var(--border-strong)' }} 
             />
