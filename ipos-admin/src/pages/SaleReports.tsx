@@ -229,7 +229,10 @@ const SaleReports = () => {
 
   const showCash = selectedMethods.length === 0 || selectedMethods.includes('cash');
   const showBank = selectedMethods.length === 0 || selectedMethods.includes('bank');
-  const colSpanCount = 1 + (showCash ? 1 : 0) + (showBank ? 1 : 0) + 1;
+  const showLAK = selectedCurrencies.length === 0 || selectedCurrencies.includes('LAK');
+  const showTHB = selectedCurrencies.length === 0 || selectedCurrencies.includes('THB');
+  const showUSD = selectedCurrencies.length === 0 || selectedCurrencies.includes('USD');
+  const colSpanCount = 1 + (showCash ? 1 : 0) + (showBank ? 1 : 0) + 2;
 
   return (
     <div className="animate-slide-up">
@@ -436,23 +439,23 @@ const SaleReports = () => {
                     </td>
                     {showCash && (
                       <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(s.cashLAK, 'LAK')}</div>
-                        <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.cashTHB > 0 ? formatCurrency(s.cashTHB, 'THB') : '0'} ฿</div>
-                        <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.cashUSD > 0 ? formatCurrency(s.cashUSD, 'USD') : '0'} $</div>
+                        {showLAK && <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(s.cashLAK, 'LAK')}</div>}
+                        {showTHB && <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.cashTHB > 0 ? formatCurrency(s.cashTHB, 'THB') : '0'} ฿</div>}
+                        {showUSD && <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.cashUSD > 0 ? formatCurrency(s.cashUSD, 'USD') : '0'} $</div>}
                       </td>
                     )}
                     {showBank && (
                       <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(s.bankLAK, 'LAK')}</div>
-                        <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.bankTHB > 0 ? formatCurrency(s.bankTHB, 'THB') : '0'} ฿</div>
-                        <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.bankUSD > 0 ? formatCurrency(s.bankUSD, 'USD') : '0'} $</div>
+                        {showLAK && <div style={{ fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(s.bankLAK, 'LAK')}</div>}
+                        {showTHB && <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.bankTHB > 0 ? formatCurrency(s.bankTHB, 'THB') : '0'} ฿</div>}
+                        {showUSD && <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.bankUSD > 0 ? formatCurrency(s.bankUSD, 'USD') : '0'} $</div>}
                       </td>
                     )}
                     <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.85rem', verticalAlign: 'top' }}>{s.txCount}</td>
                     <td style={{ padding: '14px 24px', textAlign: 'right', verticalAlign: 'top' }}>
-                      <div style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1rem' }}>{formatCurrency(s.totalLAK, 'LAK')}</div>
-                      <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.totalTHB > 0 ? formatCurrency(s.totalTHB, 'THB') : '0'} ฿</div>
-                      <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.totalUSD > 0 ? formatCurrency(s.totalUSD, 'USD') : '0'} $</div>
+                      {showLAK && <div style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1rem' }}>{formatCurrency(s.totalLAK, 'LAK')}</div>}
+                      {showTHB && <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{s.totalTHB > 0 ? formatCurrency(s.totalTHB, 'THB') : '0'} ฿</div>}
+                      {showUSD && <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{s.totalUSD > 0 ? formatCurrency(s.totalUSD, 'USD') : '0'} $</div>}
                     </td>
                   </tr>
                 )})}
@@ -462,23 +465,23 @@ const SaleReports = () => {
                     <td style={{ padding: '12px 24px', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'right', verticalAlign: 'top' }}>GRAND TOTAL</td>
                     {showCash && (
                       <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>
-                        <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.cashTHB, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.cashTHB, 0), 'THB') : '0'} ฿</div>
-                        <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.cashUSD, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.cashUSD, 0), 'USD') : '0'} $</div>
+                        {showLAK && <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>}
+                        {showTHB && <div style={{ fontWeight: 800, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashTHB, 0), 'THB')} ฿</div>}
+                        {showUSD && <div style={{ fontWeight: 800, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashUSD, 0), 'USD')} $</div>}
                       </td>
                     )}
                     {showBank && (
                       <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</div>
-                        <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.bankTHB, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.bankTHB, 0), 'THB') : '0'} ฿</div>
-                        <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.bankUSD, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.bankUSD, 0), 'USD') : '0'} $</div>
+                        {showLAK && <div style={{ fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</div>}
+                        {showTHB && <div style={{ fontWeight: 800, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankTHB, 0), 'THB')} ฿</div>}
+                        {showUSD && <div style={{ fontWeight: 800, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankUSD, 0), 'USD')} $</div>}
                       </td>
                     )}
-                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.85rem', verticalAlign: 'top' }}>{reportRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.9rem', verticalAlign: 'top' }}>{reportRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
                     <td style={{ padding: '12px 24px', textAlign: 'right', verticalAlign: 'top' }}>
-                      <div style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</div>
-                      <div style={{ fontWeight: 700, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.totalTHB, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB') : '0'} ฿</div>
-                      <div style={{ fontWeight: 700, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{reportRows.reduce((sum, s) => sum + s.totalUSD, 0) > 0 ? formatCurrency(reportRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD') : '0'} $</div>
+                      {showLAK && <div style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</div>}
+                      {showTHB && <div style={{ fontWeight: 800, color: '#eab308', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB')} ฿</div>}
+                      {showUSD && <div style={{ fontWeight: 800, color: '#ec4899', fontSize: '0.78rem', marginTop: '2px' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD')} $</div>}
                     </td>
                   </tr>
                 )}
@@ -564,20 +567,20 @@ const SaleReports = () => {
                         <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}><User size={10} /> {s.cashierName}</div>
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 800, color: '#10b981' }}>{formatCurrency(s.cashLAK, 'LAK')}</div>
-                        {s.cashTHB > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.cashTHB, 'THB')} ฿</div>}
-                        {s.cashUSD > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.cashUSD, 'USD')} $</div>}
+                        {showLAK && <div style={{ fontWeight: 800, color: '#10b981' }}>{formatCurrency(s.cashLAK, 'LAK')}</div>}
+                        {showTHB && (s.cashTHB > 0 || selectedCurrencies.includes('THB')) && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.cashTHB, 'THB')} ฿</div>}
+                        {showUSD && (s.cashUSD > 0 || selectedCurrencies.includes('USD')) && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.cashUSD, 'USD')} $</div>}
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 800, color: '#3b82f6' }}>{formatCurrency(s.bankLAK, 'LAK')}</div>
-                        {s.bankTHB > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.bankTHB, 'THB')} ฿</div>}
-                        {s.bankUSD > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.bankUSD, 'USD')} $</div>}
+                        {showLAK && <div style={{ fontWeight: 800, color: '#3b82f6' }}>{formatCurrency(s.bankLAK, 'LAK')}</div>}
+                        {showTHB && (s.bankTHB > 0 || selectedCurrencies.includes('THB')) && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.bankTHB, 'THB')} ฿</div>}
+                        {showUSD && (s.bankUSD > 0 || selectedCurrencies.includes('USD')) && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.bankUSD, 'USD')} $</div>}
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: '#64748b' }}>{s.txCount}</td>
                       <td style={{ padding: '10px 12px', textAlign: 'right', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 900, color: '#7c3aed' }}>{formatCurrency(s.totalLAK, 'LAK')}</div>
-                        {s.totalTHB > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.totalTHB, 'THB')} ฿</div>}
-                        {s.totalUSD > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.totalUSD, 'USD')} $</div>}
+                        {showLAK && <div style={{ fontWeight: 900, color: '#7c3aed' }}>{formatCurrency(s.totalLAK, 'LAK')}</div>}
+                        {showTHB && (s.totalTHB > 0 || selectedCurrencies.includes('THB')) && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(s.totalTHB, 'THB')} ฿</div>}
+                        {showUSD && (s.totalUSD > 0 || selectedCurrencies.includes('USD')) && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(s.totalUSD, 'USD')} $</div>}
                       </td>
                     </tr>
                   )})}
@@ -585,20 +588,20 @@ const SaleReports = () => {
                   <tr style={{ borderTop: '2px solid #1e293b', background: '#f1f5f9' }}>
                     <td style={{ padding: '12px', fontWeight: 900, color: '#1e293b', fontSize: '0.8rem' }}>GRAND TOTAL</td>
                     <td style={{ padding: '12px', textAlign: 'right', verticalAlign: 'top' }}>
-                      <div style={{ fontWeight: 900, color: '#10b981' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>
-                      {reportRows.reduce((sum, s) => sum + s.cashTHB, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashTHB, 0), 'THB')} ฿</div>}
-                      {reportRows.reduce((sum, s) => sum + s.cashUSD, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashUSD, 0), 'USD')} $</div>}
+                      {showLAK && <div style={{ fontWeight: 800, color: '#10b981' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>}
+                      {showTHB && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashTHB, 0), 'THB')} ฿</div>}
+                      {showUSD && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashUSD, 0), 'USD')} $</div>}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right', verticalAlign: 'top' }}>
-                      <div style={{ fontWeight: 900, color: '#3b82f6' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</div>
-                      {reportRows.reduce((sum, s) => sum + s.bankTHB, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankTHB, 0), 'THB')} ฿</div>}
-                      {reportRows.reduce((sum, s) => sum + s.bankUSD, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankUSD, 0), 'USD')} $</div>}
+                      {showLAK && <div style={{ fontWeight: 800, color: '#3b82f6' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</div>}
+                      {showTHB && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankTHB, 0), 'THB')} ฿</div>}
+                      {showUSD && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.bankUSD, 0), 'USD')} $</div>}
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#64748b' }}>{reportRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#1e293b' }}>{reportRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
                     <td style={{ padding: '12px', textAlign: 'right', verticalAlign: 'top' }}>
-                      <div style={{ fontWeight: 900, color: '#7c3aed' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</div>
-                      {reportRows.reduce((sum, s) => sum + s.totalTHB, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB')} ฿</div>}
-                      {reportRows.reduce((sum, s) => sum + s.totalUSD, 0) > 0 && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD')} $</div>}
+                      {showLAK && <div style={{ fontWeight: 900, color: '#7c3aed' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</div>}
+                      {showTHB && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB')} ฿</div>}
+                      {showUSD && <div style={{ fontSize: '0.75rem', color: '#ec4899' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD')} $</div>}
                     </td>
                   </tr>
                 </tbody>
