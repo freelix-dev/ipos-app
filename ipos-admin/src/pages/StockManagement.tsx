@@ -17,7 +17,7 @@ const StockManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
   const [activeTab, setActiveTab] = useState('Global Supply');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -165,6 +165,7 @@ const StockManagement = () => {
                   value={selectedShopId}
                   onChange={(e) => {
                     setSelectedShopId(e.target.value);
+                    localStorage.setItem('selectedShopId', e.target.value);
                     setCurrentPage(1);
                   }}
                   style={{ 

@@ -22,7 +22,7 @@ const Dashboard = () => {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
@@ -133,7 +133,10 @@ const Dashboard = () => {
             <div style={{ position: 'relative', width: '220px' }}>
               <select 
                 value={selectedShopId}
-                onChange={(e) => setSelectedShopId(e.target.value)}
+                onChange={(e) => {
+                  setSelectedShopId(e.target.value);
+                  localStorage.setItem('selectedShopId', e.target.value);
+                }}
                 style={{ 
                   width: '100%', height: '50px', padding: '0 40px 0 16px', 
                   borderRadius: '16px', border: '1px solid var(--border-strong)', 

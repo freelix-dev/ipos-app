@@ -18,7 +18,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -158,6 +158,7 @@ const Products = () => {
                   value={selectedShopId}
                   onChange={(e) => {
                     setSelectedShopId(e.target.value);
+                    localStorage.setItem('selectedShopId', e.target.value);
                     setCurrentPage(1);
                   }}
                   style={{ 
