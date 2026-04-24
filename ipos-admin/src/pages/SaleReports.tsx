@@ -7,6 +7,7 @@ import {
   X,
   CreditCard,
   User,
+  Coins,
   ChevronLeft,
   ChevronRight,
   ChevronFirst,
@@ -22,6 +23,7 @@ const SaleReports = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedCurrencies, setSelectedCurrencies] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Pagination State
@@ -94,8 +96,9 @@ const SaleReports = () => {
     const matchesDate = (!start || orderDate >= start) && (!end || orderDate <= end);
     const matchesUser = selectedUsers.length === 0 || selectedUsers.some(u => u.trim().toLowerCase() === sellerName);
     const matchesMethod = selectedMethods.length === 0 || selectedMethods.includes(o.paymentMethod);
+    const matchesCurrency = selectedCurrencies.length === 0 || selectedCurrencies.includes((o.currency || 'LAK').toUpperCase());
 
-    return matchesSearch && matchesDate && matchesUser && matchesMethod;
+    return matchesSearch && matchesDate && matchesUser && matchesMethod && matchesCurrency;
   }).reverse();
 
   // Pagination Logic
@@ -119,70 +122,56 @@ const SaleReports = () => {
   });
 
   const allMethods = Array.from(new Set(orders.map(o => o.paymentMethod))).filter(Boolean);
+  const allCurrencies = Array.from(new Set(orders.map(o => (o.currency || 'LAK').toUpperCase()))).filter(Boolean);
   // ใช้ user_name จาก order โดยตรง (ข้อมูลจาก API) แทนการ parse จาก remark
   const orderUserNames = Array.from(new Set(
     orders.map(o => o.user_name || getSellerInfo(o.remark).userName)
   )).filter(n => n && n !== 'System' && n !== 'Unknown Seller' && n !== 'Legacy Label');
   const allUsers = orderUserNames.sort() as string[];
 
-  // Cashier Summary: group completed orders by cashier + payment method
-  // Respects date + user filter but NOT method filter (to always show both cash & bank totals)
-  const summaryOrders = processedOrders.filter(o => {
-    const sellerName = (o.user_name || getSellerInfo(o.remark).userName || '').trim().toLowerCase();
-    const orderDate = new Date(o.date).setHours(0, 0, 0, 0);
-    const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
-    const end = endDate ? new Date(endDate).setHours(23, 59, 59, 999) : null;
-    const matchesDate = (!start || orderDate >= start) && (!end || orderDate <= end);
-    const matchesUser = selectedUsers.length === 0 || selectedUsers.some(u => u.trim().toLowerCase() === sellerName);
-    return matchesDate && matchesUser && o.status === 'Completed';
+  // Cashier Summary: filter completed orders based on ALL active filters
+  const summaryOrders = filteredOrders.filter(o => o.status === 'Completed');
+
+  const cashierSummary: Record<string, { cashierName: string; cashLAK: number; bankLAK: number; totalLAK: number; totalTHB: number; totalUSD: number; txCount: number }> = {};
+  
+  // Pre-populate so cashiers always show up even if their totals are 0 for the selected filters
+  const usersToDisplay = selectedUsers.length > 0 ? allUsers.filter(u => selectedUsers.includes(u)) : allUsers;
+  usersToDisplay.forEach(u => {
+    cashierSummary[u] = { cashierName: u, cashLAK: 0, bankLAK: 0, totalLAK: 0, totalTHB: 0, totalUSD: 0, txCount: 0 };
   });
 
-  const cashierSummary: Record<string, { date: string; cashierName: string; cashLAK: number; bankLAK: number; totalLAK: number; totalTHB: number; totalUSD: number; txCount: number }> = {};
   summaryOrders.forEach(o => {
-    const d = new Date(o.date).toLocaleDateString('en-GB'); // DD/MM/YYYY
     const name = (o.user_name || getSellerInfo(o.remark).userName || 'Unknown').trim();
-    const key = `${d}_${name}`;
 
-    if (!cashierSummary[key]) {
-      cashierSummary[key] = { date: d, cashierName: name, cashLAK: 0, bankLAK: 0, totalLAK: 0, totalTHB: 0, totalUSD: 0, txCount: 0 };
+    // If a name somehow wasn't in allUsers, add it dynamically
+    if (!cashierSummary[name]) {
+      cashierSummary[name] = { cashierName: name, cashLAK: 0, bankLAK: 0, totalLAK: 0, totalTHB: 0, totalUSD: 0, txCount: 0 };
     }
     const amount = Number(o.total) || 0;
     const method = (o.paymentMethod || '').toLowerCase();
     const currency = (o.currency || 'LAK').toUpperCase();
     
     if (currency === 'LAK') {
-      cashierSummary[key].totalLAK += amount;
-      if (method === 'cash') cashierSummary[key].cashLAK += amount;
-      else if (method === 'bank') cashierSummary[key].bankLAK += amount;
+      cashierSummary[name].totalLAK += amount;
+      if (method === 'cash') cashierSummary[name].cashLAK += amount;
+      else if (method === 'bank') cashierSummary[name].bankLAK += amount;
     } else if (currency === 'THB') {
-      cashierSummary[key].totalTHB += amount;
+      cashierSummary[name].totalTHB += amount;
     } else if (currency === 'USD') {
-      cashierSummary[key].totalUSD += amount;
+        cashierSummary[name].totalUSD += amount;
     }
     
-    cashierSummary[key].txCount += 1;
+    cashierSummary[name].txCount += 1;
   });
   
-  const cashierRows = Object.values(cashierSummary).sort((a, b) => {
-    const [ad, am, ay] = a.date.split('/').map(Number);
-    const [bd, bm, by] = b.date.split('/').map(Number);
-    const timeA = new Date(ay, am - 1, ad).getTime();
-    const timeB = new Date(by, bm - 1, bd).getTime();
-    if (timeA !== timeB) return timeB - timeA;
-    return b.totalLAK - a.totalLAK;
-  });
+  const cashierRows = Object.values(cashierSummary).sort((a, b) => b.totalLAK - a.totalLAK);
 
-  const groupedByDateSummary: Record<string, typeof cashierRows> = {};
-  cashierRows.forEach(r => {
-    if (!groupedByDateSummary[r.date]) groupedByDateSummary[r.date] = [];
-    groupedByDateSummary[r.date].push(r);
-  });
-  
-  const sortedDates = Object.keys(groupedByDateSummary).sort((a, b) => {
-    const [ad, am, ay] = a.split('/').map(Number);
-    const [bd, bm, by] = b.split('/').map(Number);
-    return new Date(by, bm - 1, bd).getTime() - new Date(ay, am - 1, ad).getTime();
-  });
+  const showLAK = selectedCurrencies.length === 0 || selectedCurrencies.includes('LAK');
+  const showTHB = selectedCurrencies.length === 0 || selectedCurrencies.includes('THB');
+  const showUSD = selectedCurrencies.length === 0 || selectedCurrencies.includes('USD');
+  const showCash = showLAK && (selectedMethods.length === 0 || selectedMethods.includes('cash'));
+  const showBank = showLAK && (selectedMethods.length === 0 || selectedMethods.includes('bank'));
+  const colSpanCount = 3 + (showCash ? 1 : 0) + (showBank ? 1 : 0) + (showTHB ? 1 : 0) + (showUSD ? 1 : 0);
 
   return (
     <div className="animate-slide-up">
@@ -247,6 +236,24 @@ const SaleReports = () => {
               </div>
             </div>
 
+            {/* Currency Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ position: 'relative' }}>
+                <Coins size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)' }} />
+                <select
+                  className="input-premium"
+                  style={{ height: '50px', borderRadius: '16px', paddingLeft: '44px', width: '200px', fontWeight: 700 }}
+                  onChange={(e) => {
+                    if (e.target.value && !selectedCurrencies.includes(e.target.value)) setSelectedCurrencies([...selectedCurrencies, e.target.value]);
+                  }}
+                  value=""
+                >
+                  <option value="">Filter by Currency</option>
+                  {allCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
             {/* Date Range */}
             <div style={{
               display: 'flex', alignItems: 'center', background: '#f8fafc',
@@ -287,74 +294,67 @@ const SaleReports = () => {
                 {m} <X size={14} style={{ cursor: 'pointer' }} onClick={() => setSelectedMethods(prev => prev.filter(x => x !== m))} />
               </span>
             ))}
+            {selectedCurrencies.map(c => (
+              <span key={c} style={{ padding: '6px 14px', borderRadius: '12px', background: 'rgba(234, 179, 8, 0.1)', color: '#ca8a04', fontWeight: 800, fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(234, 179, 8, 0.2)' }}>
+                {c} <X size={14} style={{ cursor: 'pointer' }} onClick={() => setSelectedCurrencies(prev => prev.filter(x => x !== c))} />
+              </span>
+            ))}
           </div>
         </div>
 
         {/* 💳 Cashier Summary Table */}
-        {cashierRows.length > 0 ? (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc' }}>
                 <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>CASHIER</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟢 CASH (LAK)</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔵 BANK (LAK)</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#eab308', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟡 THB</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#ec4899', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔴 USD</th>
+                {showCash && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟢 CASH (LAK)</th>}
+                {showBank && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔵 BANK (LAK)</th>}
+                {showTHB && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#eab308', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟡 THB</th>}
+                {showUSD && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#ec4899', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔴 USD</th>}
                 <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ITEM</th>
                 <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>TOTAL (LAK)</th>
               </tr>
             </thead>
             <tbody>
-              {sortedDates.map((date) => {
-                const dayRows = groupedByDateSummary[date];
-                return (
-                  <React.Fragment key={date}>
-                    {/* Date Header Row */}
-                    <tr style={{ background: '#e2e8f0' }}>
-                      <td colSpan={7} style={{ padding: '10px 24px', fontWeight: 900, color: '#334155', fontSize: '0.85rem' }}>
-                        📅 {date}
-                      </td>
-                    </tr>
-                    {/* Cashier Rows for this date */}
-                    {dayRows.map((s) => (
-                      <tr key={`${s.date}_${s.cashierName}`} style={{ borderTop: '1px solid var(--border)', background: '#fff' }}>
-                        <td style={{ padding: '14px 24px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', flexShrink: 0 }}>
-                              {s.cashierName.charAt(0).toUpperCase()}
-                            </div>
-                            <span style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{s.cashierName}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(s.cashLAK, 'LAK')}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(s.bankLAK, 'LAK')}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#eab308', fontSize: '0.95rem' }}>{s.totalTHB > 0 ? formatCurrency(s.totalTHB, 'THB') : '-'}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#ec4899', fontSize: '0.95rem' }}>{s.totalUSD > 0 ? formatCurrency(s.totalUSD, 'USD') : '-'}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.85rem' }}>{s.txCount}</td>
-                        <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1rem' }}>{formatCurrency(s.totalLAK, 'LAK')}</td>
-                      </tr>
-                    ))}
-                    {/* Subtotal Row for this date */}
-                    <tr style={{ borderTop: '1px solid var(--border)', background: '#f8fafc' }}>
-                      <td style={{ padding: '12px 24px', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'right' }}>TOTAL {date}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(dayRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(dayRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#eab308', fontSize: '0.95rem' }}>{formatCurrency(dayRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB')}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#ec4899', fontSize: '0.95rem' }}>{formatCurrency(dayRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD')}</td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.85rem' }}>{dayRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
-                      <td style={{ padding: '12px 24px', textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(dayRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</td>
-                    </tr>
-                  </React.Fragment>
-                );
-              })}
+              {cashierRows.length === 0 && (
+                <tr>
+                  <td colSpan={colSpanCount + 2} style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    No data found for the selected filters.
+                  </td>
+                </tr>
+              )}
+              {cashierRows.map((s, idx) => (
+                <tr key={s.cashierName} style={{ borderTop: '1px solid var(--border)', background: idx % 2 === 0 ? '#fff' : '#fcfdfe' }}>
+                  <td style={{ padding: '14px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', flexShrink: 0 }}>
+                        {s.cashierName.charAt(0).toUpperCase()}
+                      </div>
+                      <span style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{s.cashierName}</span>
+                    </div>
+                  </td>
+                  {showCash && <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(s.cashLAK, 'LAK')}</td>}
+                  {showBank && <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(s.bankLAK, 'LAK')}</td>}
+                  {showTHB && <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#eab308', fontSize: '0.95rem' }}>{s.totalTHB > 0 ? formatCurrency(s.totalTHB, 'THB') : '-'}</td>}
+                  {showUSD && <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 900, color: '#ec4899', fontSize: '0.95rem' }}>{s.totalUSD > 0 ? formatCurrency(s.totalUSD, 'USD') : '-'}</td>}
+                  <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.85rem' }}>{s.txCount}</td>
+                  <td style={{ padding: '14px 24px', textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1rem' }}>{formatCurrency(s.totalLAK, 'LAK')}</td>
+                </tr>
+              ))}
+              {/* Grand Total Footer Row */}
+              {cashierRows.length > 0 && (
+                <tr style={{ borderTop: '2px solid var(--border)', background: '#f8fafc' }}>
+                  <td style={{ padding: '12px 24px', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'right' }}>TOTAL</td>
+                  {showCash && <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(cashierRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</td>}
+                  {showBank && <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#3b82f6', fontSize: '0.95rem' }}>{formatCurrency(cashierRows.reduce((sum, s) => sum + s.bankLAK, 0), 'LAK')}</td>}
+                  {showTHB && <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#eab308', fontSize: '0.95rem' }}>{formatCurrency(cashierRows.reduce((sum, s) => sum + s.totalTHB, 0), 'THB')}</td>}
+                  {showUSD && <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: '#ec4899', fontSize: '0.95rem' }}>{formatCurrency(cashierRows.reduce((sum, s) => sum + s.totalUSD, 0), 'USD')}</td>}
+                  <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.85rem' }}>{cashierRows.reduce((sum, s) => sum + s.txCount, 0)}</td>
+                  <td style={{ padding: '12px 24px', textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(cashierRows.reduce((sum, s) => sum + s.totalLAK, 0), 'LAK')}</td>
+                </tr>
+              )}
             </tbody>
           </table>
-        ) : (
-          <div style={{ padding: '80px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>
-            No data found for the selected filters.
-          </div>
-        )}
-
       </div>
 
       <style>{`
