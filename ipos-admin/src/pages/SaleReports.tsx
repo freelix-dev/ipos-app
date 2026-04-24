@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronFirst,
   ChevronLast,
+  ChevronDown,
   Store,
   Package,
   FileText
@@ -22,8 +23,9 @@ const SaleReports = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedCurrencies, setSelectedCurrencies] = useState<string[]>([]);
@@ -304,6 +306,7 @@ const SaleReports = () => {
             {/* Shop Selector for System Admin & Owners */}
             {(isSystemAdmin || (currentUser?.role === 'admin')) && (
               <div style={{ position: 'relative', flex: '1 1 200px' }}>
+                <Package size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', opacity: 0.8 }} />
                 <select
                   value={selectedShopId}
                   onChange={(e) => {
@@ -311,8 +314,9 @@ const SaleReports = () => {
                     localStorage.setItem('selectedShopId', e.target.value);
                     setCurrentPage(1);
                   }}
+                  className="input-premium"
                   style={{ 
-                    height: '50px', borderRadius: '16px', padding: '0 40px 0 16px', width: '100%', 
+                    height: '50px', borderRadius: '16px', padding: '0 40px 0 44px', width: '100%', 
                     fontWeight: 900, fontSize: '0.95rem', color: 'var(--primary)', 
                     border: '1px solid var(--border-strong)', background: '#fff', 
                     appearance: 'none', cursor: 'pointer', outline: 'none',
@@ -325,7 +329,7 @@ const SaleReports = () => {
                   ))}
                 </select>
                 <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                  <Package size={20} color="var(--primary)" style={{ opacity: 0.6 }} />
+                  <ChevronDown size={18} color="var(--primary)" style={{ opacity: 0.6 }} />
                 </div>
               </div>
             )}
@@ -335,7 +339,7 @@ const SaleReports = () => {
               <CreditCard size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)' }} />
               <select
                 className="input-premium"
-                style={{ height: '50px', borderRadius: '16px', paddingLeft: '44px', width: '100%', fontWeight: 700 }}
+                style={{ height: '50px', borderRadius: '16px', padding: '0 40px 0 44px', width: '100%', fontWeight: 700, appearance: 'none', cursor: 'pointer' }}
                 onChange={(e) => {
                   if (e.target.value && !selectedMethods.includes(e.target.value)) setSelectedMethods([...selectedMethods, e.target.value]);
                 }}
@@ -344,6 +348,9 @@ const SaleReports = () => {
                 <option value="">Filter by Account</option>
                 {allMethods.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
               </select>
+              <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <ChevronDown size={18} color="var(--text-sidebar)" />
+              </div>
             </div>
 
             {/* User Multi-select */}
@@ -351,7 +358,7 @@ const SaleReports = () => {
               <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)' }} />
               <select
                 className="input-premium"
-                style={{ height: '50px', borderRadius: '16px', paddingLeft: '44px', width: '100%', fontWeight: 700 }}
+                style={{ height: '50px', borderRadius: '16px', padding: '0 40px 0 44px', width: '100%', fontWeight: 700, appearance: 'none', cursor: 'pointer' }}
                 onChange={(e) => {
                   if (e.target.value && !selectedUsers.includes(e.target.value)) setSelectedUsers([...selectedUsers, e.target.value]);
                 }}
@@ -360,6 +367,9 @@ const SaleReports = () => {
                 <option value="">Filter by User</option>
                 {allUsers.map(u => <option key={u} value={u}>{u}</option>)}
               </select>
+              <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <ChevronDown size={18} color="var(--text-sidebar)" />
+              </div>
             </div>
 
             {/* Currency Dropdown */}
@@ -367,7 +377,7 @@ const SaleReports = () => {
               <Coins size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)' }} />
               <select
                 className="input-premium"
-                style={{ height: '50px', borderRadius: '16px', paddingLeft: '44px', width: '100%', fontWeight: 700 }}
+                style={{ height: '50px', borderRadius: '16px', padding: '0 40px 0 44px', width: '100%', fontWeight: 700, appearance: 'none', cursor: 'pointer' }}
                 onChange={(e) => {
                   if (e.target.value && !selectedCurrencies.includes(e.target.value)) setSelectedCurrencies([...selectedCurrencies, e.target.value]);
                 }}
@@ -376,6 +386,9 @@ const SaleReports = () => {
                 <option value="">Filter by Currency</option>
                 {allCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+              <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <ChevronDown size={18} color="var(--text-sidebar)" />
+              </div>
             </div>
 
           </div>
@@ -416,7 +429,7 @@ const SaleReports = () => {
                   {showCash && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟢 CASH</th>}
                   {showBank && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔵 BANK</th>}
                   <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ITEM</th>
-                  <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>GRAND TOTAL</th>
+                  <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>TOTAL</th>
                 </tr>
               </thead>
               <tbody>
