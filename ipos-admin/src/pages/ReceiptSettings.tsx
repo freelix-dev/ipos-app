@@ -103,7 +103,7 @@ const ReceiptSettings = () => {
       try {
         setSaving(true);
         const res = await api.uploadImage(e.target.files[0]);
-        handleChange('logo_path', res.imageUrl);
+        handleChange('logo_path', res.imagePath);
       } catch (error) {
         alert('Logo upload failed');
       } finally {

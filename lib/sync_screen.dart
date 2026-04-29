@@ -327,7 +327,7 @@ class _SyncScreenState extends State<SyncScreen> {
           await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
 
           // 4.1 Download Receipt Settings
-          final receiptUrl = Uri.parse(ApiConfig.receiptSettingsUrl);
+          final receiptUrl = Uri.parse('${ApiConfig.receiptSettingsUrl}?shopId=$shopId');
           final receiptRes = await http.get(
             receiptUrl,
             headers: {'Authorization': 'Bearer $token'},

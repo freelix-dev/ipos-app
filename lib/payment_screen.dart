@@ -30,6 +30,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   late String currentCurrency;
   final TextEditingController _cashController = TextEditingController();
   double _receivedAmount = 0;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -217,9 +218,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                    onPressed: !_canConfirm
+                    onPressed: (!_canConfirm || _isProcessing)
                     ? null
                     : () async {
+                        setState(() => _isProcessing = true);
+                        try {
                         // Get User Info
                         final prefs = await SharedPreferences.getInstance();
                         final userId = prefs.getString('user_id');
@@ -258,6 +261,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         }
                         
                         _showSuccessDialog(order);
+                        } catch (e) {
+                          print('Error during checkout: $e');
+                        } finally {
+                          if (mounted) setState(() => _isProcessing = false);
+                        }
                       },
                 child: const Text(
                   'ຢືນຢັນການຊຳລະເງິນ',
