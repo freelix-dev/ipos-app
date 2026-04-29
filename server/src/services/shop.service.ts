@@ -43,11 +43,11 @@ export const getShopById = async (id: string) => {
 };
 
 export const createShop = async (shopData: any) => {
-  const { name, address, phone, logoPath, owner_id } = shopData;
+  const { name, address, phone, logoPath, owner_id, vat_rate, vat_enabled } = shopData;
   const id = uuidv4();
   await writePool.query(
-    'INSERT INTO shops (id, owner_id, name, address, phone, logoPath) VALUES (?, ?, ?, ?, ?, ?)',
-    [id, owner_id || null, name, address, phone, logoPath || null]
+    'INSERT INTO shops (id, owner_id, name, address, phone, logoPath, vat_rate, vat_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, owner_id || null, name, address, phone, logoPath || null, vat_rate || 0.00, vat_enabled || false]
   );
   return id;
 };
@@ -60,6 +60,8 @@ export const updateShop = async (id: string, shopData: any) => {
   if (shopData.address !== undefined)  { fields.push('address = ?');  values.push(shopData.address); }
   if (shopData.phone !== undefined)    { fields.push('phone = ?');    values.push(shopData.phone); }
   if (shopData.logoPath !== undefined) { fields.push('logoPath = ?'); values.push(shopData.logoPath); }
+  if (shopData.vat_rate !== undefined) { fields.push('vat_rate = ?'); values.push(shopData.vat_rate); }
+  if (shopData.vat_enabled !== undefined) { fields.push('vat_enabled = ?'); values.push(shopData.vat_enabled); }
 
   if (fields.length === 0) return true;
   values.push(id);
@@ -93,8 +95,8 @@ export const registerShop = async (data: any) => {
 
     // 2. Create Shop with owner_id
     await connection.query(
-      'INSERT INTO shops (id, owner_id, name, address, phone, logoPath) VALUES (?, ?, ?, ?, ?, ?)',
-      [shopId, userId, shopName, address, phone, data.logoPath || null]
+      'INSERT INTO shops (id, owner_id, name, address, phone, logoPath, vat_rate, vat_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [shopId, userId, shopName, address, phone, data.logoPath || null, 0.00, false]
     );
 
     // 3. Link user to the shop as their default shop

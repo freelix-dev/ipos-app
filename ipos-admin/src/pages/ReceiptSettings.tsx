@@ -28,12 +28,13 @@ const ReceiptSettings = () => {
     show_order_id: true,
     show_staff_name: true,
     show_qr: false,
-    qr_data: '',
-    font_size: 'medium'
+    qr_image_url: '',
+    font_size: 10
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [qrUploading, setQrUploading] = useState(false);
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
@@ -74,21 +75,23 @@ const ReceiptSettings = () => {
           show_order_id: !!data.show_order_id,
           show_staff_name: !!data.show_staff_name,
           show_qr: !!data.show_qr,
+          qr_image_url: data.qr_image_url || '',
+          font_size: data.font_size || 10
         });
       } else {
         // Reset to defaults if no settings found
         setSettings({
           logo_enabled: true,
           logo_path: '',
-          header_text: `Welcome to ${shops.find(s => s.id === selectedShopId)?.name || 'Our Store'}`,
-          footer_text: 'Thank you for your purchase!',
+          header_text: `ຍິນດີຕ້ອນຮັບສູ່ ${shops.find(s => s.id === selectedShopId)?.name || 'ຮ້ານຂອງພວກເຮົາ'}`,
+          footer_text: 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ!',
           show_phone: true,
           show_address: true,
           show_order_id: true,
           show_staff_name: true,
           show_qr: false,
-          qr_data: '',
-          font_size: 'medium'
+          qr_image_url: '',
+          font_size: 10
         });
       }
     } catch (error) {
@@ -176,7 +179,7 @@ const ReceiptSettings = () => {
                   onChange={(e) => handleChange('header_text', e.target.value)}
                   className="input-premium" 
                   style={{ height: '80px', resize: 'none', paddingTop: '12px' }}
-                  placeholder="E.g. Welcome to our store..."
+                  placeholder="ເຊັ່ນ: ຍິນດີຕ້ອນຮັບ..."
                 />
               </div>
               <div>
@@ -186,7 +189,7 @@ const ReceiptSettings = () => {
                   onChange={(e) => handleChange('footer_text', e.target.value)}
                   className="input-premium" 
                   style={{ height: '80px', resize: 'none', paddingTop: '12px' }}
-                  placeholder="E.g. Visit us again!"
+                  placeholder="ເຊັ່ນ: ຂອບໃຈທີ່ໃຊ້ບໍລິການ!"
                 />
               </div>
             </div>
@@ -224,30 +227,39 @@ const ReceiptSettings = () => {
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '16px', opacity: 0.6 }}>BASE FONT SIZE</label>
-                <div style={{ display: 'flex', gap: '12px', background: '#f1f5f9', padding: '6px', borderRadius: '16px' }}>
-                  {['small', 'medium', 'large'].map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => handleChange('font_size', size)}
-                      style={{
-                        flex: 1, padding: '10px', borderRadius: '12px', border: 'none',
-                        fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase',
-                        background: settings.font_size === size ? '#fff' : 'transparent',
-                        color: settings.font_size === size ? 'var(--primary)' : 'var(--text-muted)',
-                        boxShadow: settings.font_size === size ? '0 4px 6px -1px rgba(0,0,0,0.1)' : 'none',
-                        cursor: 'pointer', transition: 'all 0.2s'
-                      }}
-                    >
-                      {size}
-                    </button>
-                  ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '24px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>BASE FONT SIZE</h4>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', opacity: 0.6 }}>Adjust the overall text size on the printed bill.</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        onClick={() => handleChange('font_size', 20)}
+                        style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 20 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 20 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
+                      >
+                        Small (20)
+                      </button>
+                      <button 
+                        onClick={() => handleChange('font_size', 22)}
+                        style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 22 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 22 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
+                      >
+                        Medium (22)
+                      </button>
+                      <button 
+                        onClick={() => handleChange('font_size', 24)}
+                        style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 24 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 24 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
+                      >
+                        Large (24)
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div style={{ padding: '24px', background: '#f8fafc', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Hash size={18} color="var(--primary)" />
                     <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>QR Code Attachment</span>
@@ -257,15 +269,63 @@ const ReceiptSettings = () => {
                     <span className="slider round"></span>
                   </label>
                 </div>
+
                 {settings.show_qr && (
-                  <input 
-                    type="text" 
-                    value={settings.qr_data} 
-                    onChange={(e) => handleChange('qr_data', e.target.value)}
-                    placeholder="Enter URL or Payment ID..."
-                    className="input-premium"
-                    style={{ background: '#fff' }}
-                  />
+                  <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                    <div style={{ 
+                      width: '100px', height: '100px', borderRadius: '24px', 
+                      border: '2px dashed var(--border-strong)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: '#fff', overflow: 'hidden'
+                    }}>
+                      {settings.qr_image_url ? (
+                        <img src={settings.qr_image_url} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <ImageIcon size={32} color="#cbd5e1" />
+                      )}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '12px', opacity: 0.6 }}>QR IMAGE (PROMPTPAY, ETC.)</label>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <input 
+                          type="file" 
+                          id="qr-upload" 
+                          hidden 
+                          accept="image/*"
+                          disabled={qrUploading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || !selectedShopId) return;
+                            setQrUploading(true);
+                            try {
+                              const res = await api.uploadShopQr(selectedShopId, file);
+                              handleChange('qr_image_url', res.qrImageUrl);
+                            } catch (err) {
+                              alert('Failed to upload QR image');
+                            } finally {
+                              setQrUploading(false);
+                            }
+                          }}
+                        />
+                        <button 
+                          onClick={() => document.getElementById('qr-upload')?.click()} 
+                          className="btn-secondary" 
+                          style={{ padding: '10px 20px', borderRadius: '12px' }}
+                          disabled={qrUploading}
+                        >
+                          {qrUploading ? 'Uploading...' : 'Upload QR Image'}
+                        </button>
+                        {settings.qr_image_url && (
+                          <button 
+                            onClick={() => handleChange('qr_image_url', '')} 
+                            style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -329,47 +389,63 @@ const ReceiptSettings = () => {
               </div>
             )}
             
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <p style={{ fontWeight: 'bold', fontSize: '1.2em', marginBottom: '8px' }}>{shops.find(s => s.id === selectedShopId)?.name || 'YOUR STORE'}</p>
-              {settings.show_address && <p style={{ fontSize: '0.8em', opacity: 0.8 }}>123 Merchant Way, City Center</p>}
-              {settings.show_phone && <p style={{ fontSize: '0.8em', opacity: 0.8 }}>TEL: +856 20 12345678</p>}
-            </div>
-
-            <div style={{ borderTop: '1px dashed #ccc', borderBottom: '1px dashed #ccc', padding: '12px 0', margin: '20px 0' }}>
-              <pre style={{ margin: 0, fontSize: '0.9em', whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{settings.header_text}</pre>
-            </div>
-
-            <div style={{ margin: '20px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{shops.find(s => s.id === selectedShopId)?.name || 'YOUR STORE'}</h3>
+              {settings.show_address && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>123 Merchant Way, City Center</p>}
+              {settings.show_phone && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>TEL: +856 20 12345678</p>}
+              
+              <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
+              
+              {settings.header_text && (
+                <>
+                  <p style={{ margin: '8px 0', fontSize: '0.9rem', fontStyle: 'italic' }}>{settings.header_text}</p>
+                  <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
+                </>
+              )}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px' }}>
                 <span>Item Name x2</span>
                 <span>50,000</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px' }}>
                 <span>Another Product</span>
                 <span>25,000</span>
               </div>
-              <div style={{ borderTop: '1px solid #eee', marginTop: '12px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                <span>TOTAL (LAK)</span>
+              
+              <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1rem' }}>
+                <span>ລວມທັງໝົດ (LAK)</span>
                 <span>75,000</span>
               </div>
-            </div>
-
-            <div style={{ opacity: 0.6, display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8em' }}>
-              {settings.show_order_id && <span>ORDER: #INV-2024-001</span>}
-              {settings.show_staff_name && <span>STAFF: Admin User</span>}
-              <span>DATE: {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</span>
-            </div>
-
-            <div style={{ borderTop: '1px dashed #ccc', padding: '12px 0', marginTop: '24px', textAlign: 'center' }}>
-              <pre style={{ margin: 0, fontSize: '0.9em', whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{settings.footer_text}</pre>
+              
+              <div style={{ margin: '16px 0', textAlign: 'left', fontSize: '0.75rem', opacity: 0.6, lineHeight: 1.6 }}>
+                {settings.show_order_id && <div>ເລກທີບິນ: #INV-2024-001</div>}
+                {settings.show_staff_name && <div>ພະນັກງານ: Admin User</div>}
+                <div>ວັນທີ: {new Date().toLocaleString()}</div>
+              </div>
+              
+              <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
+              
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>{settings.footer_text || 'ຂອບໃຈที่ໃຊ້ບໍລິການ'}</p>
             </div>
             
             {settings.show_qr && (
               <div style={{ textAlign: 'center', marginTop: '24px', padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #eee' }}>
-                <div style={{ width: '80px', height: '80px', margin: '0 auto', border: '4px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '60px', height: '60px', border: '2px solid #333' }}></div>
-                </div>
-                <p style={{ fontSize: '0.6rem', marginTop: '8px', fontWeight: 'bold' }}>{settings.qr_data || 'SCAN TO PAY'}</p>
+                {settings.qr_image_url ? (
+                  <img
+                    src={settings.qr_image_url}
+                    alt="QR Code"
+                    style={{ width: '100px', height: '100px', objectFit: 'contain', margin: '0 auto', display: 'block' }}
+                  />
+                ) : (
+                  <>
+                    <div style={{ width: '80px', height: '80px', margin: '0 auto', border: '4px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '60px', height: '60px', border: '2px solid #333' }}></div>
+                    </div>
+                    <p style={{ fontSize: '0.6rem', marginTop: '8px', fontWeight: 'bold', opacity: 0.5 }}>Upload QR image to preview</p>
+                  </>
+                )}
               </div>
             )}
 

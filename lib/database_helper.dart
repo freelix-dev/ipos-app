@@ -20,7 +20,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'ipos_database.db');
     return await openDatabase(
       path,
-      version: 13,
+      version: 14,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -98,6 +98,12 @@ class DatabaseHelper {
         ''');
       } catch (_) {}
     }
+    if (oldVersion < 14) {
+      try {
+        await db.execute('ALTER TABLE orders ADD COLUMN vat_amount REAL DEFAULT 0');
+        await db.execute('ALTER TABLE orders ADD COLUMN vat_rate REAL DEFAULT 0');
+      } catch (_) {}
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -138,7 +144,9 @@ class DatabaseHelper {
         synced INTEGER DEFAULT 0,
         remark TEXT,
         userId TEXT,
-        userName TEXT
+        userName TEXT,
+        vat_amount REAL DEFAULT 0,
+        vat_rate REAL DEFAULT 0
       )
     ''');
 

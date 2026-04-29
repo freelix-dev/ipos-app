@@ -31,11 +31,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final TextEditingController _cashController = TextEditingController();
   double _receivedAmount = 0;
   bool _isProcessing = false;
+  bool _vatEnabled = false;
+  double _taxRate = 0;
+  double _vatAmount = 0;
+  double _subtotalInLak = 0;
 
   @override
   void initState() {
     super.initState();
     currentCurrency = widget.initialCurrency;
+    _subtotalInLak = widget.totalAmount;
+    _loadVatSettings();
+  }
+
+  Future<void> _loadVatSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _vatEnabled = prefs.getBool('vat_enabled') ?? false;
+      String taxRateStr = prefs.getString('system_tax_rate') ?? '0';
+      _taxRate = double.tryParse(taxRateStr) ?? 0;
+      
+      if (_vatEnabled) {
+        _vatAmount = (_subtotalInLak * _taxRate) / 100;
+      } else {
+        _vatAmount = 0;
+      }
+    });
   }
 
   String formatPrice(double price) {
@@ -56,7 +77,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return priceInLak / rate;
   }
 
-  double get _convertedTotal => _convertPrice(widget.totalAmount);
+  double get _totalInLak => _subtotalInLak + _vatAmount;
+
+  double get _convertedTotal => _convertPrice(_totalInLak);
+  double get _convertedVat => _convertPrice(_vatAmount);
+  double get _convertedSubtotal => _convertPrice(_subtotalInLak);
 
   @override
   void dispose() {
@@ -104,6 +129,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       color: primaryGreen,
                     ),
                   ),
+                  if (_vatEnabled) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Subtotal: ${formatPrice(_convertedSubtotal)} | VAT ($_taxRate%): ${formatPrice(_convertedVat)}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -246,6 +278,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           'changeAmount': selectedMethod == 'cash' ? _change : 0,
                           'userId': userId,
                           'userName': userName,
+                          'vat_amount': _convertedVat,
+                          'vat_rate': _taxRate,
                         };
                         await DatabaseHelper().insertOrder(order);
 
@@ -370,7 +404,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'ລະບົບໄດ້ເກັບບັນທຶກຂໍ້ມູນຮຽບຮ້ອຍແລ້ວ',
+              'ລະບົບໄດ້ເກັບບັນທຶกຂໍ້ມູນຮຽບຮ້ອຍແລ້ວ',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),

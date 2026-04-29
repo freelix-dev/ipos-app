@@ -179,7 +179,9 @@ class _MainDrawerState extends State<MainDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                    );
+                    ).then((_) {
+                      if (widget.onSyncComplete != null) widget.onSyncComplete!();
+                    });
                   },
                 ),
               ],
