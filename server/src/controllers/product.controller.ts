@@ -1,5 +1,13 @@
 import { Request, Response } from 'express';
-import * as productService from '../services/product.service';
+import { 
+  getAllProducts, 
+  getProductById as getProductByIdService, 
+  createProduct as createProductService, 
+  updateProduct as updateProductService, 
+  deleteProduct as deleteProductService, 
+  updateStock as updateStockService 
+} from '../services/product.service'; 
+import { createAuditLog } from '../services/audit.service';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
@@ -23,7 +31,7 @@ export const getProducts = async (req: Request, res: Response) => {
       }
     }
 
-    const products = await productService.getAllProducts(shopId, ownerId, userId);
+    const products = await getAllProducts(shopId, ownerId, userId);
     res.json(products);
   } catch (e) {
     console.error('Error in getProducts:', e);
@@ -33,7 +41,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const product = await productService.getProductById(req.params.id as string);
+    const product = await getProductByIdService(req.params.id as string);
     if (!product) res.status(404).json({ message: 'Product not found' });
     else res.json(product);
   } catch (e) {
@@ -44,7 +52,19 @@ export const getProductById = async (req: Request, res: Response) => {
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const id = await productService.createProduct(req.body);
+    const id = await createProductService(req.body);
+    const user = (req as any).user;
+    
+    await createAuditLog({
+      user_id: user?.id,
+      shop_id: req.body.shop_id || user?.shop_id,
+      action: 'Create Product',
+      target_type: 'product',
+      target_id: id,
+      details: `Created product: ${req.body.name}`,
+      ip_address: req.ip
+    });
+
     res.status(201).json({ message: 'Product created', id });
   } catch (e: any) {
     console.error('CREATE PRODUCT ERROR:', e);
@@ -54,7 +74,19 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    await productService.updateProduct(req.params.id as string, req.body);
+    await updateProductService(req.params.id as string, req.body);
+    const user = (req as any).user;
+
+    await createAuditLog({
+      user_id: user?.id,
+      shop_id: req.body.shop_id || user?.shop_id,
+      action: 'Update Product',
+      target_type: 'product',
+      target_id: req.params.id as string,
+      details: `Updated product: ${req.body.name}`,
+      ip_address: req.ip
+    });
+
     res.json({ message: 'Product updated successfully' });
   } catch (e) {
     console.error(e);
@@ -64,7 +96,19 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    await productService.deleteProduct(req.params.id as string);
+    await deleteProductService(req.params.id as string);
+    const user = (req as any).user;
+
+    await createAuditLog({
+      user_id: user?.id,
+      shop_id: user?.shop_id,
+      action: 'Delete Product',
+      target_type: 'product',
+      target_id: req.params.id as string,
+      details: `Deleted product ID: ${req.params.id}`,
+      ip_address: req.ip
+    });
+
     res.json({ message: 'Product deleted successfully' });
   } catch (e) {
     console.error(e);
@@ -74,7 +118,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const updateStock = async (req: Request, res: Response) => {
   try {
-    await productService.updateStock(req.params.id as string, req.body.stock);
+    await updateStockService(req.params.id as string, req.body.stock);
     res.json({ message: 'Stock updated successfully' });
   } catch (e) {
     console.error(e);

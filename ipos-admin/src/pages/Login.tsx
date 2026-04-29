@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, Lock, Mail, Eye, EyeOff, Loader2, ArrowUpRight } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -144,9 +145,14 @@ const Login = () => {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '40px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-          New here? <span onClick={() => window.location.href='/register-shop'} style={{ color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Register Your Shop</span>
-        </p>
+        <div style={{ marginTop: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <Link to="/pricing" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none', fontSize: '0.9rem' }}>
+            View Subscription Plans
+          </Link>
+          <Link to="/register-shop" style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, textDecoration: 'none', fontSize: '0.85rem' }}>
+            Don't have a shop? Register now
+          </Link>
+        </div>
       </div>
 
       <style>{`

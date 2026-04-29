@@ -14,7 +14,14 @@ import {
   Store,
   Coins,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Truck,
+  History,
+  FileText,
+  Smartphone,
+  Tag,
+  Wallet,
+  Activity
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -25,14 +32,20 @@ const Sidebar = () => {
   const isSystemAdmin = currentUser && !currentUser.shop_id;
 
   const menuItems = [
+    ...(isSystemAdmin ? [
+      { icon: <Activity size={20} />, label: 'Admin Insights', path: '/admin-insights' }
+    ] : []),
     { icon: <LayoutDashboard size={19} />, label: 'Dashboard', path: '/dashboard' },
     { icon: <ShoppingBag size={20} />, label: 'Orders', path: '/orders' },
+    { icon: <Wallet size={20} />, label: 'Expenses', path: '/expenses' },
     { icon: <Package size={20} />, label: 'Products', path: '/products' },
     { icon: <Layers size={20} />, label: 'Stock', path: '/stock' },
     { icon: <TrendingUp size={20} />, label: 'Sale Report', path: '/reports/sales' },
     { icon: <PieChart size={20} />, label: 'Stock Report', path: '/reports/stock' },
     { icon: <Users size={20} />, label: 'Manage Users', path: '/users' },
-    // Only System Admin or Shop Owners can manage shops
+    { icon: <Truck size={20} />, label: 'Suppliers', path: '/suppliers' },
+    { icon: <Tag size={20} />, label: 'Categories', path: '/categories' },
+    // Only System Admin or Shop Owners (Admins) can manage shops
     ...(currentUser?.role === 'admin' ? [
       { icon: <Store size={20} />, label: 'Manage Shops', path: '/shops' }
     ] : []),
@@ -76,6 +89,7 @@ const Sidebar = () => {
           </NavLink>
         ))}
 
+
         {/* Collapsible Settings Menu */}
         <div className="settings-menu-group">
           <div 
@@ -87,7 +101,7 @@ const Sidebar = () => {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Settings size={20} />
               </div>
-              <span>Settings</span>
+              <span>Control Center</span>
             </div>
             {settingsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
@@ -95,18 +109,71 @@ const Sidebar = () => {
           {settingsOpen && (
             <div className="submenu" style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
               {currentUser?.role === 'admin' && (
-                <NavLink 
-                  to="/exchange-rates" 
-                  className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
-                  style={{ fontSize: '0.9rem', padding: '10px 18px' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Coins size={18} />
-                  </div>
-                  <span>Exchange Rates</span>
-                </NavLink>
+                <>
+                  <NavLink 
+                    to="/exchange-rates" 
+                    className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                    style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Coins size={18} />
+                    </div>
+                    <span>Exchange Rates</span>
+                  </NavLink>
+                  <NavLink 
+                    to="/settings" 
+                    className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                    style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Database size={18} />
+                    </div>
+                    <span>System Params</span>
+                  </NavLink>
+                  <NavLink 
+                    to="/audit-logs" 
+                    className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                    style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <History size={18} />
+                    </div>
+                    <span>Audit Trail</span>
+                  </NavLink>
+                  <NavLink 
+                    to="/receipt-settings" 
+                    className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                    style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <FileText size={18} />
+                    </div>
+                    <span>Receipt Designer</span>
+                  </NavLink>
+                  <NavLink 
+                    to="/stock-history" 
+                    className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                    style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <History size={18} />
+                    </div>
+                    <span>Stock Ledger</span>
+                  </NavLink>
+                  {isSystemAdmin && (
+                    <NavLink 
+                      to="/app-management" 
+                      className={({ isActive }) => `nav-item submenu-item ${isActive ? 'active' : ''}`}
+                      style={{ fontSize: '0.9rem', padding: '10px 18px' }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Smartphone size={18} />
+                      </div>
+                      <span>App Ecosystem</span>
+                    </NavLink>
+                  )}
+                </>
               )}
-              {/* Add more settings here if needed */}
             </div>
           )}
         </div>

@@ -4,6 +4,16 @@ const Header = () => {
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : { name: 'Guest', role: 'Viewer' };
 
+  // Localized role for display
+  const displayRole = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case 'admin': return currentUser.shop_id ? 'Shop Manager' : 'System Admin';
+      case 'staff': return 'Staff';
+      case 'user': return 'User';
+      default: return role || 'Unknown';
+    }
+  };
+
   return (
     <header className="header" style={{ 
       display: 'flex', 
@@ -33,7 +43,7 @@ const Header = () => {
             background: '#10b981', 
             borderRadius: '50%',
             border: '2px solid #fff',
-            boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.2)'
+            boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.25)'
           }}></div>
         </button>
         
@@ -58,7 +68,7 @@ const Header = () => {
               {currentUser.name}
             </p>
             <p style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              {currentUser.role}
+              {displayRole(currentUser.role)}
             </p>
           </div>
           <div style={{ 

@@ -8,16 +8,20 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronFirst,
-  ChevronLast
+  ChevronLast,
+  Edit3,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  RefreshCw
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const StockManagement = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
   const [activeTab, setActiveTab] = useState('Global Supply');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -25,6 +29,14 @@ const StockManagement = () => {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Adjustment States
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [adjustAmount, setAdjustAmount] = useState('');
+  const [adjustType, setAdjustType] = useState<'Restock' | 'Adjustment'>('Restock');
+  const [adjustReason, setAdjustReason] = useState('');
+  const [isAdjusting, setIsAdjusting] = useState(false);
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
@@ -66,17 +78,28 @@ const StockManagement = () => {
     ));
   };
 
-  const handleUpdateStock = async (id: string, stock: number) => {
+  const handleAdjustStock = async () => {
+    if (!selectedProduct || !adjustAmount || !adjustReason) return;
     try {
-      setSavingId(id);
-      await api.updateStock(id, stock);
-      setMessage({ type: 'success', text: 'Cloud inventory synchronized!' });
+      setIsAdjusting(true);
+      await api.adjustStock(
+        selectedProduct.id, 
+        parseInt(adjustAmount), 
+        adjustType, 
+        adjustReason
+      );
+      
+      setShowAdjustModal(false);
+      setAdjustAmount('');
+      setAdjustReason('');
+      setSelectedProduct(null);
+      setMessage({ type: 'success', text: 'Stock adjusted successfully!' });
       setTimeout(() => setMessage(null), 3000);
-    } catch (error) {
-      console.error('Error updating stock:', error);
-      setMessage({ type: 'error', text: 'Network failure during sync' });
+      loadProducts();
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to adjust stock' });
     } finally {
-      setSavingId(null);
+      setIsAdjusting(false);
     }
   };
 
@@ -165,6 +188,7 @@ const StockManagement = () => {
                   value={selectedShopId}
                   onChange={(e) => {
                     setSelectedShopId(e.target.value);
+                    localStorage.setItem('selectedShopId', e.target.value);
                     setCurrentPage(1);
                   }}
                   style={{ 
@@ -254,10 +278,10 @@ const StockManagement = () => {
                             overflow: 'hidden', border: '1px solid #fff', boxShadow: 'var(--shadow-sm)'
                           }}>
                             <img 
-                              src={`http://127.0.0.1:3000/${product.imagePath}`} 
+                              src={`${IMAGE_BASE_URL}/${product.imagePath}`} 
                               alt="" 
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              onError={(e: any) => { e.target.src = 'http://127.0.0.1:3000/assets/images/default.png'; }}
+                              onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }}
                             />
                           </div>
                           <div>
@@ -276,47 +300,27 @@ const StockManagement = () => {
                         </span>
                       </td>
                       <td>
-                        <input 
-                          type="number" 
-                          disabled={currentUser?.role !== 'admin'}
-                          value={product.stock}
-                          onChange={(e) => handleStockChange(product.id, e.target.value)}
-                          className="input-premium"
-                          style={{ 
-                            height: '44px', 
-                            textAlign: 'center', 
-                            fontWeight: 900, 
-                            color: 'var(--primary)', 
-                            letterSpacing: '0.05em',
-                            opacity: currentUser?.role !== 'admin' ? 0.6 : 1,
-                            cursor: currentUser?.role !== 'admin' ? 'not-allowed' : 'text'
-                          }}
-                        />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border-strong)', width: 'fit-content' }}>
+                          <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary)' }}>{product.stock}</span>
+                          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>{product.unit.toUpperCase()}</span>
+                        </div>
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '32px' }}>
                         {currentUser?.role === 'admin' ? (
                           <button 
-                            onClick={() => handleUpdateStock(product.id, product.stock)}
-                            disabled={savingId === product.id}
+                            onClick={() => { setSelectedProduct(product); setShowAdjustModal(true); }}
                             className="btn-primary"
                             style={{ 
                               padding: '10px 24px', 
                               borderRadius: '12px', 
                               fontSize: '0.85rem',
-                              background: savingId === product.id ? 'var(--text-muted)' : 'var(--primary)',
-                              boxShadow: savingId === product.id ? 'none' : 'var(--shadow-md)',
-                              cursor: savingId === product.id ? 'wait' : 'pointer',
                               display: 'inline-flex',
-                              width: '120px',
-                              justifyContent: 'center'
+                              alignItems: 'center',
+                              gap: '8px'
                             }}
                           >
-                            {savingId === product.id ? <div className="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }}></div> : (
-                              <>
-                                <Save size={16} />
-                                <span style={{ marginLeft: '8px' }}>SYNC</span>
-                              </>
-                            )}
+                            <Edit3 size={16} />
+                            <span>ADJUST</span>
                           </button>
                         ) : (
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Authorized Only</span>
@@ -445,6 +449,95 @@ const StockManagement = () => {
         .pagination-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
         .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
       `}</style>
+
+      {/* Stock Adjustment Modal */}
+      {showAdjustModal && selectedProduct && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: '#fff', width: '90%', maxWidth: '450px', borderRadius: '32px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '32px' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <img src={`${IMAGE_BASE_URL}/${selectedProduct.imagePath}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Inventory Flux</h2>
+                <p style={{ fontWeight: 800, color: 'var(--primary)' }}>{selectedProduct.name}</p>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>CURRENT BALANCE: {selectedProduct.stock} {selectedProduct.unit.toUpperCase()}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Adjustment Quantum (±)</label>
+                <div style={{ position: 'relative' }}>
+                  <Package size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                  <input 
+                    type="number" 
+                    className="input-premium" 
+                    style={{ paddingLeft: '48px' }}
+                    value={adjustAmount}
+                    onChange={(e) => setAdjustAmount(e.target.value)}
+                    placeholder="e.g. 50 or -10"
+                  />
+                </div>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 600 }}>* Use positive values to ADD, negative to SUBTRACT</p>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Movement Vector</label>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => setAdjustType('Restock')}
+                    type="button"
+                    style={{ 
+                      flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid var(--border-strong)',
+                      background: adjustType === 'Restock' ? 'var(--primary)' : '#fff',
+                      color: adjustType === 'Restock' ? '#fff' : 'var(--text-main)',
+                      fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'var(--transition)'
+                    }}
+                  >
+                    <ArrowUpCircle size={18} /> RESTOCK
+                  </button>
+                  <button 
+                    onClick={() => setAdjustType('Adjustment')}
+                    type="button"
+                    style={{ 
+                      flex: 1, padding: '12px', borderRadius: '14px', border: '1px solid var(--border-strong)',
+                      background: adjustType === 'Adjustment' ? '#3b82f6' : '#fff',
+                      color: adjustType === 'Adjustment' ? '#fff' : 'var(--text-main)',
+                      fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'var(--transition)'
+                    }}
+                  >
+                    <RefreshCw size={18} /> ADJUST
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Audit Justification</label>
+                <textarea 
+                  className="input-premium"
+                  style={{ height: '80px', resize: 'none' }}
+                  value={adjustReason}
+                  onChange={(e) => setAdjustReason(e.target.value)}
+                  placeholder="Why is this adjustment necessary? (e.g., New delivery, Damage, Stock count error)..."
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button onClick={() => setShowAdjustModal(false)} className="btn-secondary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>Cancel</button>
+              <button 
+                onClick={handleAdjustStock}
+                disabled={isAdjusting || !adjustAmount || !adjustReason}
+                className="btn-primary" 
+                style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}
+              >
+                {isAdjusting ? 'Processing...' : 'Apply Change'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -11,14 +11,16 @@ import {
   ChevronLast
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, IMAGE_BASE_URL } from '../services/api';
 
 const Products = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All Products');
 
@@ -33,6 +35,7 @@ const Products = () => {
   useEffect(() => {
     loadShops();
     loadProducts();
+    loadCategories();
   }, [selectedShopId]);
 
   const loadShops = async () => {
@@ -41,6 +44,15 @@ const Products = () => {
       setShops(data);
     } catch (error) {
       console.error('Failed to load shops:', error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const data = await api.getCategories(selectedShopId || undefined);
+      setCategories(data);
+    } catch (error) {
+      console.error('Failed to load categories:', error);
     }
   };
 
@@ -86,13 +98,14 @@ const Products = () => {
   // Filtering Logic
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategoryId === '' || p.category_id === selectedCategoryId;
     
     let matchesTab = true;
     if (activeTab === 'In Stock') matchesTab = p.stock > 10;
     else if (activeTab === 'Low Stock') matchesTab = p.stock > 0 && p.stock <= 10;
     else if (activeTab === 'Out of Stock') matchesTab = p.stock <= 0;
     
-    return matchesSearch && matchesTab;
+    return matchesSearch && matchesTab && matchesCategory;
   });
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -151,6 +164,31 @@ const Products = () => {
               />
             </div>
 
+            <div style={{ position: 'relative', width: '200px' }}>
+              <select 
+                value={selectedCategoryId}
+                onChange={(e) => {
+                  setSelectedCategoryId(e.target.value);
+                  setCurrentPage(1);
+                }}
+                style={{ 
+                  width: '100%', height: '50px', padding: '0 40px 0 16px', 
+                  borderRadius: '16px', border: '1px solid var(--border-strong)', 
+                  background: '#fff', fontSize: '0.9rem', fontWeight: 800,
+                  appearance: 'none', cursor: 'pointer', outline: 'none',
+                  color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                <option value="">All Categories</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+              <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                 <Filter size={16} />
+              </div>
+            </div>
+
             {/* Shop Selector for System Admin & Owners */}
             {(isSystemAdmin || (currentUser?.role === 'admin')) && (
               <div style={{ position: 'relative', width: '220px' }}>
@@ -158,6 +196,7 @@ const Products = () => {
                   value={selectedShopId}
                   onChange={(e) => {
                     setSelectedShopId(e.target.value);
+                    localStorage.setItem('selectedShopId', e.target.value);
                     setCurrentPage(1);
                   }}
                   style={{ 
@@ -178,8 +217,6 @@ const Products = () => {
                 </div>
               </div>
             )}
-
-            {/* Category Module removed as requested */}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -243,16 +280,28 @@ const Products = () => {
                           overflow: 'hidden', boxShadow: 'var(--shadow-sm)', border: '1px solid #fff'
                         }}>
                           <img 
-                            src={`http://127.0.0.1:3000/${product.imagePath}`} 
+                            src={`${IMAGE_BASE_URL}/${product.imagePath}`} 
                             alt="" 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                            onError={(e: any) => { e.target.src = 'http://127.0.0.1:3000/assets/images/default.png'; }}
+                            onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }}
                           />
                         </div>
                         <div>
                           <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{product.name}</p>
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
+                            {product.category_name && (
+                              <span style={{ fontSize: '0.7rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                                {product.category_name}
+                              </span>
+                            )}
+                            {product.supplier_name && (
+                              <span style={{ fontSize: '0.7rem', background: '#fef3c7', color: '#d97706', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                                {product.supplier_name}
+                              </span>
+                            )}
+                          </div>
                           {(selectedShopId === '' || isSystemAdmin) && (
-                            <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>{product.shop_name || 'System Catalog'}</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700, marginTop: '4px' }}>{product.shop_name || 'System Catalog'}</p>
                           )}
                           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>ID: {product.id.toString().slice(-6).toUpperCase()}</p>
                         </div>

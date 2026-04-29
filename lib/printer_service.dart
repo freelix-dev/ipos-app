@@ -20,33 +20,52 @@ class PrinterService {
       print('PrinterService: Printer initialized');
       await Future.delayed(const Duration(milliseconds: 500));
 
-      // Load Shop Info from SharedPreferences
+      // Load Shop Info and Receipt Settings from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final shopName = prefs.getString('shop_name') ?? 'Namkhong Vientiane';
-      final shopAddress = prefs.getString('shop_address') ?? 'Terminal POS System';
+      final shopName = prefs.getString('shop_name') ?? 'iPOS PRO';
+      final shopAddress = prefs.getString('shop_address') ?? '';
       final shopPhone = prefs.getString('shop_phone') ?? '';
+      
+      final settingsJson = prefs.getString('receipt_settings');
+      Map<String, dynamic> settings = settingsJson != null ? json.decode(settingsJson) : {};
+      
+      final headerText = settings['header_text'] ?? '';
+      final footerText = settings['footer_text'] ?? 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ';
+      final showOrderNo = settings['show_order_id'] != 'false';
+      final showEmployee = settings['show_employee'] != 'false';
+      final showDate = settings['show_date'] != 'false';
 
       await SunmiPrinter.lineWrap(1);
       
       // Header
       await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-      await SunmiPrinter.printText('$shopName\n');
+      if (headerText.isNotEmpty) {
+        await SunmiPrinter.printText('$headerText\n');
+      } else {
+        await SunmiPrinter.printText('$shopName\n');
+      }
+
       if (shopAddress.isNotEmpty) {
         await SunmiPrinter.printText('$shopAddress\n');
       }
       if (shopPhone.isNotEmpty) {
         await SunmiPrinter.printText('Tel: $shopPhone\n');
       }
+
       await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
       await SunmiPrinter.printText('--------------------------------\n');
-
+      
       // Order Info
       DateTime orderDate = DateTime.parse(order['date']);
       String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(orderDate);
       
-      await SunmiPrinter.printText('ໃບບິນເລກທີ: ${order['id'].toString().substring(0, 8)}\n');
-      await SunmiPrinter.printText('ວັນທີ: $formattedDate\n');
-      if (order['userName'] != null) {
+      if (showOrderNo) {
+        await SunmiPrinter.printText('ໃບບິນເລກທີ: ${order['id'].toString().substring(0, 8)}\n');
+      }
+      if (showDate) {
+        await SunmiPrinter.printText('ວັນທີ: $formattedDate\n');
+      }
+      if (showEmployee && order['userName'] != null) {
         await SunmiPrinter.printText('ພະນັກງານ: ${order['userName']}\n');
       }
       await SunmiPrinter.printText('--------------------------------\n');
@@ -99,8 +118,8 @@ class PrinterService {
       }
 
       await SunmiPrinter.printText('--------------------------------\n');
-      await SunmiPrinter.printText('      ຂອບໃຈທີ່ໃຊ້ບໍລິການ\n');
-      await SunmiPrinter.printText('      ສະບາຍດີ! ຂໍຂອບໃຈ!\n');
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      await SunmiPrinter.printText('$footerText\n');
       
       // Reasonable margin to feed paper past the tear bar
       await SunmiPrinter.lineWrap(75);

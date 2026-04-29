@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://127.0.0.1:3000';
+const API_BASE_URL = `${BASE_URL}/api`;
+
+export const IMAGE_BASE_URL = BASE_URL;
 
 
 const getHeaders = (isMultipart = false) => {
@@ -197,13 +200,6 @@ export const api = {
     return response.json();
   },
 
-  getExchangeRates: async (shopId?: string) => {
-    const url = shopId ? `${API_BASE_URL}/exchange-rates?shopId=${shopId}` : `${API_BASE_URL}/exchange-rates`;
-    const response = await fetch(url, { headers: getHeaders() });
-    if (!response.ok) throw new Error('Failed to fetch rates');
-    return response.json();
-  },
-
   updateExchangeRates: async (rates: any, shopId?: string) => {
     const response = await fetch(`${API_BASE_URL}/exchange-rates`, {
       method: 'POST',
@@ -212,5 +208,236 @@ export const api = {
     });
     if (!response.ok) throw new Error('Failed to update rates');
     return response.json();
+  },
+
+  // Admin Features
+  getSuppliers: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/admin/suppliers?shopId=${shopId}` : `${API_BASE_URL}/admin/suppliers`;
+    const response = await fetch(url, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  addSupplier: async (supplier: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/suppliers`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(supplier),
+    });
+    return handleResponse(response);
+  },
+
+  updateSupplier: async (id: string, supplier: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/suppliers/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(supplier),
+    });
+    return handleResponse(response);
+  },
+
+  deleteSupplier: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/suppliers/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  
+  // Categories
+  getCategories: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/admin/categories?shopId=${shopId}` : `${API_BASE_URL}/admin/categories`;
+    const response = await fetch(url, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  addCategory: async (category: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(category),
+    });
+    return handleResponse(response);
+  },
+
+  updateCategory: async (id: string, category: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(category),
+    });
+    return handleResponse(response);
+  },
+
+  deleteCategory: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getAuditLogs: async (filters: any) => {
+    const params = new URLSearchParams(filters);
+    const response = await fetch(`${API_BASE_URL}/admin/audit-logs?${params.toString()}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  getSystemSettings: async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/settings`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  updateSystemSettings: async (settings: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(settings),
+    });
+    return handleResponse(response);
+  },
+
+  getDashboardStats: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/admin/dashboard-stats?shopId=${shopId}` : `${API_BASE_URL}/admin/dashboard-stats`;
+    const response = await fetch(url, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  getGlobalStats: async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/global-stats`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  getReceiptSettings: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/admin/receipt-settings?shopId=${shopId}` : `${API_BASE_URL}/admin/receipt-settings`;
+    const response = await fetch(url, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  updateReceiptSettings: async (settings: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/receipt-settings`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(settings),
+    });
+    return handleResponse(response);
+  },
+
+  getLowStock: async (shopId?: string) => {
+    const url = shopId ? `${API_BASE_URL}/admin/low-stock?shopId=${shopId}` : `${API_BASE_URL}/admin/low-stock`;
+    const response = await fetch(url, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  updateShopLicense: async (data: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/shop-license`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  updateAppConfig: async (config: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/app-config`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(config),
+    });
+    return handleResponse(response);
+  },
+
+  voidOrder: async (orderId: string, reason: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/void-order`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ orderId, reason }),
+    });
+    return handleResponse(response);
+  },
+
+  getExpenses: async (shopId: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/expenses?shopId=${shopId}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  createExpense: async (expense: any) => {
+    const response = await fetch(`${API_BASE_URL}/admin/expenses`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(expense),
+    });
+    return handleResponse(response);
+  },
+
+  deleteExpense: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/expenses/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getStockHistory: async (shopId: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/stock-history?shopId=${shopId}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  adjustStock: async (productId: string, adjustment: number, type: string, reason: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/adjust-stock`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ productId, adjustment, type, reason }),
+    });
+    return handleResponse(response);
+  },
+
+  getExchangeRates: async (shopId?: string) => {
+    const response = await fetch(`${API_BASE_URL}/admin/exchange-rates?shopId=${shopId || ''}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  // Marketing
+  getPromotions: async (shopId: string) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/promotions?shopId=${shopId}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  createPromotion: async (promotion: any) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/promotions`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(promotion),
+    });
+    return handleResponse(response);
+  },
+
+  deletePromotion: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/promotions/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  getCoupons: async (shopId: string) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/coupons?shopId=${shopId}`, { headers: getHeaders() });
+    return handleResponse(response);
+  },
+
+  createCoupon: async (coupon: any) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/coupons`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(coupon),
+    });
+    return handleResponse(response);
+  },
+
+  deleteCoupon: async (id: string) => {
+    const response = await fetch(`${API_BASE_URL}/marketing/coupons/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
   }
 };

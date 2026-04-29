@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, 
   ShoppingBag, 
@@ -8,21 +9,49 @@ import {
   ArrowDownRight,
   Plus,
   Shield,
-  Database
+  Database,
+  Calendar,
+  CreditCard,
+  Target,
+  AlertTriangle,
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
-import { api } from '../services/api';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
+import { api, IMAGE_BASE_URL } from '../services/api';
+
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    totalSales: 0,
-    ordersCount: 0,
-    productsCount: 0,
-    pendingOrders: 0
+  const navigate = useNavigate();
+  const [stats, setStats] = useState<any>({
+    salesOverTime: [],
+    paymentDistribution: [],
+    summary: [], // Changed to array for multi-currency support
+    topProducts: []
   });
+  const [expenses, setExpenses] = useState<any[]>([]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
+  const [rates, setRates] = useState<any>({ thb: 750, usd: 25000 }); // Default fallback
   const [loading, setLoading] = useState(true);
   const [shops, setShops] = useState<any[]>([]);
-  const [selectedShopId, setSelectedShopId] = useState('');
+  const [selectedShopId, setSelectedShopId] = useState(() => localStorage.getItem('selectedShopId') || '');
+  const [activeCurrency, setActiveCurrency] = useState('LAK');
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
@@ -48,25 +77,20 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [orders, products] = await Promise.all([
-        api.getOrders(isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id)),
-        api.getProducts(isSystemAdmin ? selectedShopId : (selectedShopId || currentUser?.shop_id))
+      const effectiveShopId = selectedShopId || undefined;
+      const [visualStats, orders, lowStock, expenseData, rateData] = await Promise.all([
+        api.getDashboardStats(effectiveShopId),
+        api.getOrders(effectiveShopId),
+        api.getLowStock(effectiveShopId),
+        effectiveShopId ? api.getExpenses(effectiveShopId) : api.getExpenses(''), // Fetch all if no shop
+        api.getExchangeRates(effectiveShopId)
       ]);
 
-      const totalSales = orders.reduce((sum: number, order: any) => 
-        order.status === 'Completed' ? sum + parseFloat(order.total) : sum, 0
-      );
-      
-      const pending = orders.filter((o: any) => o.status === 'Pending').length;
-
-      setStats({
-        totalSales,
-        ordersCount: orders.length,
-        productsCount: products.length,
-        pendingOrders: pending
-      });
-
+      setStats(visualStats);
       setRecentOrders(orders.slice(0, 6));
+      setLowStockProducts(lowStock.slice(0, 5));
+      setExpenses(expenseData);
+      if (rateData) setRates(rateData);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -74,11 +98,26 @@ const Dashboard = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK', maximumFractionDigits: 0 }).format(amount);
+  const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
+  
+  // Convert all revenues to LAK for a unified Net Profit estimate
+  const totalRevenueInLAK = Array.isArray(stats.summary) ? stats.summary.reduce((sum: number, s: any) => {
+    const amount = Number(s.totalRevenue) || 0;
+    if (s.currency === 'THB') return sum + (amount * (rates.thb || 1));
+    if (s.currency === 'USD') return sum + (amount * (rates.usd || 1));
+    return sum + amount;
+  }, 0) : 0;
+
+  const netProfit = totalRevenueInLAK - totalExpense;
+
+  const formatCurrency = (amount: number, currency: string = 'LAK') => {
+    const symbol = currency === 'THB' ? '฿' : (currency === 'USD' ? '$' : '');
+    const formatted = new Intl.NumberFormat('lo-LA', { style: 'decimal', minimumFractionDigits: 0 }).format(amount || 0);
+    const suffix = currency === 'LAK' || !currency ? ' ₭' : '';
+    return `${symbol}${formatted}${suffix}`;
   };
 
-  const StatCard = ({ title, value, icon, trend, color, label }: any) => (
+  const StatCard = ({ title, values, icon, color, label }: any) => (
     <div className="stat-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ 
@@ -90,235 +129,373 @@ const Dashboard = () => {
         }}>
           {icon}
         </div>
-        {trend && (
-          <div style={{ 
-            display: 'flex', alignItems: 'center', gap: '4px', 
-            color: trend > 0 ? '#10b981' : '#ef4444', 
-            fontSize: '0.8rem', fontWeight: 800,
-            background: trend > 0 ? '#10b98110' : '#ef444410',
-            padding: '6px 10px', borderRadius: '12px'
-          }}>
-            {trend > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-            {Math.abs(trend)}%
-          </div>
-        )}
       </div>
       <div style={{ marginTop: '24px' }}>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</p>
-        <h3 style={{ fontSize: '1.75rem', marginTop: '6px', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{value}</h3>
-        {label && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{label}</p>}
+        <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {Array.isArray(values) ? values.map((v: any, i: number) => (
+            <h3 key={i} style={{ fontSize: v.isMain ? '1.75rem' : '1.1rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+              {v.amount}
+            </h3>
+          )) : (
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{values}</h3>
+          )}
+        </div>
+        {label && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 700 }}>{label}</p>}
       </div>
     </div>
   );
 
   return (
     <div className="animate-slide-up">
+      {lowStockProducts.length > 0 && (
+        <div style={{ 
+          background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '24px', 
+          padding: '24px 32px', marginBottom: '40px', display: 'flex', 
+          justifyContent: 'space-between', alignItems: 'center',
+          boxShadow: '0 10px 15px -3px rgba(239, 68, 68, 0.1)'
+        }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <div style={{ background: '#ef4444', color: '#fff', padding: '12px', borderRadius: '14px' }}>
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <h4 style={{ fontWeight: 900, color: '#991b1b', fontSize: '1.1rem' }}>Inventory Alert: {lowStockProducts.length} Items Low</h4>
+              <p style={{ color: '#b91c1c', fontSize: '0.9rem', fontWeight: 600 }}>Critical stock levels detected in {selectedShopId ? 'this branch' : 'multiple branches'}.</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {lowStockProducts.slice(0, 3).map((p, i) => (
+              <div key={i} style={{ background: '#fff', padding: '8px 16px', borderRadius: '12px', border: '1px solid #fee2e2', fontSize: '0.8rem', fontWeight: 800, color: '#991b1b' }}>
+                {p.name}: <span style={{ color: '#ef4444' }}>{p.stock} left</span>
+              </div>
+            ))}
+            <button 
+              onClick={() => window.location.href='/stock'}
+              style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              Restock Now <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Store Intelligence</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Real-time performance metrics and operational tracing</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Executive Overview</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Advanced analytics and performance visualization</p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {/* Current Shop Logo Display */}
-          {selectedShopId && shops.find(s => s.id === selectedShopId)?.logoPath && (
-            <img 
-              src={`http://127.0.0.1:3000${shops.find(s => s.id === selectedShopId)?.logoPath}`} 
-              alt="Shop Logo" 
-              style={{ width: '50px', height: '50px', borderRadius: '14px', objectFit: 'cover', border: '1px solid var(--border-strong)' }} 
-            />
-          )}
-
-          {/* Shop Selector for System Admin & Owners */}
           {(isSystemAdmin || (currentUser?.role === 'admin')) && (
-            <div style={{ position: 'relative', width: '220px' }}>
-              <select 
-                value={selectedShopId}
-                onChange={(e) => setSelectedShopId(e.target.value)}
-                style={{ 
-                  width: '100%', height: '50px', padding: '0 40px 0 16px', 
-                  borderRadius: '16px', border: '1px solid var(--border-strong)', 
-                  background: '#fff', fontSize: '0.9rem', fontWeight: 800,
-                  appearance: 'none', cursor: 'pointer', outline: 'none',
-                  color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
-                }}
-              >
-                <option value="">{isSystemAdmin ? 'All Branches' : 'Current Store'}</option>
-                {shops.map(shop => (
-                  <option key={shop.id} value={shop.id}>{shop.name}</option>
-                ))}
-              </select>
-            </div>
+            <select 
+              value={selectedShopId}
+              onChange={(e) => {
+                setSelectedShopId(e.target.value);
+                localStorage.setItem('selectedShopId', e.target.value);
+              }}
+              className="input-premium"
+              style={{ width: '220px', fontWeight: 800, color: 'var(--primary)' }}
+            >
+              <option value="">{isSystemAdmin ? 'All Branches' : 'Current Store'}</option>
+              {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
+            </select>
           )}
-          
           <div style={{ background: '#fff', padding: '12px 24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', gap: '12px', height: '50px' }}>
             <div className="pulse-dot"></div>
-            <span style={{ fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em', color: 'var(--text-main)' }}>SYSTEM ONLINE</span>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>LIVE FEED</span>
           </div>
         </div>
       </div>
 
       <div className="stats-grid">
         <StatCard 
-          title="Total Revenue" 
-          value={formatCurrency(stats.totalSales)} 
+          title="Today's Revenue" 
+          values={(stats.summary || []).map((s: any) => ({ 
+            amount: formatCurrency(s.todayRevenue, s.currency), 
+            isMain: s.currency === 'LAK' 
+          }))} 
           icon={<TrendingUp size={24} />} 
-          trend={12.5} 
           color="#10b981" 
-          label="GROSS SETTLEMENT (30D)"
+          label="REAL-TIME SETTLEMENT"
         />
         <StatCard 
-          title="Orders Trace" 
-          value={stats.ordersCount} 
+          title="Today's Orders" 
+          values={(stats.summary || []).reduce((sum: number, s: any) => sum + s.todayOrders, 0)} 
           icon={<ShoppingBag size={24} />} 
-          trend={8.2} 
           color="#3b82f6" 
-          label="LIFETIME TRANSACTIONS"
+          label="COMPLETED TRANSACTIONS"
         />
         <StatCard 
-          title="Active Inventory" 
-          value={stats.productsCount} 
+          title="Gross Volume" 
+          values={(stats.summary || []).map((s: any) => ({ 
+            amount: formatCurrency(s.totalRevenue, s.currency), 
+            isMain: s.currency === 'LAK' 
+          }))} 
           icon={<Package size={24} />} 
-          color="#f59e0b" 
-          label="SKUs IN CORE CATALOG"
+          color="#3b82f6" 
+          label="GROSS MERCHANDISE VALUE"
         />
         <StatCard 
-          title="Sync Latency" 
-          value={stats.pendingOrders} 
-          icon={<Users size={24} />} 
+          title="Total Expenses" 
+          values={formatCurrency(totalExpense)} 
+          icon={<CreditCard size={24} />} 
           color="#ef4444" 
-          label="PENDING CLOUD BACKUP"
+          label="OPERATIONAL OVERHEADS"
+        />
+        <StatCard 
+          title="Net Profit (LAK Est.)" 
+          values={formatCurrency(netProfit)} 
+          icon={<Target size={24} />} 
+          color={netProfit >= 0 ? "#10b981" : "#ef4444"}
+          label="ADJUSTED NET EARNINGS"
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px', marginTop: '40px' }}>
-        <div className="table-container" style={{ border: 'none', boxShadow: 'var(--shadow-premium)' }}>
-          <div style={{ padding: '28px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
-            <div>
-              <h3 style={{ fontWeight: 900, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>Audit Trail</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>LATEST OPERATIONAL LOGS</p>
-            </div>
-            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.85rem', background: '#fff', color: 'var(--text-main)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-sm)' }}>
-              VIEW ALL LOGS
-            </button>
+      {/* Main Revenue Chart */}
+      <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', marginTop: '40px', boxShadow: 'var(--shadow-premium)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Revenue Velocity ({activeCurrency})</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>CASHFLOW TRENDS FOR {activeCurrency} OVER THE LAST 30 DAYS</p>
           </div>
-          {loading ? (
-            <div style={{ padding: '80px', textAlign: 'center' }}>
-              <div className="spinner" style={{ margin: '0 auto' }}></div>
-            </div>
-          ) : (
-            <table style={{ border: 'none' }}>
-              <thead>
-                <tr>
-                  <th style={{ paddingLeft: '32px' }}>Tracing ID</th>
-                  <th>Execution Delay</th>
-                  <th>Valuation</th>
-                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>Process State</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="directory-row">
-                    <td style={{ paddingLeft: '32px' }}>
-                      <div style={{ background: 'var(--bg-main)', padding: '6px 12px', borderRadius: '8px', display: 'inline-block', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.05em', border: '1px solid var(--border-strong)', fontSize: '0.85rem' }}>
-                        #{order.order_no || order.id.substring(0, 8).toUpperCase()}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.9rem' }}>{new Date(order.date).toLocaleDateString('en-GB')}</span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>{new Date(order.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(order.total)}</td>
-                    <td style={{ textAlign: 'right', paddingRight: '32px' }}>
-                      <span className={`badge ${
-                        order.status === 'Completed' ? 'badge-success' : 
-                        order.status === 'Pending' ? 'badge-warning' : 'badge-danger'
-                      }`}>
-                        {order.status.toUpperCase()}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {['LAK', 'THB', 'USD'].map(curr => (
+              <button 
+                key={curr}
+                onClick={() => setActiveCurrency(curr)}
+                style={{ 
+                  padding: '8px 16px', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem',
+                  border: '1px solid var(--border)', cursor: 'pointer',
+                  background: activeCurrency === curr ? 'var(--primary)' : '#fff',
+                  color: activeCurrency === curr ? '#fff' : 'var(--text-muted)',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {curr}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div style={{ width: '100%', height: '350px' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={stats.salesOverTime?.filter((d: any) => d.currency === activeCurrency)}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis 
+                dataKey="day" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }}
+                tickFormatter={(val) => new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+              />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }}
+                tickFormatter={(val) => (val / 1000) + 'k'}
+              />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 800 }}
+                formatter={(val: any) => [formatCurrency(Number(val) || 0), 'Revenue']}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={4} fillOpacity={1} fill="url(#colorRevenue)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px', marginTop: '40px' }}>
+        {/* Category Distribution */}
+        <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Database size={20} color="var(--primary)" />
+            Inventory by Category
+          </h3>
+          <div style={{ width: '100%', height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats.categoryDistribution}
+                  cx="50%" cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="count"
+                  nameKey="name"
+                >
+                  {stats.categoryDistribution?.map((_: any, index: number) => (
+                    <Cell key={`cell-cat-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36}/>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          <div className="card-premium" style={{ padding: '32px' }}>
-            <h3 style={{ marginBottom: '24px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '-0.02em' }}>Quick Actions</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button className="btn-action" onClick={() => window.location.href='/products/add'}>
-                <Plus size={18} />
-                <span>Publish New Product</span>
-              </button>
-              <button className="btn-action" onClick={() => window.location.href='/stock'}>
-                <Package size={18} />
-                <span>Audit Inventory</span>
-              </button>
-              <button className="btn-action">
-                <TrendingUp size={18} />
-                <span>Download Report</span>
-              </button>
-            </div>
+        {/* Supplier Distribution */}
+        <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Shield size={20} color="var(--primary)" />
+            Supplier Distribution
+          </h3>
+          <div style={{ width: '100%', height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.supplierDistribution}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fontSize: 10, fontWeight: 700 }}
+                />
+                <YAxis hide />
+                <Tooltip cursor={{fill: '#f8fafc'}} />
+                <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          
-          <div style={{ 
-            padding: '36px', borderRadius: '32px', 
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', 
-            color: '#fff', position: 'relative', overflow: 'hidden',
-            boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.5)',
-            border: '1px solid rgba(255,255,255,0.05)'
-          }}>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ background: 'rgba(255,255,255,0.1)', padding: '14px', borderRadius: '18px', display: 'inline-flex', marginBottom: '24px', backdropFilter: 'blur(10px)' }}>
-                <Shield size={26} color="#10b981" />
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px', marginTop: '40px' }}>
+        {/* Settlement Mix */}
+        <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <CreditCard size={20} color="var(--primary)" />
+            Settlement Mix
+          </h3>
+          <div style={{ width: '100%', height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats.paymentDistribution}
+                  cx="50%" cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  nameKey="paymentMethod"
+                >
+                  {stats.paymentDistribution?.map((_: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36}/>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Top Products */}
+        <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Package size={20} color="var(--primary)" />
+            Top Velocity Products
+          </h3>
+          <div style={{ width: '100%', height: '280px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.topProducts} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis type="number" hide />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  width={120}
+                  tick={{ fontSize: 11, fontWeight: 800, fill: '#334155' }}
+                />
+                <Tooltip cursor={{fill: '#f8fafc'}} />
+                <Bar dataKey="quantity" fill="var(--primary)" radius={[0, 8, 8, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="table-container" style={{ marginTop: '40px', border: 'none', boxShadow: 'var(--shadow-premium)' }}>
+        <div style={{ padding: '28px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
+          <div>
+            <h3 style={{ fontWeight: 900, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>Live Transaction Trace</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>REAL-TIME FEED FROM CONNECTED TERMINALS</p>
+          </div>
+        </div>
+        <table style={{ border: 'none' }}>
+          <thead>
+            <tr>
+              <th style={{ paddingLeft: '32px' }}>Trace ID</th>
+              <th>Execution Time</th>
+              <th>Valuation</th>
+              <th style={{ textAlign: 'right', paddingRight: '32px' }}>Process State</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentOrders.map((order) => (
+              <tr key={order.id} className="directory-row">
+                <td style={{ paddingLeft: '32px' }}>
+                  <div style={{ background: 'var(--bg-main)', padding: '6px 12px', borderRadius: '8px', display: 'inline-block', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.05em', border: '1px solid var(--border-strong)', fontSize: '0.85rem' }}>
+                    #{order.order_no || order.id.substring(0, 8).toUpperCase()}
+                  </div>
+                </td>
+                <td>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.9rem' }}>{new Date(order.date).toLocaleDateString('en-GB')}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>{new Date(order.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </td>
+                <td style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.05rem' }}>{formatCurrency(order.total)}</td>
+                <td style={{ textAlign: 'right', paddingRight: '32px' }}>
+                  <span className={`badge ${
+                    order.status === 'Completed' ? 'badge-success' : 
+                    order.status === 'Pending' ? 'badge-warning' : 'badge-danger'
+                  }`}>
+                    {order.status.toUpperCase()}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ marginTop: '40px' }}>
+        {/* Low Stock Alert */}
+        <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <AlertCircle size={20} color="#ef4444" />
+              Inventory Velocity Alerts
+            </h3>
+            <span style={{ background: '#fee2e2', color: '#ef4444', padding: '6px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>CRITICAL REPLENISHMENT</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {lowStockProducts.slice(0, 8).map((product: any) => (
+              <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#f8fafc', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                   <div style={{ width: '40px', height: '40px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Package size={20} color="#ef4444" />
+                  </div>
+                  <div>
+                    <p style={{ fontWeight: 800, fontSize: '0.95rem' }}>{product.name}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>STOCK: {product.stock} {product.unit}</p>
+                  </div>
+                </div>
               </div>
-              <h4 style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.01em' }}>Security Vault</h4>
-              <p style={{ fontSize: '0.95rem', opacity: 0.6, marginTop: '12px', lineHeight: 1.7, fontWeight: 500 }}>
-                High-level synchronization enabled. {stats.pendingOrders} local operations are awaiting cloud validation.
-              </p>
-              <button className="btn-primary" style={{ 
-                marginTop: '32px', width: '100%', padding: '18px', borderRadius: '18px', 
-                border: 'none', background: 'var(--primary)', color: '#fff', fontWeight: 900,
-                cursor: 'pointer', transition: 'var(--transition)', letterSpacing: '0.02em',
-                boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
-              }}>
-                TRIGGER CLOUD SYNC
-              </button>
-            </div>
-            <div style={{ position: 'absolute', bottom: '-40px', right: '-40px', opacity: 0.03 }}>
-              <Database size={240} />
-            </div>
+            ))}
           </div>
         </div>
       </div>
       
       <style>{`
-        .btn-action {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          width: 100%;
-          padding: 18px 24px;
-          border-radius: 18px;
-          border: 1px solid var(--border);
-          background: #f8fafc;
-          color: var(--text-main);
-          font-weight: 800;
-          cursor: pointer;
-          transition: var(--transition);
-          text-align: left;
-          font-size: 0.95rem;
-        }
-        .btn-action:hover {
-          background: #fff;
-          border-color: var(--primary);
-          color: var(--primary);
-          transform: translateX(6px);
-          box-shadow: var(--shadow-md);
-        }
         .pulse-dot {
           width: 12px; height: 12px; border-radius: 50%; background: #10b981;
           box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
@@ -331,12 +508,9 @@ const Dashboard = () => {
         }
         .directory-row td { transition: var(--transition); }
         .directory-row:hover td { background: #fcfdfe; }
-        .spinner { width: 44px; height: 44px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
 };
-
 
 export default Dashboard;
