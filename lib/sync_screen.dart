@@ -64,7 +64,6 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       // 1.5 Sync Categories
-      final shopId = prefs.getString('shop_id') ?? '';
       final categoryUrl = Uri.parse('${ApiConfig.categoriesUrl}?shopId=$shopId');
       final categoryRes = await http.get(
         categoryUrl,
@@ -243,6 +242,7 @@ class _SyncScreenState extends State<SyncScreen> {
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('user_token') ?? '';
+      final shopId = prefs.getString('shop_id') ?? '';
 
       final unsynced = await DatabaseHelper().getUnsyncedOrders();
       if (unsynced.isNotEmpty) {
@@ -295,7 +295,6 @@ class _SyncScreenState extends State<SyncScreen> {
         _progress = 0.85;
       });
 
-      final shopId = prefs.getString('shop_id') ?? '';
       final rateUrl = Uri.parse('${ApiConfig.ratesUrl}?shopId=$shopId');
       final rateRes = await http.get(
         rateUrl,
