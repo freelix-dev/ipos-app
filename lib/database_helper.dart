@@ -20,7 +20,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'ipos_database.db');
     return await openDatabase(
       path,
-      version: 11,
+      version: 13,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -78,6 +78,26 @@ class DatabaseHelper {
         await db.execute('ALTER TABLE orders ADD COLUMN userName TEXT');
       } catch (_) {}
     }
+    if (oldVersion < 12) {
+      try {
+        await db.execute('ALTER TABLE products ADD COLUMN min_stock_level INTEGER DEFAULT 5');
+      } catch (_) {}
+    }
+    if (oldVersion < 13) {
+      try {
+        await db.execute('ALTER TABLE products ADD COLUMN category_id TEXT');
+        await db.execute('ALTER TABLE products ADD COLUMN category_name TEXT');
+        await db.execute('ALTER TABLE products ADD COLUMN supplier_id TEXT');
+        
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS categories(
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            shop_id TEXT
+          )
+        ''');
+      } catch (_) {}
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -88,7 +108,19 @@ class DatabaseHelper {
         imagePath TEXT,
         price REAL,
         stock INTEGER,
-        unit TEXT
+        unit TEXT,
+        min_stock_level INTEGER DEFAULT 5,
+        category_id TEXT,
+        category_name TEXT,
+        supplier_id TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS categories(
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        shop_id TEXT
       )
     ''');
 
@@ -135,6 +167,22 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getProducts() async {
     final db = await database;
     return await db.query('products');
+  }
+
+  // Category Operations
+  Future<void> insertCategories(List<Map<String, dynamic>> categories) async {
+    final db = await database;
+    Batch batch = db.batch();
+    batch.delete('categories');
+    for (var cat in categories) {
+      batch.insert('categories', cat);
+    }
+    await batch.commit();
+  }
+
+  Future<List<Map<String, dynamic>>> getCategories() async {
+    final db = await database;
+    return await db.query('categories');
   }
 
   // Order Operations
@@ -225,13 +273,17 @@ class DatabaseHelper {
   }
 
   // Currency Operations
-  Future<void> updateExchangeRates(Map<String, dynamic> rates) async {
+  Future<void> updateExchangeRates(Map<String, dynamic> data) async {
     final db = await database;
     Batch batch = db.batch();
+    
+    // Support both { 'LAK': 1.0, 'THB': 750 } and { 'rates': { 'LAK': 1.0, ... } }
+    Map<String, dynamic> rates = data.containsKey('rates') ? data['rates'] : data;
+
     for (var entry in rates.entries) {
       batch.insert(
         'exchange_rates', 
-        {'currency': entry.key, 'rate': entry.value},
+        {'currency': entry.key.toUpperCase(), 'rate': (entry.value as num).toDouble()},
         conflictAlgorithm: ConflictAlgorithm.replace
       );
     }

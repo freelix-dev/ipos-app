@@ -279,7 +279,18 @@ const SaleReports = () => {
             )}
           </div>
 
-
+          <button
+            onClick={() => setShowRemit(true)}
+            className="btn-primary"
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '8px', height: '50px', 
+              whiteSpace: 'nowrap', background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+            }}
+          >
+            <FileText size={18} />
+            <span>Remittance Slip</span>
+          </button>
 
           <button
             className="btn-primary"
@@ -544,8 +555,8 @@ const SaleReports = () => {
 
       {/* Remit Modal */}
       {showRemit && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', width: '600px', maxWidth: '95vw', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.3)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: '#fff', borderRadius: '20px', width: '600px', maxWidth: '95vw', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
             {/* Modal Header */}
             <div style={{ padding: '24px 28px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>

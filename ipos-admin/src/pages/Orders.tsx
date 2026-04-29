@@ -4,11 +4,18 @@ import {
   Filter, 
   Download, 
   Eye, 
-  MoreHorizontal,
+  XCircle,
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   ChevronFirst,
-  ChevronLast
+  ChevronLast,
+  ShoppingCart,
+  Clock,
+  User,
+  Hash,
+  MoreHorizontal,
+  TrendingUp
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -25,6 +32,13 @@ const Orders = () => {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Void & View States
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showVoidModal, setShowVoidModal] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
+  const [isVoiding, setIsVoiding] = useState(false);
 
   const userJson = localStorage.getItem('user');
   const currentUser = userJson ? JSON.parse(userJson) : null;
@@ -58,8 +72,36 @@ const Orders = () => {
     }
   };
 
+  const handleVoid = async () => {
+    if (!selectedOrder || !voidReason.trim()) return;
+    try {
+      setIsVoiding(true);
+      await api.voidOrder(selectedOrder.id, voidReason);
+      setShowVoidModal(false);
+      setVoidReason('');
+      setSelectedOrder(null);
+      loadOrders();
+      alert('Order voided and stock restored successfully.');
+    } catch (error: any) {
+      alert(error.message || 'Failed to void order');
+    } finally {
+      setIsVoiding(false);
+    }
+  };
+
   const formatCurrency = (amount: number, currency: string = 'LAK') => {
     return new Intl.NumberFormat('lo-LA', { style: 'currency', currency }).format(amount);
+  };
+
+  const safeParseItems = (itemsJson: any) => {
+    if (!itemsJson) return [];
+    if (typeof itemsJson !== 'string') return itemsJson; // Already an object/array
+    try {
+      return JSON.parse(itemsJson);
+    } catch (e) {
+      console.error('Failed to parse itemsJson:', e);
+      return [];
+    }
   };
 
   const filteredOrders = orders.filter(o => {
@@ -77,12 +119,26 @@ const Orders = () => {
     return matchesFilter && matchesSearch && matchesDate;
   });
 
-  // Pagination Logic
   const totalItems = filteredOrders.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentOrders = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Quick Stats Calculations
+  const completedOrders = filteredOrders.filter(o => o.status === 'Completed');
+  const cancelledOrders = filteredOrders.filter(o => o.status === 'Cancelled');
+  
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const avgOrderValue = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
+  const voidRate = filteredOrders.length > 0 ? (cancelledOrders.length / filteredOrders.length) * 100 : 0;
+  
+  const stats = [
+    { label: 'Total Revenue', value: formatCurrency(totalRevenue), icon: <TrendingUp size={24} />, color: '#10b981', bg: '#10b98115' },
+    { label: 'Order Volume', value: filteredOrders.length.toString(), icon: <ShoppingCart size={24} />, color: '#3b82f6', bg: '#3b82f615' },
+    { label: 'Avg. Basket', value: formatCurrency(avgOrderValue), icon: <Hash size={24} />, color: '#6366f1', bg: '#6366f115' },
+    { label: 'Void Rate', value: `${voidRate.toFixed(1)}%`, icon: <XCircle size={24} />, color: '#ef4444', bg: '#ef444415' },
+  ];
 
   return (
     <div className="animate-slide-up">
@@ -94,9 +150,33 @@ const Orders = () => {
         <div style={{ display: 'flex', gap: '16px' }}>
           <button className="btn-primary" style={{ background: '#fff', color: 'var(--text-main)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Download size={20} />
-            <span>Generate CSV</span>
+            <span>Export Analytics</span>
           </button>
         </div>
+      </div>
+
+      {/* Quick Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+        {stats.map((stat, i) => (
+          <div key={i} style={{ 
+            background: '#fff', padding: '24px', borderRadius: '24px', 
+            boxShadow: 'var(--shadow-premium)', border: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: '20px',
+            transition: 'transform 0.3s ease'
+          }} className="stat-card-hover">
+            <div style={{ 
+              width: '56px', height: '56px', borderRadius: '18px', 
+              background: stat.bg, color: stat.color, 
+              display: 'flex', alignItems: 'center', justifyContent: 'center' 
+            }}>
+              {stat.icon}
+            </div>
+            <div>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>{stat.label}</p>
+              <p style={{ color: 'var(--text-main)', fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{stat.value}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="table-container" style={{ border: 'none', boxShadow: 'var(--shadow-premium)', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
@@ -301,15 +381,37 @@ const Orders = () => {
                     </td>
                     <td style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>{formatCurrency(order.total, order.currency)}</td>
                     <td>
-                      <span className={`badge ${order.status === 'Completed' ? 'badge-success' : order.status === 'Pending' ? 'badge-warning' : 'badge-danger'}`}>
+                      <span className={`badge ${order.status === 'Completed' ? 'badge-success' : order.status === 'Pending' ? 'badge-warning' : order.status === 'Voided' ? 'badge-danger' : 'badge-danger'}`} style={{
+                        background: order.status === 'Voided' ? '#fee2e2' : undefined,
+                        color: order.status === 'Voided' ? '#ef4444' : undefined,
+                        border: order.status === 'Voided' ? '1px solid #fecaca' : undefined
+                      }}>
                         {order.status.toUpperCase()}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: '32px' }}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                        <button className="row-action-btn" style={{ padding: '10px', borderRadius: '12px', border: '1px solid var(--border-strong)', background: '#fff', color: 'var(--text-main)', cursor: 'pointer', transition: 'var(--transition)' }}>
+                        <button 
+                          onClick={() => { 
+                            console.log('Viewing order:', order);
+                            setSelectedOrder(order); 
+                            setShowViewModal(true); 
+                          }}
+                          className="row-action-btn" 
+                          style={{ padding: '10px', borderRadius: '12px', border: '1px solid var(--border-strong)', background: '#fff', color: 'var(--text-main)', cursor: 'pointer', transition: 'var(--transition)' }}
+                        >
                           <Eye size={18} />
                         </button>
+                        {order.status !== 'Voided' && order.status !== 'Cancelled' && (
+                          <button 
+                            onClick={() => { setSelectedOrder(order); setShowVoidModal(true); }}
+                            className="row-action-btn" 
+                            style={{ padding: '10px', borderRadius: '12px', border: '1px solid #fee2e2', background: '#fff', color: '#ef4444', cursor: 'pointer', transition: 'var(--transition)' }}
+                            title="Void Order"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                        )}
                         <button className="row-action-btn" style={{ padding: '10px', borderRadius: '12px', border: '1px solid var(--border-strong)', background: '#fff', color: 'var(--text-main)', cursor: 'pointer', transition: 'var(--transition)' }}>
                           <MoreHorizontal size={18} />
                         </button>
@@ -426,6 +528,7 @@ const Orders = () => {
       <style>{`
         .directory-row td { transition: var(--transition); }
         .directory-row:hover td { background: #fcfdfe; }
+        .stat-card-hover:hover { transform: translateY(-5px); }
         .row-action-btn:hover { border-color: var(--primary) !important; color: var(--primary) !important; transform: scale(1.1); }
         .spinner { width: 44px; height: 44px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -438,6 +541,125 @@ const Orders = () => {
         .pagination-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
         .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
       `}</style>
+
+      {/* View Order Modal */}
+      {showViewModal && selectedOrder && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: '#fff', width: '90%', maxWidth: '600px', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
+            <div style={{ padding: '32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>Order Particulars</h2>
+                <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 800 }}>INV#{selectedOrder.id.substring(0, 12).toUpperCase()}</span>
+              </div>
+              <button onClick={() => setShowViewModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px', opacity: 0.5 }}>✕</button>
+            </div>
+            <div style={{ padding: '32px', maxHeight: '60vh', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '20px' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Operator Identity</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <User size={14} color="var(--primary)" />
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{selectedOrder.user_name || 'System Auto'}</span>
+                  </div>
+                </div>
+                <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '20px' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Timestamp</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Clock size={14} color="var(--primary)" />
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{new Date(selectedOrder.date).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '32px' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <ShoppingCart size={18} color="var(--primary)" />
+                  Inventory Items
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {safeParseItems(selectedOrder.itemsJson).map((item: any, i: number) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: '14px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{item.name || 'Unknown Item'}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>{formatCurrency(item.price || 0, selectedOrder.currency)} × {item.quantity || 0}</span>
+                      </div>
+                      <span style={{ fontWeight: 900, color: 'var(--primary)' }}>{formatCurrency((item.price || 0) * (item.quantity || 0), selectedOrder.currency)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ padding: '24px', background: 'var(--bg-main)', borderRadius: '24px', border: '1px solid var(--border-strong)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Sub-Total</span>
+                  <span style={{ fontWeight: 800 }}>{formatCurrency(selectedOrder.total, selectedOrder.currency)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px dashed var(--border-strong)' }}>
+                  <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.1rem' }}>GRAND TOTAL</span>
+                  <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }}>{formatCurrency(selectedOrder.total, selectedOrder.currency)}</span>
+                </div>
+              </div>
+
+              {selectedOrder.status === 'Voided' && (
+                <div style={{ marginTop: '24px', padding: '16px', background: '#fff1f2', borderRadius: '16px', border: '1px solid #fecaca' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#be123c', marginBottom: '4px' }}>
+                    <AlertTriangle size={16} />
+                    <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>VOID INFORMATION</span>
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 600 }}>{selectedOrder.void_reason || 'No reason provided'}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Void Confirmation Modal */}
+      {showVoidModal && selectedOrder && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: '#fff', width: '90%', maxWidth: '450px', borderRadius: '32px', padding: '32px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <XCircle size={32} />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Authorize Transaction Void</h2>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '8px' }}>This action will reverse inventory stock and mark this order as invalid. This cannot be undone.</p>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sidebar)', marginBottom: '8px', opacity: 0.6, letterSpacing: '0.05em' }}>MANDATORY VOID JUSTIFICATION</label>
+              <textarea 
+                value={voidReason}
+                onChange={(e) => setVoidReason(e.target.value)}
+                placeholder="Specify the reason for cancellation (e.g., Wrong items, Payment failure, Customer request)..."
+                style={{ 
+                  width: '100%', height: '100px', padding: '16px', borderRadius: '16px', 
+                  border: '1px solid var(--border-strong)', background: '#f8fafc', 
+                  fontSize: '0.9rem', fontWeight: 600, resize: 'none', outline: 'none'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowVoidModal(false)}
+                className="btn-secondary" 
+                style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleVoid}
+                disabled={isVoiding || !voidReason.trim()}
+                className="btn-primary" 
+                style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800, background: '#ef4444' }}
+              >
+                {isVoiding ? 'Voiding...' : 'Confirm Void'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -25,7 +25,10 @@ const Shops = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingShop, setEditingShop] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: '', address: '', phone: '', logoPath: '' });
+  const [formData, setFormData] = useState({ 
+    name: '', address: '', phone: '', logoPath: '',
+    status: 'Active', license_expiry: '', plan_type: 'Premium'
+  });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +71,14 @@ const Shops = () => {
       let savedShopId = editingShop?.id;
       if (editingShop) {
         await api.updateShop(editingShop.id, { name: formData.name, address: formData.address, phone: formData.phone });
+        if (isSystemAdmin) {
+          await api.updateShopLicense({ 
+            shop_id: editingShop.id, 
+            status: formData.status, 
+            license_expiry: formData.license_expiry, 
+            plan_type: formData.plan_type 
+          });
+        }
       } else {
         const result = await api.addShop({ 
           name: formData.name, 
@@ -83,7 +94,7 @@ const Shops = () => {
       }
       setIsModalOpen(false);
       setEditingShop(null);
-      setFormData({ name: '', address: '', phone: '', logoPath: '' });
+      setFormData({ name: '', address: '', phone: '', logoPath: '', status: 'Active', license_expiry: '', plan_type: 'Premium' });
       setLogoFile(null);
       setLogoPreview('');
       loadShops();
@@ -94,7 +105,15 @@ const Shops = () => {
 
   const handleEdit = (shop: any) => {
     setEditingShop(shop);
-    setFormData({ name: shop.name, address: shop.address || '', phone: shop.phone || '', logoPath: shop.logoPath || '' });
+    setFormData({ 
+      name: shop.name, 
+      address: shop.address || '', 
+      phone: shop.phone || '', 
+      logoPath: shop.logoPath || '',
+      status: shop.status || 'Active',
+      license_expiry: shop.license_expiry ? new Date(shop.license_expiry).toISOString().split('T')[0] : '',
+      plan_type: shop.plan_type || 'Premium'
+    });
     setLogoFile(null);
     setLogoPreview(shop.logoPath ? `${API_BASE}${shop.logoPath}` : '');
     setIsModalOpen(true);
@@ -129,7 +148,7 @@ const Shops = () => {
           </div>
           {currentUser?.role === 'admin' && (
             <button 
-              onClick={() => { setEditingShop(null); setFormData({ name: '', address: '', phone: '', logoPath: '' }); setLogoFile(null); setLogoPreview(''); setIsModalOpen(true); }}
+              onClick={() => { setEditingShop(null); setFormData({ name: '', address: '', phone: '', logoPath: '', status: 'Active', license_expiry: '', plan_type: 'Premium' }); setLogoFile(null); setLogoPreview(''); setIsModalOpen(true); }}
               className="btn-primary"
               style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
             >
@@ -185,7 +204,16 @@ const Shops = () => {
                         )}
                         <div>
                           <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>{shop.name}</p>
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {shop.id.slice(0, 8)}</p>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                             <span style={{ 
+                               fontSize: '0.65rem', fontWeight: 900, padding: '2px 8px', borderRadius: '6px',
+                               background: shop.status === 'Active' ? '#dcfce7' : shop.status === 'Expired' ? '#fee2e2' : '#f1f5f9',
+                               color: shop.status === 'Active' ? '#166534' : shop.status === 'Expired' ? '#991b1b' : '#475569'
+                             }}>
+                               {shop.status?.toUpperCase()}
+                             </span>
+                             <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>{shop.plan_type}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -225,8 +253,8 @@ const Shops = () => {
         </div>
 
         {isModalOpen && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px', overflow: 'hidden' }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
               <div style={{ padding: '32px', background: 'var(--bg-sidebar)', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingShop ? 'Edit Shop' : 'Onboard New Shop'}</h2>
                 <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
@@ -245,6 +273,35 @@ const Shops = () => {
                     <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>CONTACT PHONE</label>
                     <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="input-premium" />
                   </div>
+                  
+                  {isSystemAdmin && editingShop && (
+                    <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <p style={{ fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>LICENSE & PLAN</p>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>STATUS</label>
+                          <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }}>
+                            <option value="Active">Active</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Expired">Expired</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>PLAN</label>
+                          <select value={formData.plan_type} onChange={e => setFormData({...formData, plan_type: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }}>
+                            <option value="Basic">Basic</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Enterprise">Enterprise</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>EXPIRY DATE</label>
+                        <input type="date" value={formData.license_expiry} onChange={e => setFormData({...formData, license_expiry: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }} />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Shop Logo Upload */}
                   <div>
                     <label style={{ display: 'block', fontWeight: 800, marginBottom: '10px', fontSize: '0.85rem' }}>SHOP LOGO</label>

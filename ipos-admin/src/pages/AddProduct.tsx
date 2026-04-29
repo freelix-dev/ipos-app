@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Package, Upload, ChevronLeft, Save, X, Store, DollarSign, Box } from 'lucide-react';
+import { Package, Upload, ChevronLeft, Save, X, Store, DollarSign, Box, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
@@ -11,13 +11,18 @@ const AddProduct = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [shops, setShops] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock: '',
     unit: '',
-    shop_id: ''
+    shop_id: '',
+    category_id: '',
+    supplier_id: '',
+    min_stock_level: '5'
   });
 
   const userJson = localStorage.getItem('user');
@@ -25,19 +30,45 @@ const AddProduct = () => {
   const isSystemAdmin = currentUser && !currentUser.shop_id && !currentUser.owner_id;
 
   React.useEffect(() => {
-    const loadShops = async () => {
+    const loadInitialData = async () => {
       try {
-        const data = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
-        setShops(data);
-        if (data.length > 0) {
-          setFormData(prev => ({ ...prev, shop_id: data[0].id }));
+        const shopsData = await api.getShops(isSystemAdmin ? undefined : (currentUser?.owner_id || currentUser?.id));
+        setShops(shopsData);
+        
+        if (shopsData.length > 0) {
+          const firstShopId = shopsData[0].id;
+          setFormData(prev => ({ ...prev, shop_id: firstShopId }));
+          
+          // Load categories and suppliers for the first shop
+          const [cats, sups] = await Promise.all([
+            api.getCategories(firstShopId),
+            api.getSuppliers(firstShopId)
+          ]);
+          setCategories(cats);
+          setSuppliers(sups);
         }
       } catch (error) {
-        console.error('Failed to load shops:', error);
+        console.error('Failed to load initial data:', error);
       }
     };
-    loadShops();
+    loadInitialData();
   }, []);
+
+  // Re-load categories and suppliers when shop changes
+  const handleShopChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newShopId = e.target.value;
+    setFormData(prev => ({ ...prev, shop_id: newShopId }));
+    try {
+      const [cats, sups] = await Promise.all([
+        api.getCategories(newShopId),
+        api.getSuppliers(newShopId)
+      ]);
+      setCategories(cats);
+      setSuppliers(sups);
+    } catch (error) {
+      console.error('Failed to update categories/suppliers:', error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,7 +124,10 @@ const AddProduct = () => {
         stock: stockNum,
         unit: formData.unit,
         imagePath: imagePath,
-        shop_id: formData.shop_id
+        shop_id: formData.shop_id,
+        category_id: formData.category_id || null,
+        supplier_id: formData.supplier_id || null,
+        min_stock_level: parseInt(formData.min_stock_level)
       });
       
       console.log('Product added successfully:', response);
@@ -201,7 +235,7 @@ const AddProduct = () => {
                     name="shop_id"
                     required
                     value={formData.shop_id}
-                    onChange={handleChange}
+                    onChange={handleShopChange}
                     className="input-premium"
                     style={{ appearance: 'none', background: '#fff', paddingRight: '40px' }}
                   >
@@ -210,6 +244,37 @@ const AddProduct = () => {
                     ))}
                   </select>
                   <Store size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>CATEGORY</label>
+                  <select 
+                    name="category_id"
+                    value={formData.category_id}
+                    onChange={handleChange}
+                    className="input-premium"
+                  >
+                    <option value="">Uncategorized</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>SUPPLIER</label>
+                  <select 
+                    name="supplier_id"
+                    value={formData.supplier_id}
+                    onChange={handleChange}
+                    className="input-premium"
+                  >
+                    <option value="">None</option>
+                    {suppliers.map(sup => (
+                      <option key={sup.id} value={sup.id}>{sup.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -291,6 +356,23 @@ const AddProduct = () => {
                   <Box size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
                 </div>
               </div>
+            </div>
+
+            <div style={{ marginTop: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>ALERT THRESHOLD (LOW STOCK)</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="number" 
+                  name="min_stock_level" 
+                  required 
+                  value={formData.min_stock_level} 
+                  onChange={handleChange} 
+                  className="input-premium" 
+                  style={{ fontWeight: 700, border: '1px solid #fee2e2' }} 
+                />
+                <AlertTriangle size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#ef4444' }} />
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>Notify me on dashboard when stock drops below this value.</p>
             </div>
           </div>
         </div>

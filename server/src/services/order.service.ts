@@ -80,9 +80,17 @@ export const syncOrders = async (ordersToProcess: any[]) => {
             [status, remark || null, user_id, shop_id, syncedAt, id]
           );
           
-          if (status === 'Cancelled' && oldStatus !== 'Cancelled') {
+          if ((status === 'Cancelled' || status === 'Voided') && oldStatus !== 'Cancelled' && oldStatus !== 'Voided' && oldStatus === 'Completed') {
             for (const item of parsedItems) {
-              await connection.query('UPDATE products SET stock = stock + ? WHERE id = ? OR name = ?', [item.quantity, item.id, item.name]);
+              const productId = item.id || item.productId;
+              if (productId) {
+                await connection.query('UPDATE products SET stock = stock + ? WHERE id = ?', [item.quantity, productId]);
+                // Log stock history
+                await connection.query(
+                  'INSERT INTO stock_history (product_id, shop_id, change_amount, type, reason) VALUES (?, ?, ?, ?, ?)',
+                  [productId, shop_id, item.quantity, status === 'Voided' ? 'Void' : 'Adjustment', `Order ${status}: ${id}`]
+                );
+              }
             }
           }
         } else {
@@ -93,7 +101,15 @@ export const syncOrders = async (ordersToProcess: any[]) => {
           
           if (status === 'Completed') {
             for (const item of parsedItems) {
-              await connection.query('UPDATE products SET stock = stock - ? WHERE id = ? OR name = ?', [item.quantity, item.id, item.name]);
+              const productId = item.id || item.productId;
+              if (productId) {
+                await connection.query('UPDATE products SET stock = stock - ? WHERE id = ?', [item.quantity, productId]);
+                // Log stock history
+                await connection.query(
+                  'INSERT INTO stock_history (product_id, shop_id, change_amount, type, reason) VALUES (?, ?, ?, ?, ?)',
+                  [productId, shop_id, -item.quantity, 'Sale', `Sale Order: ${id}`]
+                );
+              }
             }
           }
         }
@@ -119,4 +135,45 @@ export const syncOrders = async (ordersToProcess: any[]) => {
   } finally {
     connection.release();
   }
-}
+};
+
+export const voidOrder = async (orderId: string, reason: string, voidedBy: string) => {
+  const connection = await writePool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Get order details
+    const [orders] = await connection.query<RowDataPacket[]>('SELECT * FROM orders WHERE id = ?', [orderId]);
+    if (orders.length === 0) throw new Error('Order not found');
+    const order = orders[0];
+
+    if (order.status === 'Voided') throw new Error('Order is already voided');
+
+    // 2. Update order status
+    await connection.query(
+      'UPDATE orders SET status = "Voided", void_reason = ?, voided_at = NOW(), voided_by = ? WHERE id = ?',
+      [reason, voidedBy, orderId]
+    );
+
+    // 3. Restore stock and log history
+    const items = typeof order.itemsJson === 'string' ? JSON.parse(order.itemsJson) : (order.itemsJson || []);
+    for (const item of items) {
+      const productId = item.id || item.productId;
+      if (productId) {
+        await connection.query('UPDATE products SET stock = stock + ? WHERE id = ?', [item.quantity, productId]);
+        await connection.query(
+          'INSERT INTO stock_history (product_id, shop_id, change_amount, type, reason, created_by) VALUES (?, ?, ?, ?, ?, ?)',
+          [productId, order.shop_id, item.quantity, 'Void', `Manual Void: ${orderId} - ${reason}`, voidedBy]
+        );
+      }
+    }
+
+    await connection.commit();
+    return { success: true };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};

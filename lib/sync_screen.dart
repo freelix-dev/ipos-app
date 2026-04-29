@@ -29,8 +29,9 @@ class _SyncScreenState extends State<SyncScreen> {
       // 1. Sync Products
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('user_token') ?? '';
+      final shopId = prefs.getString('shop_id') ?? '';
 
-      final productUrl = Uri.parse(ApiConfig.productsUrl);
+      final productUrl = Uri.parse('${ApiConfig.productsUrl}?shopId=$shopId');
       final productRes = await http.get(
         productUrl,
         headers: {'Authorization': 'Bearer $token'},
@@ -47,10 +48,39 @@ class _SyncScreenState extends State<SyncScreen> {
                 'price': double.tryParse(item['price'].toString()) ?? 0.0,
                 'stock': int.tryParse(item['stock'].toString()) ?? 0,
                 'unit': item['unit']?.toString() ?? '',
+                'min_stock_level': int.tryParse(item['min_stock_level']?.toString() ?? '5') ?? 5,
+                'category_id': item['category_id']?.toString() ?? '',
+                'category_name': item['category_name']?.toString() ?? '',
+                'supplier_id': item['supplier_id']?.toString() ?? '',
               },
             )
             .toList();
         await DatabaseHelper().insertProducts(productsArr);
+      }
+
+      setState(() {
+        _status = 'ຊິງໝວດหมู่ສິນຄ້າ...';
+        _progress = 0.3;
+      });
+
+      // 1.5 Sync Categories
+      final shopId = prefs.getString('shop_id') ?? '';
+      final categoryUrl = Uri.parse('${ApiConfig.categoriesUrl}?shopId=$shopId');
+      final categoryRes = await http.get(
+        categoryUrl,
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 30));
+
+      if (categoryRes.statusCode == 200) {
+        List<dynamic> categoryData = json.decode(categoryRes.body);
+        List<Map<String, dynamic>> categoriesArr = categoryData
+            .map((item) => {
+                  'id': item['id']?.toString() ?? '',
+                  'name': item['name']?.toString() ?? '',
+                  'shop_id': item['shop_id']?.toString() ?? '',
+                })
+            .toList();
+        await DatabaseHelper().insertCategories(categoriesArr);
       }
 
       setState(() {
@@ -59,7 +89,6 @@ class _SyncScreenState extends State<SyncScreen> {
       });
 
       // 2. Sync Exchange Rates
-      final shopId = prefs.getString('shop_id') ?? '';
       final rateUrl = Uri.parse('${ApiConfig.ratesUrl}?shopId=$shopId');
       final rateRes = await http.get(
         rateUrl,
@@ -90,6 +119,18 @@ class _SyncScreenState extends State<SyncScreen> {
           await prefs.setString('shop_address', shopData['address'] ?? '');
           await prefs.setString('shop_phone', shopData['phone'] ?? '');
           await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
+
+          // Download Receipt Settings
+          final receiptUrl = Uri.parse('${ApiConfig.receiptSettingsUrl}?shopId=$shopId');
+          final receiptRes = await http.get(
+            receiptUrl,
+            headers: {'Authorization': 'Bearer $token'},
+          ).timeout(const Duration(seconds: 15));
+          
+          if (receiptRes.statusCode == 200) {
+            final receiptData = json.decode(receiptRes.body);
+            await prefs.setString('receipt_settings', json.encode(receiptData));
+          }
         }
       }
 
@@ -225,11 +266,11 @@ class _SyncScreenState extends State<SyncScreen> {
 
       // 2. Download Products
       setState(() {
-        _status = '2/2 ດາວໂຫລດຂໍ້ມູນສິນຄ້າ...';
+        _status = '2/2 ດາວໂຫລດຂໍ້ມູນສินค้า...';
         _progress = 0.6;
       });
 
-      final productUrl = Uri.parse(ApiConfig.productsUrl);
+      final productUrl = Uri.parse('${ApiConfig.productsUrl}?shopId=$shopId');
       final productRes = await http.get(
         productUrl,
         headers: {'Authorization': 'Bearer $token'},
@@ -243,6 +284,7 @@ class _SyncScreenState extends State<SyncScreen> {
           'price': double.tryParse(item['price'].toString()) ?? 0.0,
           'stock': int.tryParse(item['stock'].toString()) ?? 0,
           'unit': item['unit']?.toString() ?? '',
+          'min_stock_level': int.tryParse(item['min_stock_level']?.toString() ?? '5') ?? 5,
         }).toList();
         await DatabaseHelper().insertProducts(productsArr);
       }
@@ -284,6 +326,18 @@ class _SyncScreenState extends State<SyncScreen> {
           await prefs.setString('shop_address', shopData['address'] ?? '');
           await prefs.setString('shop_phone', shopData['phone'] ?? '');
           await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
+
+          // 4.1 Download Receipt Settings
+          final receiptUrl = Uri.parse(ApiConfig.receiptSettingsUrl);
+          final receiptRes = await http.get(
+            receiptUrl,
+            headers: {'Authorization': 'Bearer $token'},
+          ).timeout(const Duration(seconds: 15));
+          
+          if (receiptRes.statusCode == 200) {
+            final receiptData = json.decode(receiptRes.body);
+            await prefs.setString('receipt_settings', json.encode(receiptData));
+          }
         }
       }
 

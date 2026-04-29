@@ -12,8 +12,12 @@ class Product {
   final String imagePath;
   final double price;
   final int stock;
+  final int min_stock_level;
   final String unit;
   final int initialQuantity;
+  final String categoryId;
+  final String categoryName;
+  final String supplierId;
 
   Product({
     required this.id,
@@ -22,8 +26,19 @@ class Product {
     required this.price,
     required this.stock,
     required this.unit,
+    this.min_stock_level = 5,
     this.initialQuantity = 1,
+    this.categoryId = '',
+    this.categoryName = '',
+    this.supplierId = '',
   });
+}
+
+class Category {
+  final String id;
+  final String name;
+
+  Category({required this.id, required this.name});
 }
 
 class CartItem {
@@ -43,8 +58,10 @@ class PosScreen extends StatefulWidget {
 class _PosScreenState extends State<PosScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Product> products = [];
+  List<Category> categories = [];
   List<CartItem> cartItems = [];
   String searchQuery = '';
+  String selectedCategoryId = 'all';
   String selectedCurrency = 'LAK';
   String shopName = 'Namkhong Beer';
   final TextEditingController _searchController = TextEditingController();
@@ -61,11 +78,15 @@ class _PosScreenState extends State<PosScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     final localProducts = await DatabaseHelper().getProducts();
+    final localCategories = await DatabaseHelper().getCategories();
     final localRates = await DatabaseHelper().getExchangeRates();
     final prefs = await SharedPreferences.getInstance();
     final savedShopName = prefs.getString('shop_name') ?? 'Namkhong Beer';
 
     setState(() {
+      categories = [Category(id: 'all', name: 'ທັງໝົດ')] + 
+          localCategories.map((c) => Category(id: c['id'], name: c['name'])).toList();
+
       products = localProducts
           .map(
             (p) => Product(
@@ -74,7 +95,11 @@ class _PosScreenState extends State<PosScreen> {
               imagePath: p['imagePath'],
               price: (p['price'] as num).toDouble(),
               stock: int.tryParse(p['stock'].toString()) ?? 0,
+              min_stock_level: int.tryParse(p['min_stock_level']?.toString() ?? '5') ?? 5,
               unit: p['unit'] ?? '',
+              categoryId: p['category_id']?.toString() ?? '',
+              categoryName: p['category_name']?.toString() ?? '',
+              supplierId: p['supplier_id']?.toString() ?? '',
             ),
           )
           .toList();
@@ -87,6 +112,18 @@ class _PosScreenState extends State<PosScreen> {
       shopName = savedShopName;
       _isLoading = false;
     });
+  }
+
+  List<Product> get filteredProducts {
+    return products.where((p) {
+      final matchesSearch = p.name.toLowerCase().contains(searchQuery.toLowerCase());
+      final matchesCategory = selectedCategoryId == 'all' || p.categoryId == selectedCategoryId;
+      return matchesSearch && matchesCategory;
+    }).toList();
+  }
+
+  List<Product> get lowStockProducts {
+    return products.where((p) => p.stock <= p.min_stock_level).toList();
   }
 
   double get cartTotal => cartItems.fold(
@@ -432,6 +469,55 @@ class _PosScreenState extends State<PosScreen> {
         actions: [
           Row(
             children: [
+              if (lowStockProducts.isNotEmpty)
+                IconButton(
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.notifications_active_outlined, color: Colors.white),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+                          child: Text(
+                            '${lowStockProducts.length}',
+                            style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('ສິນຄ້າໃກ້ໝົດສຕັອກ'),
+                        content: SizedBox(
+                          width: double.maxFinite,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: lowStockProducts.length,
+                            itemBuilder: (context, i) => ListTile(
+                              leading: const Icon(Icons.warning, color: Colors.orange),
+                              title: Text(lowStockProducts[i].name),
+                              trailing: Text('${lowStockProducts[i].stock} ${lowStockProducts[i].unit}', 
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('ປິດ'))
+                        ],
+                      ),
+                    );
+                  },
+                ),
               IconButton(
                 icon: const Icon(Icons.history, color: Colors.white),
                 onPressed: () {
@@ -446,6 +532,7 @@ class _PosScreenState extends State<PosScreen> {
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(value: 'LAK', child: Text('LAK (₭)')),
                   const PopupMenuItem<String>(value: 'THB', child: Text('THB (฿)')),
+                  const PopupMenuItem<String>(value: 'USD', child: Text('USD (\$)')),
                 ],
                 child: Row(
                   children: [
@@ -529,16 +616,55 @@ class _PosScreenState extends State<PosScreen> {
               ],
             ),
           ),
+          
+          // Exchange Rate & Sync Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: primaryGreen.withOpacity(0.05),
+              border: Border(
+                bottom: BorderSide(color: primaryGreen.withOpacity(0.1)),
+                top: BorderSide(color: primaryGreen.withOpacity(0.1)),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.sync_outlined, size: 14, color: Colors.blue),
+                const SizedBox(width: 4),
+                const Text(
+                  'SYNC: ONLINE',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.blue),
+                ),
+                const Spacer(),
+                if (exchangeRates.containsKey('THB')) ...[
+                  const Icon(Icons.currency_exchange, size: 14, color: Colors.orange),
+                  const SizedBox(width: 4),
+                  Text(
+                    '1 ฿ = ${exchangeRates['THB']?.toStringAsFixed(0)} ₭',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.orange),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (exchangeRates.containsKey('USD')) ...[
+                  const Icon(Icons.attach_money, size: 14, color: Colors.blueGrey),
+                  const SizedBox(width: 4),
+                  Text(
+                    '1 \$ = ${exchangeRates['USD']?.toStringAsFixed(0)} ₭',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.blueGrey),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              children: [
-                _buildCategoryChip('ທົ່ວໄປ', true),
-                _buildCategoryChip('Beverages', false),
-                _buildCategoryChip('Snacks', false),
-                _buildCategoryChip('Other', false),
-              ],
+              children: categories.map((cat) => 
+                _buildCategoryChip(cat.name, selectedCategoryId == cat.id, cat.id)
+              ).toList(),
             ),
           ),
           const SizedBox(height: 16),
@@ -683,30 +809,33 @@ class _PosScreenState extends State<PosScreen> {
     );
   }
 
-  Widget _buildCategoryChip(String label, bool isActive) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? darkSlate : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isActive ? darkSlate : Colors.grey.shade200),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: darkSlate.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [],
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.grey.shade600,
-          fontWeight: FontWeight.w800,
-          fontSize: 13,
+  Widget _buildCategoryChip(String label, bool isActive, String id) {
+    return GestureDetector(
+      onTap: () => setState(() => selectedCategoryId = id),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? darkSlate : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: isActive ? darkSlate : Colors.grey.shade200),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: darkSlate.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.grey.shade600,
+            fontWeight: FontWeight.w800,
+            fontSize: 13,
+          ),
         ),
       ),
     );
@@ -799,14 +928,36 @@ class _ProductCardState extends State<ProductCard> {
               color: Colors.grey.shade50,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
-            child: Image.network(
-              _getImageUrl(widget.product.imagePath),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => Image.network(
-                '${ApiConfig.baseUrl}/assets/images/default.png',
-                fit: BoxFit.contain,
-                errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
-              ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.network(
+                    _getImageUrl(widget.product.imagePath),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Image.network(
+                      '${ApiConfig.baseUrl}/assets/images/default.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+                    ),
+                  ),
+                ),
+                if (widget.product.stock <= widget.product.min_stock_level)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'LOW',
+                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -827,9 +978,9 @@ class _ProductCardState extends State<ProductCard> {
               const SizedBox(height: 4),
               Text(
                 'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFFF59E0B),
+                  color: widget.product.stock <= widget.product.min_stock_level ? Colors.red : const Color(0xFFF59E0B),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -892,14 +1043,36 @@ class _ProductCardState extends State<ProductCard> {
             color: Colors.grey.shade50,
             borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
           ),
-          child: Image.network(
-            _getImageUrl(widget.product.imagePath),
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Image.network(
-              '${ApiConfig.baseUrl}/assets/images/default.png',
-              fit: BoxFit.contain,
-              errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
-            ),
+          child: Stack(
+            children: [
+              Center(
+                child: Image.network(
+                  _getImageUrl(widget.product.imagePath),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Image.network(
+                    '${ApiConfig.baseUrl}/assets/images/default.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+                  ),
+                ),
+              ),
+              if (widget.product.stock <= widget.product.min_stock_level)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'LOW STOCK',
+                      style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
         Expanded(
