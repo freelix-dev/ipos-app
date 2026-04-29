@@ -68,6 +68,8 @@ class _PosScreenState extends State<PosScreen> {
   Map<String, double> exchangeRates = {'LAK': 1.0};
   bool _isLoading = true;
   bool isGridView = true;
+  bool _vatEnabled = false;
+  double _taxRate = 0;
 
   @override
   void initState() {
@@ -82,10 +84,18 @@ class _PosScreenState extends State<PosScreen> {
     final localRates = await DatabaseHelper().getExchangeRates();
     final prefs = await SharedPreferences.getInstance();
     final savedShopName = prefs.getString('shop_name') ?? 'Namkhong Beer';
+    final vatEnabled = prefs.getBool('vat_enabled') ?? false;
+    final taxRateStr = prefs.getString('system_tax_rate') ?? '0';
+    final taxRate = double.tryParse(taxRateStr) ?? 0;
 
     setState(() {
-      categories = [Category(id: 'all', name: 'ທັງໝົດ')] + 
-          localCategories.map((c) => Category(id: c['id'], name: c['name'])).toList();
+      _vatEnabled = vatEnabled;
+      _taxRate = taxRate;
+      categories =
+          [Category(id: 'all', name: 'ທັງໝົດ')] +
+          localCategories
+              .map((c) => Category(id: c['id'], name: c['name']))
+              .toList();
 
       products = localProducts
           .map(
@@ -95,7 +105,8 @@ class _PosScreenState extends State<PosScreen> {
               imagePath: p['imagePath'],
               price: (p['price'] as num).toDouble(),
               stock: int.tryParse(p['stock'].toString()) ?? 0,
-              min_stock_level: int.tryParse(p['min_stock_level']?.toString() ?? '5') ?? 5,
+              min_stock_level:
+                  int.tryParse(p['min_stock_level']?.toString() ?? '5') ?? 5,
               unit: p['unit'] ?? '',
               categoryId: p['category_id']?.toString() ?? '',
               categoryName: p['category_name']?.toString() ?? '',
@@ -116,8 +127,11 @@ class _PosScreenState extends State<PosScreen> {
 
   List<Product> get filteredProducts {
     return products.where((p) {
-      final matchesSearch = p.name.toLowerCase().contains(searchQuery.toLowerCase());
-      final matchesCategory = selectedCategoryId == 'all' || p.categoryId == selectedCategoryId;
+      final matchesSearch = p.name.toLowerCase().contains(
+        searchQuery.toLowerCase(),
+      );
+      final matchesCategory =
+          selectedCategoryId == 'all' || p.categoryId == selectedCategoryId;
       return matchesSearch && matchesCategory;
     }).toList();
   }
@@ -141,24 +155,24 @@ class _PosScreenState extends State<PosScreen> {
     if (path == null || path.trim().isEmpty) {
       return '${ApiConfig.baseUrl}/assets/images/default.png';
     }
-    
+
     if (path.startsWith('http')) return path;
-    
+
     String normalizedPath = path.trim();
     if (normalizedPath.startsWith('/')) {
       normalizedPath = normalizedPath.substring(1);
     }
-    
+
     // If it's just a filename or missing the root folder, assume public/assets/images/
-    if (!normalizedPath.startsWith('assets/') && 
-        !normalizedPath.startsWith('public/') && 
+    if (!normalizedPath.startsWith('assets/') &&
+        !normalizedPath.startsWith('public/') &&
         !normalizedPath.startsWith('uploads/')) {
-       normalizedPath = 'public/assets/images/$normalizedPath';
+      normalizedPath = 'public/assets/images/$normalizedPath';
     } else if (!normalizedPath.startsWith('public/')) {
-       // If it starts with assets/ or uploads/, prepend public/
-       normalizedPath = 'public/$normalizedPath';
+      // If it starts with assets/ or uploads/, prepend public/
+      normalizedPath = 'public/$normalizedPath';
     }
-    
+
     // Add cache busting timestamp
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '${ApiConfig.baseUrl}/$normalizedPath?t=$timestamp';
@@ -289,10 +303,15 @@ class _PosScreenState extends State<PosScreen> {
                                 child: Image.network(
                                   _getImageUrl(item.product.imagePath),
                                   fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) => Image.network(
-                                    '${ApiConfig.baseUrl}/assets/images/default.png',
-                                    errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 24),
-                                  ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Image.network(
+                                        '${ApiConfig.baseUrl}/assets/images/default.png',
+                                        errorBuilder: (context, e, s) => Icon(
+                                          Icons.image_not_supported_rounded,
+                                          color: Colors.grey.shade300,
+                                          size: 24,
+                                        ),
+                                      ),
                                 ),
                               ),
                               title: Text(
@@ -302,21 +321,21 @@ class _PosScreenState extends State<PosScreen> {
                                 ),
                               ),
                               subtitle: Text(
-                                '${item.product.price.toStringAsFixed(0)} x ${item.quantity} ${item.product.unit}',
-                                style: TextStyle(color: Colors.grey.shade600),
+                                'x ${item.quantity}  @ ${formatPrice(item.product.price)} ${item.product.unit}',
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    formatPrice(
-                                      _convertPrice(
-                                        item.product.price * item.quantity,
+                                  SizedBox(
+                                    width: 110,
+                                    child: Text(
+                                      '${formatPrice(_convertPrice(item.product.price * item.quantity))} ${selectedCurrency == 'LAK' ? 'ກີບ' : selectedCurrency == 'THB' ? 'ບາດ' : "\$"}',
+                                      textAlign: TextAlign.right,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
                                       ),
-                                    ),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -337,14 +356,22 @@ class _PosScreenState extends State<PosScreen> {
                         ),
                       ),
                     const Divider(),
+                    if (_vatEnabled) ...[
+                      _buildPriceRow('Subtotal', _convertPrice(cartTotal)),
+                      _buildPriceRow(
+                        'VAT ($_taxRate%)',
+                        _convertPrice(cartTotal * _taxRate / 100),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'ລວມທັງໝົດ',
-                            style: TextStyle(
+                          Text(
+                            _vatEnabled ? 'Grand Total' : 'ລວມທັງໝົດ',
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -352,7 +379,7 @@ class _PosScreenState extends State<PosScreen> {
                           const SizedBox(width: 12),
                           Flexible(
                             child: Text(
-                              '${formatPrice(_convertPrice(cartTotal))} ${selectedCurrency == 'LAK'
+                              '${formatPrice(_convertPrice(cartTotal * (1 + (_vatEnabled ? _taxRate : 0) / 100)))} ${selectedCurrency == 'LAK'
                                   ? 'ກີບ'
                                   : selectedCurrency == 'THB'
                                   ? 'ບາດ'
@@ -439,7 +466,7 @@ class _PosScreenState extends State<PosScreen> {
       appBar: AppBar(
         backgroundColor: primaryGreen,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu_rounded, color: Colors.white),
@@ -456,14 +483,6 @@ class _PosScreenState extends State<PosScreen> {
                 fontSize: 20,
               ),
             ),
-            const Text(
-              'ນ້ຳຂອງ ວຽງຈັນ',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
           ],
         ),
         actions: [
@@ -473,7 +492,10 @@ class _PosScreenState extends State<PosScreen> {
                 IconButton(
                   icon: Stack(
                     children: [
-                      const Icon(Icons.notifications_active_outlined, color: Colors.white),
+                      const Icon(
+                        Icons.notifications_active_outlined,
+                        color: Colors.white,
+                      ),
                       Positioned(
                         right: 0,
                         top: 0,
@@ -483,10 +505,17 @@ class _PosScreenState extends State<PosScreen> {
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+                          constraints: const BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
                           child: Text(
                             '${lowStockProducts.length}',
-                            style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -504,15 +533,26 @@ class _PosScreenState extends State<PosScreen> {
                             shrinkWrap: true,
                             itemCount: lowStockProducts.length,
                             itemBuilder: (context, i) => ListTile(
-                              leading: const Icon(Icons.warning, color: Colors.orange),
+                              leading: const Icon(
+                                Icons.warning,
+                                color: Colors.orange,
+                              ),
                               title: Text(lowStockProducts[i].name),
-                              trailing: Text('${lowStockProducts[i].stock} ${lowStockProducts[i].unit}', 
-                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                              trailing: Text(
+                                '${lowStockProducts[i].stock} ${lowStockProducts[i].unit}',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('ປິດ'))
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('ປິດ'),
+                          ),
                         ],
                       ),
                     );
@@ -523,22 +563,37 @@ class _PosScreenState extends State<PosScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ViewOrdersScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const ViewOrdersScreen(),
+                    ),
                   );
                 },
               ),
               PopupMenuButton<String>(
-                onSelected: (String value) => setState(() => selectedCurrency = value),
+                onSelected: (String value) =>
+                    setState(() => selectedCurrency = value),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(value: 'LAK', child: Text('LAK (₭)')),
-                  const PopupMenuItem<String>(value: 'THB', child: Text('THB (฿)')),
-                  const PopupMenuItem<String>(value: 'USD', child: Text('USD (\$)')),
+                  const PopupMenuItem<String>(
+                    value: 'LAK',
+                    child: Text('LAK (₭)'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'THB',
+                    child: Text('THB (฿)'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'USD',
+                    child: Text('USD (\$)'),
+                  ),
                 ],
                 child: Row(
                   children: [
                     Text(
                       selectedCurrency,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Icon(Icons.arrow_drop_down, color: Colors.white),
                   ],
@@ -553,6 +608,7 @@ class _PosScreenState extends State<PosScreen> {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -616,55 +672,21 @@ class _PosScreenState extends State<PosScreen> {
               ],
             ),
           ),
-          
-          // Exchange Rate & Sync Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: primaryGreen.withOpacity(0.05),
-              border: Border(
-                bottom: BorderSide(color: primaryGreen.withOpacity(0.1)),
-                top: BorderSide(color: primaryGreen.withOpacity(0.1)),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.sync_outlined, size: 14, color: Colors.blue),
-                const SizedBox(width: 4),
-                const Text(
-                  'SYNC: ONLINE',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.blue),
-                ),
-                const Spacer(),
-                if (exchangeRates.containsKey('THB')) ...[
-                  const Icon(Icons.currency_exchange, size: 14, color: Colors.orange),
-                  const SizedBox(width: 4),
-                  Text(
-                    '1 ฿ = ${exchangeRates['THB']?.toStringAsFixed(0)} ₭',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.orange),
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                if (exchangeRates.containsKey('USD')) ...[
-                  const Icon(Icons.attach_money, size: 14, color: Colors.blueGrey),
-                  const SizedBox(width: 4),
-                  Text(
-                    '1 \$ = ${exchangeRates['USD']?.toStringAsFixed(0)} ₭',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.blueGrey),
-                  ),
-                ],
-              ],
-            ),
-          ),
 
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              children: categories.map((cat) => 
-                _buildCategoryChip(cat.name, selectedCategoryId == cat.id, cat.id)
-              ).toList(),
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: categories
+                  .map(
+                    (cat) => _buildCategoryChip(
+                      cat.name,
+                      selectedCategoryId == cat.id,
+                      cat.id,
+                    ),
+                  )
+                  .toList(),
             ),
           ),
           const SizedBox(height: 16),
@@ -697,7 +719,7 @@ class _PosScreenState extends State<PosScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: isGridView ? 2 : 1,
-                      childAspectRatio: isGridView ? 0.58 : 3.0,
+                      childAspectRatio: isGridView ? 0.58 : 2.2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
@@ -818,7 +840,9 @@ class _PosScreenState extends State<PosScreen> {
         decoration: BoxDecoration(
           color: isActive ? darkSlate : Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isActive ? darkSlate : Colors.grey.shade200),
+          border: Border.all(
+            color: isActive ? darkSlate : Colors.grey.shade200,
+          ),
           boxShadow: isActive
               ? [
                   BoxShadow(
@@ -837,6 +861,29 @@ class _PosScreenState extends State<PosScreen> {
             fontSize: 13,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPriceRow(String label, double price) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+          Text(
+            '${formatPrice(price)} ${selectedCurrency == 'LAK'
+                ? 'ກີບ'
+                : selectedCurrency == 'THB'
+                ? 'ບາດ'
+                : "\$"}',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+        ],
       ),
     );
   }
@@ -872,22 +919,22 @@ class _ProductCardState extends State<ProductCard> {
       return '${ApiConfig.baseUrl}/assets/images/default.png';
     }
     if (path.startsWith('http')) return path;
-    
+
     String normalizedPath = path.trim();
     if (normalizedPath.startsWith('/')) {
       normalizedPath = normalizedPath.substring(1);
     }
-    
+
     // Remove public/ if it's already there
     if (normalizedPath.startsWith('public/')) {
       normalizedPath = normalizedPath.substring(7);
     }
-    
-    if (!normalizedPath.startsWith('assets/') && 
+
+    if (!normalizedPath.startsWith('assets/') &&
         !normalizedPath.startsWith('uploads/')) {
-       normalizedPath = 'assets/images/$normalizedPath';
+      normalizedPath = 'assets/images/$normalizedPath';
     }
-    
+
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return '${ApiConfig.baseUrl}/$normalizedPath?t=$timestamp';
   }
@@ -920,13 +967,32 @@ class _ProductCardState extends State<ProductCard> {
   Widget _buildVertical() {
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.product.name,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Color(0xFF1E293B),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Stack(
               children: [
@@ -937,7 +1003,11 @@ class _ProductCardState extends State<ProductCard> {
                     errorBuilder: (context, error, stackTrace) => Image.network(
                       '${ApiConfig.baseUrl}/assets/images/default.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+                      errorBuilder: (context, e, s) => Icon(
+                        Icons.image_not_supported_rounded,
+                        color: Colors.grey.shade300,
+                        size: 40,
+                      ),
                     ),
                   ),
                 ),
@@ -946,14 +1016,21 @@ class _ProductCardState extends State<ProductCard> {
                     top: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: const Text(
                         'LOW',
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -962,39 +1039,31 @@ class _ProductCardState extends State<ProductCard> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(5.0),
+          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.product.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: widget.product.stock <= widget.product.min_stock_level ? Colors.red : const Color(0xFFF59E0B),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               const SizedBox(height: 4),
               Text(
                 '${widget.displayPrice} ${widget.selectedCurrency == 'LAK' ? 'ກີບ' : 'ບາດ'}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
-                  fontSize: 18,
+                  fontSize: 17,
                 ),
               ),
-              const SizedBox(height: 12),
+              Text(
+                'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: widget.product.stock <= widget.product.min_stock_level
+                      ? Colors.red
+                      : const Color(0xFFF59E0B),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   _qtyButton(Icons.remove, Colors.redAccent, () {
                     if (quantity > 1) setState(() => quantity--);
@@ -1003,24 +1072,34 @@ class _ProductCardState extends State<ProductCard> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       '$quantity',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   _qtyButton(Icons.add, const Color(0xFF76A258), () {
                     setState(() => quantity++);
                   }),
-                  const SizedBox(width: 4),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () => widget.onAdd(quantity),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF76A258),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
                         'ເພີ່ມ',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
@@ -1041,7 +1120,9 @@ class _ProductCardState extends State<ProductCard> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.grey.shade50,
-            borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(16),
+            ),
           ),
           child: Stack(
             children: [
@@ -1052,7 +1133,11 @@ class _ProductCardState extends State<ProductCard> {
                   errorBuilder: (context, error, stackTrace) => Image.network(
                     '${ApiConfig.baseUrl}/assets/images/default.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (context, e, s) => Icon(Icons.image_not_supported_rounded, color: Colors.grey.shade300, size: 40),
+                    errorBuilder: (context, e, s) => Icon(
+                      Icons.image_not_supported_rounded,
+                      color: Colors.grey.shade300,
+                      size: 40,
+                    ),
                   ),
                 ),
               ),
@@ -1061,14 +1146,21 @@ class _ProductCardState extends State<ProductCard> {
                   top: 0,
                   left: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
                       'LOW STOCK',
-                      style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -1077,7 +1169,7 @@ class _ProductCardState extends State<ProductCard> {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1091,15 +1183,7 @@ class _ProductCardState extends State<ProductCard> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFF59E0B),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   '${widget.displayPrice} ${widget.selectedCurrency == 'LAK' ? 'ກີບ' : 'ບາດ'}',
                   style: const TextStyle(
@@ -1107,43 +1191,62 @@ class _ProductCardState extends State<ProductCard> {
                     fontSize: 16,
                   ),
                 ),
+                Text(
+                  'ຄັງເຫຼືອ: ${widget.product.stock} ${widget.product.unit}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: widget.product.stock <= widget.product.min_stock_level
+                        ? Colors.red
+                        : const Color(0xFFF59E0B),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _qtyButton(Icons.remove, Colors.redAccent, () {
+                      if (quantity > 1) setState(() => quantity--);
+                    }),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '$quantity',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    _qtyButton(Icons.add, const Color(0xFF76A258), () {
+                      setState(() => quantity++);
+                    }),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () => widget.onAdd(quantity),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF76A258),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'ເພີ່ມ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: Row(
-            children: [
-              _qtyButton(Icons.remove, Colors.redAccent, () {
-                if (quantity > 1) setState(() => quantity--);
-              }),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  '$quantity',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              _qtyButton(Icons.add, const Color(0xFF76A258), () {
-                setState(() => quantity++);
-              }),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => widget.onAdd(quantity),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF76A258),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'ເພີ່ມ',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ],
@@ -1156,10 +1259,10 @@ class _ProductCardState extends State<ProductCard> {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.8),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: color, size: 20),
       ),
     );
   }

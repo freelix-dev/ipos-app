@@ -521,11 +521,6 @@ class OrderCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              Text(
-                                '${item['quantity']}x',
-                                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: primaryGreen),
-                              ),
-                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   '${item['name']}',
@@ -533,9 +528,35 @@ class OrderCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Text(
-                                formatPrice(((item['quantity'] ?? 0) * (item['price'] ?? 0)).toDouble()),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: darkSlate),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 50,
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: primaryGreen.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'x ${item['quantity']}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 11,
+                                        color: primaryGreen,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 100,
+                                child: Text(
+                                  '${formatPrice(((item['quantity'] ?? 0) * (item['price'] ?? 0)).toDouble())} ${order['currency'] ?? 'LAK'}',
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: darkSlate),
+                                ),
                               ),
                             ],
                           ),
@@ -567,6 +588,17 @@ class OrderCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    if (order['vat_amount'] != null && (order['vat_amount'] as num) > 0) ...[
+                      Text(
+                        'SUBTOTAL: ${formatPrice((order['total'] as num? ?? 0).toDouble() - (order['vat_amount'] as num).toDouble())} ${order['currency'] ?? 'LAK'}',
+                        style: TextStyle(color: Colors.grey.shade400, fontSize: 10, fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        'VAT (${order['vat_rate']}%): ${formatPrice((order['vat_amount'] as num).toDouble())} ${order['currency'] ?? 'LAK'}',
+                        style: TextStyle(color: Colors.grey.shade400, fontSize: 10, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
                     Text(
                       'TOTAL REVENUE',
                       style: TextStyle(color: Colors.grey.shade400, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1),

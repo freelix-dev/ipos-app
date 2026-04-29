@@ -23,6 +23,7 @@ export const updateReceiptSettings = async (shopId: string, settingsData: any) =
     show_staff_name,
     show_qr,
     qr_data,
+    qr_image_url,
     font_size
   } = settingsData;
   
@@ -30,9 +31,9 @@ export const updateReceiptSettings = async (shopId: string, settingsData: any) =
     `INSERT INTO receipt_settings (
       shop_id, logo_enabled, logo_path, header_text, footer_text, 
       show_phone, show_address, show_order_id, show_staff_name, 
-      show_qr, qr_data, font_size
+      show_qr, qr_data, qr_image_url, font_size
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE 
        logo_enabled = VALUES(logo_enabled),
        logo_path = VALUES(logo_path),
@@ -44,11 +45,12 @@ export const updateReceiptSettings = async (shopId: string, settingsData: any) =
        show_staff_name = VALUES(show_staff_name),
        show_qr = VALUES(show_qr),
        qr_data = VALUES(qr_data),
+       qr_image_url = VALUES(qr_image_url),
        font_size = VALUES(font_size)`,
     [
       shopId, logo_enabled, logo_path, header_text, footer_text, 
       show_phone, show_address, show_order_id, show_staff_name, 
-      show_qr, qr_data, font_size
+      show_qr, qr_data, qr_image_url, font_size
     ]
   );
 };

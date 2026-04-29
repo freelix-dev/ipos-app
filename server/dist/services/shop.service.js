@@ -35,9 +35,9 @@ const getShopById = async (id) => {
 };
 exports.getShopById = getShopById;
 const createShop = async (shopData) => {
-    const { name, address, phone, logoPath, owner_id } = shopData;
+    const { name, address, phone, logoPath, owner_id, vat_rate, vat_enabled } = shopData;
     const id = (0, uuid_1.v4)();
-    await db_1.writePool.query('INSERT INTO shops (id, owner_id, name, address, phone, logoPath) VALUES (?, ?, ?, ?, ?, ?)', [id, owner_id || null, name, address, phone, logoPath || null]);
+    await db_1.writePool.query('INSERT INTO shops (id, owner_id, name, address, phone, logoPath, vat_rate, vat_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, owner_id || null, name, address, phone, logoPath || null, vat_rate || 0.00, vat_enabled || false]);
     return id;
 };
 exports.createShop = createShop;
@@ -59,6 +59,14 @@ const updateShop = async (id, shopData) => {
     if (shopData.logoPath !== undefined) {
         fields.push('logoPath = ?');
         values.push(shopData.logoPath);
+    }
+    if (shopData.vat_rate !== undefined) {
+        fields.push('vat_rate = ?');
+        values.push(shopData.vat_rate);
+    }
+    if (shopData.vat_enabled !== undefined) {
+        fields.push('vat_enabled = ?');
+        values.push(shopData.vat_enabled);
     }
     if (fields.length === 0)
         return true;
@@ -82,7 +90,7 @@ const registerShop = async (data) => {
         // 1. Create User first to get user.id for owner_id
         await connection.query('INSERT INTO users (id, name, email, password, role) VALUES (?, ?, ?, ?, ?)', [userId, ownerName, email, password, 'admin']);
         // 2. Create Shop with owner_id
-        await connection.query('INSERT INTO shops (id, owner_id, name, address, phone, logoPath) VALUES (?, ?, ?, ?, ?, ?)', [shopId, userId, shopName, address, phone, data.logoPath || null]);
+        await connection.query('INSERT INTO shops (id, owner_id, name, address, phone, logoPath, vat_rate, vat_enabled) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [shopId, userId, shopName, address, phone, data.logoPath || null, 0.00, false]);
         // 3. Link user to the shop as their default shop
         await connection.query('UPDATE users SET shop_id = ? WHERE id = ?', [shopId, userId]);
         await connection.commit();

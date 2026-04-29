@@ -306,7 +306,25 @@ class _SyncScreenState extends State<SyncScreen> {
         await DatabaseHelper().updateExchangeRates(rateData);
       }
 
-      // 4. Download Shop Information
+      // 4. Download App Configuration (System Settings)
+      setState(() {
+        _status = 'ດາວໂຫລດການຕັ້ງຄ່າລະບົບ...';
+        _progress = 0.9;
+      });
+
+      final configRes = await http.get(
+        Uri.parse(ApiConfig.appConfigUrl),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (configRes.statusCode == 200) {
+        final configData = json.decode(configRes.body);
+        if (configData['tax_rate'] != null) {
+          await prefs.setString('system_tax_rate', configData['tax_rate'].toString());
+        }
+      }
+
+      // 5. Download Shop Information
       setState(() {
         _status = 'ດາວໂຫລດຂໍ້ມູນຮ້ານ...';
         _progress = 0.95;
@@ -327,7 +345,7 @@ class _SyncScreenState extends State<SyncScreen> {
           await prefs.setString('shop_logo', shopData['logoPath'] ?? '');
 
           // 4.1 Download Receipt Settings
-          final receiptUrl = Uri.parse(ApiConfig.receiptSettingsUrl);
+          final receiptUrl = Uri.parse('${ApiConfig.receiptSettingsUrl}?shopId=$shopId');
           final receiptRes = await http.get(
             receiptUrl,
             headers: {'Authorization': 'Bearer $token'},

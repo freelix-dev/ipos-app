@@ -8,6 +8,11 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const qrUploadDir = path.join(__dirname, '../../public/uploads/qr');
+if (!fs.existsSync(qrUploadDir)) {
+  fs.mkdirSync(qrUploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, uploadDir);
@@ -31,5 +36,22 @@ const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterC
 export const uploadLogo = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }
 }).single('logo');
+
+const qrStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, qrUploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `qr-${uniqueSuffix}${ext}`);
+  }
+});
+
+export const uploadQrImage = multer({
+  storage: qrStorage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }
+}).single('qr_image');

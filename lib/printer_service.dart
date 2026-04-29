@@ -1,133 +1,269 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
+import 'package:ipos/api_config.dart';
 
 class PrinterService {
   static Future<void> printReceipt(Map<String, dynamic> order) async {
     print('PrinterService: Starting print for order ${order['id']}');
     try {
       bool? isBound = await SunmiPrinter.bindingPrinter();
-      print('PrinterService: isBound = $isBound');
-      
-      // Proceed if true or null (sometimes null is returned on certain devices)
       if (isBound == false) {
-        print('PrinterService: Error - Printer binding failed (false)');
+        print('PrinterService: Error - Printer binding failed');
         return;
       }
 
       await SunmiPrinter.initPrinter();
-      print('PrinterService: Printer initialized');
       await Future.delayed(const Duration(milliseconds: 500));
 
-      // Load Shop Info and Receipt Settings from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final shopName = prefs.getString('shop_name') ?? 'iPOS PRO';
       final shopAddress = prefs.getString('shop_address') ?? '';
       final shopPhone = prefs.getString('shop_phone') ?? '';
-      
+
       final settingsJson = prefs.getString('receipt_settings');
-      Map<String, dynamic> settings = settingsJson != null ? json.decode(settingsJson) : {};
-      
-      final headerText = settings['header_text'] ?? '';
-      final footerText = settings['footer_text'] ?? 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ';
-      final showOrderNo = settings['show_order_id'] != 'false';
-      final showEmployee = settings['show_employee'] != 'false';
-      final showDate = settings['show_date'] != 'false';
+      Map<String, dynamic> settings = {};
+      if (settingsJson != null && settingsJson != 'null') {
+        try {
+          final decoded = json.decode(settingsJson);
+          if (decoded is Map<String, dynamic>) {
+            settings = decoded;
+          }
+        } catch (e) {
+          print('PrinterService: Error decoding settings: $e');
+        }
+      }
+
+      bool _parseBool(dynamic value, {bool defaultValue = true}) {
+        if (value == null) return defaultValue;
+        if (value is bool) return value;
+        if (value is int) return value == 1;
+        if (value is String) return value.toLowerCase() == 'true' || value == '1';
+        return defaultValue;
+      }
+
+      final headerText = settings['header_text']?.toString() ?? '';
+      final footerText = settings['footer_text']?.toString() ?? 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ';
+      final showOrderNo = _parseBool(settings['show_order_id']);
+      final showEmployee = _parseBool(settings['show_staff_name']);
+      final showDate = _parseBool(settings['show_date']);
+      final showPhone = _parseBool(settings['show_phone']);
+      final showAddress = _parseBool(settings['show_address']);
+      final logoEnabled = _parseBool(settings['logo_enabled']);
+      final showQR = _parseBool(settings['show_qr'], defaultValue: false);
+      final qrImageUrl = settings['qr_image_url']?.toString() ?? '';
+      final logoPath = settings['logo_path']?.toString() ?? '';
+      final baseFontSize = double.tryParse(settings['font_size']?.toString() ?? '24') ?? 24.0;
+
+      String _fixUrl(String url) {
+        if (url.isEmpty) return '';
+        if (url.startsWith('http')) {
+          if (url.contains('localhost') || url.contains('127.0.0.1')) {
+            Uri baseUri = Uri.parse(ApiConfig.baseUrl);
+            Uri imageUri = Uri.parse(url);
+            return imageUri.replace(host: baseUri.host, port: baseUri.port).toString();
+          }
+          return url;
+        }
+        return '${ApiConfig.baseUrl}/${url.startsWith('/') ? url.substring(1) : url}';
+      }
 
       await SunmiPrinter.lineWrap(1);
-      
-      // Header
-      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+
+      // 1. Logo (Print as normal image)
+      if (logoEnabled && logoPath.isNotEmpty) {
+        try {
+          String imageUrl = _fixUrl(logoPath);
+          final res = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 5));
+          if (res.statusCode == 200) {
+            Uint8List centered = _processImageForCentering(res.bodyBytes, targetWidth: 384);
+            await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
+            await SunmiPrinter.printImage(centered);
+          }
+        } catch (e) {
+          print('Logo error: $e');
+        }
+      }
+
+      // 2. Generate Receipt Content as Image (to overcome font size limitations)
+      // We will build a list of text parts to draw
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      const double width = 384.0; // Standard 58mm printer width in pixels
+      double currentY = 0.0;
+
+      void drawText(String text, {double? fontSize, bool bold = false, ui.TextAlign align = ui.TextAlign.center}) {
+        final textStyle = TextStyle(
+          color: Colors.black,
+          fontSize: fontSize ?? baseFontSize,
+          fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+          fontFamily: 'NotoSansLao', // Ensuring Lao support if available
+        );
+        final textSpan = TextSpan(text: text, style: textStyle);
+        final textPainter = TextPainter(
+          text: textSpan,
+          textAlign: align,
+          textDirection: ui.TextDirection.ltr,
+        );
+        textPainter.layout(minWidth: width, maxWidth: width);
+        textPainter.paint(canvas, Offset(0, currentY));
+        currentY += textPainter.height + 2;
+      }
+
+      void drawDivider() {
+        final paint = Paint()
+          ..color = Colors.black
+          ..strokeWidth = 1.0;
+        canvas.drawLine(Offset(0, currentY + 5), Offset(width, currentY + 5), paint);
+        currentY += 15;
+      }
+
+      // Build Canvas Content
+      drawText(shopName, fontSize: baseFontSize, bold: true);
+      if (showAddress && shopAddress.isNotEmpty) drawText(shopAddress, fontSize: baseFontSize);
+      if (showPhone && shopPhone.isNotEmpty) drawText('ໂທ: $shopPhone', fontSize: baseFontSize);
+      drawDivider();
+
       if (headerText.isNotEmpty) {
-        await SunmiPrinter.printText('$headerText\n');
-      } else {
-        await SunmiPrinter.printText('$shopName\n');
+        drawText(headerText);
+        drawDivider();
       }
-
-      if (shopAddress.isNotEmpty) {
-        await SunmiPrinter.printText('$shopAddress\n');
-      }
-      if (shopPhone.isNotEmpty) {
-        await SunmiPrinter.printText('Tel: $shopPhone\n');
-      }
-
-      await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
-      await SunmiPrinter.printText('--------------------------------\n');
-      
-      // Order Info
-      DateTime orderDate = DateTime.parse(order['date']);
-      String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(orderDate);
-      
-      if (showOrderNo) {
-        await SunmiPrinter.printText('ໃບບິນເລກທີ: ${order['id'].toString().substring(0, 8)}\n');
-      }
-      if (showDate) {
-        await SunmiPrinter.printText('ວັນທີ: $formattedDate\n');
-      }
-      if (showEmployee && order['userName'] != null) {
-        await SunmiPrinter.printText('ພະນັກງານ: ${order['userName']}\n');
-      }
-      await SunmiPrinter.printText('--------------------------------\n');
-      print('PrinterService: Header and info printed');
 
       // Items
-      if (order['itemsJson'] != null && order['itemsJson'].toString().isNotEmpty) {
-        print('PrinterService: Parsing items...');
-        final List<dynamic> items = json.decode(order['itemsJson']);
-        for (var item in items) {
-          String name = item['name'] ?? '';
-          int qty = item['quantity'] ?? 0;
-          double price = (item['price'] as num).toDouble();
-          double totalItem = price * qty;
-          
-          // Manual row alignment with printText
-          String qtyStr = 'x$qty'.padRight(6);
-          String priceStr = _formatPrice(totalItem).padLeft(12);
-          
-          await SunmiPrinter.printText('$name\n');
-          await SunmiPrinter.printText('$qtyStr $priceStr\n');
+      String currency = order['currency'] ?? 'LAK';
+      if (order['itemsJson'] != null && order['itemsJson'].toString().isNotEmpty && order['itemsJson'] != 'null') {
+        final decodedItems = json.decode(order['itemsJson']);
+        if (decodedItems is List) {
+          for (var item in decodedItems) {
+            String name = item['name'] ?? '';
+            int qty = item['quantity'] ?? 0;
+            double price = (item['price'] ?? 0.0).toDouble();
+            double totalItem = price * qty;
+            
+            drawText(name, align: ui.TextAlign.left, bold: true);
+            drawText('x$qty   ${_formatPrice(totalItem)} $currency', align: ui.TextAlign.right);
+            currentY += 5;
+          }
         }
-        print('PrinterService: Items printed');
       }
-      await SunmiPrinter.printText('--------------------------------\n');
+      drawDivider();
 
       // Summary
-      String currency = order['currency'] == 'LAK' ? '₭' : order['currency'] == 'THB' ? '฿' : '\$';
-      double total = (order['total'] as num).toDouble();
-      
-      String totalLabel = 'ລວມທັງໝົດ:'.padRight(15);
-      String totalVal = '${_formatPrice(total)} $currency'.padLeft(15);
-      await SunmiPrinter.printText('$totalLabel$totalVal\n');
+      double total = (order['total'] ?? 0.0).toDouble();
+      double vatAmount = (order['vat_amount'] ?? 0.0).toDouble();
+      double vatRate = (order['vat_rate'] ?? 0.0).toDouble();
+      double subtotal = total - vatAmount;
+
+      if (vatAmount > 0) {
+        drawText('ລວມ: ${_formatPrice(subtotal)} $currency', align: ui.TextAlign.left);
+        drawText('ອາກອນ ($vatRate%): ${_formatPrice(vatAmount)} $currency', align: ui.TextAlign.left);
+      }
+      drawText('ລວມທັງໝົດ: ${_formatPrice(total)} $currency', fontSize: baseFontSize, bold: true, align: ui.TextAlign.left);
+      currentY += 10;
 
       if (order['paymentMethod'] == 'cash') {
-        double received = (order['amountReceived'] as num).toDouble();
-        double change = (order['changeAmount'] as num).toDouble();
-        
-        String receivedLabel = 'ຮັບເງິນສົດ:'.padRight(15);
-        String receivedVal = '${_formatPrice(received)} $currency'.padLeft(15);
-        await SunmiPrinter.printText('$receivedLabel$receivedVal\n');
-
-        String changeLabel = 'ເງິນທອນ:'.padRight(15);
-        String changeVal = '${_formatPrice(change)} $currency'.padLeft(15);
-        await SunmiPrinter.printText('$changeLabel$changeVal\n');
+        double received = (order['amountReceived'] ?? 0.0).toDouble();
+        double change = (order['changeAmount'] ?? 0.0).toDouble();
+        drawText('ຮັບເງິນ: ${_formatPrice(received)} $currency', align: ui.TextAlign.left);
+        drawText('ເງິນທອນ: ${_formatPrice(change)} $currency', align: ui.TextAlign.left);
       } else {
-        String methodLabel = 'ຊຳລະຜ່ານ:'.padRight(15);
-        String methodVal = (order['paymentMethod'] == 'bank' ? 'ທະນາຄານ' : 'ອື່ນໆ').padLeft(15);
-        await SunmiPrinter.printText('$methodLabel$methodVal\n');
+        String methodVal = (order['paymentMethod'] == 'bank' ? 'ໂອນເງິນ' : 'ອື່ນໆ');
+        drawText('ວິທີຊໍາລະ: $methodVal', align: ui.TextAlign.left);
+      }
+      drawDivider();
+
+      // Meta
+      if (showOrderNo) drawText('ເລກທີບິນ: #${order['id'].toString().substring(0, 8).toUpperCase()}', align: ui.TextAlign.left, fontSize: baseFontSize);
+      if (showEmployee && order['userName'] != null) drawText('ພະນັກງານ: ${order['userName']}', align: ui.TextAlign.left, fontSize: baseFontSize);
+      if (showDate) {
+        String dateStr = order['date'] ?? DateTime.now().toString();
+        DateTime orderDate = DateTime.tryParse(dateStr) ?? DateTime.now();
+        String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(orderDate);
+        drawText('ວັນທີ: $formattedDate', align: ui.TextAlign.left, fontSize: baseFontSize);
+      }
+      currentY += 20;
+
+      // Convert Canvas to Image
+      final picture = recorder.endRecording();
+      final imgUi = await picture.toImage(width.toInt(), currentY.toInt());
+      final byteData = await imgUi.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final receiptBytes = byteData.buffer.asUint8List();
+        await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
+        await SunmiPrinter.printImage(receiptBytes);
       }
 
-      await SunmiPrinter.printText('--------------------------------\n');
-      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-      await SunmiPrinter.printText('$footerText\n');
+      // 6. QR (Printed separately to keep quality)
+      if (showQR && qrImageUrl.isNotEmpty) {
+        try {
+          String fullQrUrl = _fixUrl(qrImageUrl);
+          final res = await http.get(Uri.parse(fullQrUrl)).timeout(const Duration(seconds: 5));
+          if (res.statusCode == 200) {
+            Uint8List centered = _processImageForCentering(res.bodyBytes, targetWidth: 384);
+            await SunmiPrinter.printImage(centered);
+          }
+        } catch (e) {
+          print('QR error: $e');
+        }
+      }
+
+      // 7. Footer
+      await SunmiPrinter.lineWrap(1);
+      final footerRecorder = ui.PictureRecorder();
+      final footerCanvas = ui.Canvas(footerRecorder);
+      double footerY = 0.0;
       
-      // Reasonable margin to feed paper past the tear bar
-      await SunmiPrinter.lineWrap(75);
-      print('PrinterService: Print job completed');
+      final footerTextPainter = TextPainter(
+        text: TextSpan(text: footerText.trim().isEmpty ? 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ' : footerText, style: TextStyle(color: Colors.black, fontSize: baseFontSize)),
+        textAlign: ui.TextAlign.center,
+        textDirection: ui.TextDirection.ltr,
+      );
+      footerTextPainter.layout(minWidth: width, maxWidth: width);
+      footerTextPainter.paint(footerCanvas, Offset(0, footerY));
+      footerY += footerTextPainter.height + 10;
       
+      final iposPainter = TextPainter(
+        text: TextSpan(text: 'ສ້າງໂດຍ iPOS PRO', style: TextStyle(color: Colors.black, fontSize: baseFontSize)),
+        textAlign: ui.TextAlign.center,
+        textDirection: ui.TextDirection.ltr,
+      );
+      iposPainter.layout(minWidth: width, maxWidth: width);
+      iposPainter.paint(footerCanvas, Offset(0, footerY));
+      footerY += iposPainter.height + 10;
+
+      final footerImg = await footerRecorder.endRecording().toImage(width.toInt(), footerY.toInt());
+      final footerData = await footerImg.toByteData(format: ui.ImageByteFormat.png);
+      if (footerData != null) {
+        await SunmiPrinter.printImage(footerData.buffer.asUint8List());
+      }
+
+      await SunmiPrinter.lineWrap(80);
+      print('PrinterService: Image Print completed');
     } catch (e, stack) {
       print('Printing error: $e');
       print('Stack trace: $stack');
+    }
+  }
+
+  static Uint8List _processImageForCentering(Uint8List bytes, {int targetWidth = 384}) {
+    try {
+      img.Image? originalImage = img.decodeImage(bytes);
+      if (originalImage == null) return bytes;
+      if (originalImage.width >= targetWidth) return bytes;
+      img.Image canvas = img.Image(width: targetWidth, height: originalImage.height);
+      img.fill(canvas, color: img.ColorRgb8(255, 255, 255));
+      int xOffset = (targetWidth - originalImage.width) ~/ 2;
+      img.compositeImage(canvas, originalImage, dstX: xOffset, dstY: 0);
+      return Uint8List.fromList(img.encodeJpg(canvas, quality: 100));
+    } catch (e) {
+      print('Image process error: $e');
+      return bytes;
     }
   }
 

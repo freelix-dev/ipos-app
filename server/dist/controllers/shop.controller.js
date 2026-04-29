@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadShopLogo = exports.registerShop = exports.deleteShop = exports.updateShop = exports.createShop = exports.getShop = exports.getShops = void 0;
+exports.uploadShopQr = exports.uploadShopLogo = exports.registerShop = exports.deleteShop = exports.updateShop = exports.createShop = exports.getShop = exports.getShops = void 0;
 const shopService = __importStar(require("../services/shop.service"));
 const getShops = async (req, res) => {
     try {
@@ -124,3 +124,19 @@ const uploadShopLogo = async (req, res) => {
     }
 };
 exports.uploadShopLogo = uploadShopLogo;
+const uploadShopQr = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const protocol = req.protocol;
+        const host = req.get('host') || 'localhost:3000';
+        const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
+        const qrImageUrl = `${baseUrl}/uploads/qr/${req.file.filename}`;
+        res.json({ message: 'QR image uploaded successfully', qrImageUrl });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error uploading QR image', error });
+    }
+};
+exports.uploadShopQr = uploadShopQr;

@@ -190,6 +190,18 @@ export const api = {
     return response.json();
   },
 
+  uploadShopQr: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('qr_image', file);
+    const response = await fetch(`${API_BASE_URL}/shops/${id}/upload-qr`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: formData,
+    });
+    if (!response.ok) throw new Error('Failed to upload QR image');
+    return response.json();
+  },
+
   registerShop: async (data: any) => {
     const response = await fetch(`${API_BASE_URL}/shops/register`, {
       method: 'POST',

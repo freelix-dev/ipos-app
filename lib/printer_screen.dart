@@ -113,7 +113,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
             _buildDropdownCard(
               label: 'ແຖວໃໝ່ຫຼັງຈາກພິມ',
               value: _newLines,
-              items: ['0', '1', '2', '3', '4', '5'],
+              items: ['0', '10', '20', '30', '40', '50'],
               onChanged: (val) {
                 if (val != null) {
                   setState(() => _newLines = val);

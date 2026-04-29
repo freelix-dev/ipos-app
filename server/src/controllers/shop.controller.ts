@@ -84,3 +84,18 @@ export const uploadShopLogo = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error uploading logo', error });
   }
 };
+
+export const uploadShopQr = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    const protocol = req.protocol;
+    const host = req.get('host') || 'localhost:3000';
+    const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
+    const qrImageUrl = `${baseUrl}/uploads/qr/${req.file.filename}`;
+    res.json({ message: 'QR image uploaded successfully', qrImageUrl });
+  } catch (error) {
+    res.status(500).json({ message: 'Error uploading QR image', error });
+  }
+};
