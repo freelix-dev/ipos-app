@@ -292,13 +292,13 @@ const Dashboard = () => {
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }}
-                tickFormatter={(val) => new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                tickFormatter={(val: string) => new Date(val).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }}
-                tickFormatter={(val) => (val / 1000) + 'k'}
+                tickFormatter={(val: number) => (val / 1000) + 'k'}
               />
               <Tooltip 
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 800 }}
