@@ -160,21 +160,21 @@ const Dashboard = () => {
               <AlertTriangle size={24} />
             </div>
             <div>
-              <h4 style={{ fontWeight: 900, color: '#991b1b', fontSize: '1.1rem' }}>Inventory Alert: {lowStockProducts.length} Items Low</h4>
-              <p style={{ color: '#b91c1c', fontSize: '0.9rem', fontWeight: 600 }}>Critical stock levels detected in {selectedShopId ? 'this branch' : 'multiple branches'}.</p>
+              <h4 style={{ fontWeight: 900, color: '#991b1b', fontSize: '1.1rem' }}>ແຈ້ງເຕືອນສະຕັອກ: {lowStockProducts.length} ລາຍການຕ່ຳ</h4>
+              <p style={{ color: '#b91c1c', fontSize: '0.9rem', fontWeight: 600 }}>ກວດພົບລະດັບສະຕັອກທີ່ວິກິດໃນ {selectedShopId ? 'ສາຂານີ້' : 'ຫຼາຍສາຂາ'}.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {lowStockProducts.slice(0, 3).map((p, i) => (
               <div key={i} style={{ background: '#fff', padding: '8px 16px', borderRadius: '12px', border: '1px solid #fee2e2', fontSize: '0.8rem', fontWeight: 800, color: '#991b1b' }}>
-                {p.name}: <span style={{ color: '#ef4444' }}>{p.stock} left</span>
+                {p.name}: <span style={{ color: '#ef4444' }}>ຍັງເຫຼືອ {p.stock}</span>
               </div>
             ))}
             <button 
               onClick={() => window.location.href='/stock'}
               style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              Restock Now <ArrowRight size={16} />
+              ເຕີມສະຕັອກດຽວນີ້ <ArrowRight size={16} />
             </button>
           </div>
         </div>
@@ -182,8 +182,8 @@ const Dashboard = () => {
 
       <div style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Executive Overview</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Advanced analytics and performance visualization</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>ພາບລວມບໍລິຫານ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ການວິເຄາະຂັ້ນສູງ ແລະ ການສະແດງຜົນປະສິດທິພາບ</p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           {(isSystemAdmin || (currentUser?.role === 'admin')) && (
@@ -196,58 +196,58 @@ const Dashboard = () => {
               className="input-premium"
               style={{ width: '220px', fontWeight: 800, color: 'var(--primary)' }}
             >
-              <option value="">{isSystemAdmin ? 'All Branches' : 'Current Store'}</option>
+              <option value="">{isSystemAdmin ? 'ທຸກສາຂາ' : 'ຮ້ານປະຈຸບັນ'}</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           )}
           <div style={{ background: '#fff', padding: '12px 24px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', gap: '12px', height: '50px' }}>
             <div className="pulse-dot"></div>
-            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>LIVE FEED</span>
+            <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)' }}>ຂໍ້ມູນສົດ</span>
           </div>
         </div>
       </div>
 
       <div className="stats-grid">
         <StatCard 
-          title="Today's Revenue" 
+          title="ລາຍຮັບມື້ນີ້" 
           values={(stats.summary || []).map((s: any) => ({ 
             amount: formatCurrency(s.todayRevenue, s.currency), 
             isMain: s.currency === 'LAK' 
           }))} 
           icon={<TrendingUp size={24} />} 
           color="#10b981" 
-          label="REAL-TIME SETTLEMENT"
+          label="ການຊຳລະເງິນແບບສົດໆ"
         />
         <StatCard 
-          title="Today's Orders" 
+          title="ອໍເດີມື້ນີ້" 
           values={(stats.summary || []).reduce((sum: number, s: any) => sum + s.todayOrders, 0)} 
           icon={<ShoppingBag size={24} />} 
           color="#3b82f6" 
-          label="COMPLETED TRANSACTIONS"
+          label="ທຸລະກຳທີ່ສຳເລັດ"
         />
         <StatCard 
-          title="Gross Volume" 
+          title="ບໍລິມາດລວມ" 
           values={(stats.summary || []).map((s: any) => ({ 
             amount: formatCurrency(s.totalRevenue, s.currency), 
             isMain: s.currency === 'LAK' 
           }))} 
           icon={<Package size={24} />} 
           color="#3b82f6" 
-          label="GROSS MERCHANDISE VALUE"
+          label="ມູນຄ່າສິນຄ້າລວມ"
         />
         <StatCard 
-          title="Total Expenses" 
+          title="ຄ່າໃຊ້ຈ່າຍທັງໝົດ" 
           values={formatCurrency(totalExpense)} 
           icon={<CreditCard size={24} />} 
           color="#ef4444" 
-          label="OPERATIONAL OVERHEADS"
+          label="ຄ່າໃຊ້ຈ່າຍໃນການດຳເນີນງານ"
         />
         <StatCard 
-          title="Net Profit (LAK Est.)" 
+          title="ກຳໄລສຸດທິ (ປະມານ LAK)" 
           values={formatCurrency(netProfit)} 
           icon={<Target size={24} />} 
           color={netProfit >= 0 ? "#10b981" : "#ef4444"}
-          label="ADJUSTED NET EARNINGS"
+          label="ລາຍໄດ້ສຸດທິທີ່ປັບປຸງແລ້ວ"
         />
       </div>
 
@@ -255,8 +255,8 @@ const Dashboard = () => {
       <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', marginTop: '40px', boxShadow: 'var(--shadow-premium)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Revenue Velocity ({activeCurrency})</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>CASHFLOW TRENDS FOR {activeCurrency} OVER THE LAST 30 DAYS</p>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>ຄວາມໄວຂອງລາຍຮັບ ({activeCurrency})</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>ແນວໂນ້ມກະແສເງິນສົດສຳລັບ {activeCurrency} ໃນ 30 ວັນຜ່ານມາ</p>
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             {['LAK', 'THB', 'USD'].map(curr => (
@@ -315,7 +315,7 @@ const Dashboard = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Database size={20} color="var(--primary)" />
-            Inventory by Category
+            ສະຕັອກຕາມໝວດໝູ່
           </h3>
           <div style={{ width: '100%', height: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -344,7 +344,7 @@ const Dashboard = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Shield size={20} color="var(--primary)" />
-            Supplier Distribution
+            ການແຈກຢາຍຜູ້ສະໜອງ
           </h3>
           <div style={{ width: '100%', height: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -370,7 +370,7 @@ const Dashboard = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <CreditCard size={20} color="var(--primary)" />
-            Settlement Mix
+            ຮູບແບບການຊຳລະເງິນ
           </h3>
           <div style={{ width: '100%', height: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -399,7 +399,7 @@ const Dashboard = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Package size={20} color="var(--primary)" />
-            Top Velocity Products
+            ສິນຄ້າທີ່ຂາຍດີທີ່ສຸດ
           </h3>
           <div style={{ width: '100%', height: '280px' }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -425,17 +425,17 @@ const Dashboard = () => {
       <div className="table-container" style={{ marginTop: '40px', border: 'none', boxShadow: 'var(--shadow-premium)' }}>
         <div style={{ padding: '28px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
           <div>
-            <h3 style={{ fontWeight: 900, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>Live Transaction Trace</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>REAL-TIME FEED FROM CONNECTED TERMINALS</p>
+            <h3 style={{ fontWeight: 900, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>ຕິດຕາມທຸລະກຳສົດ</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>ຂໍ້ມູນສົດຈາກເຄື່ອງຂາຍທີ່ເຊື່ອມຕໍ່</p>
           </div>
         </div>
         <table style={{ border: 'none' }}>
           <thead>
             <tr>
-              <th style={{ paddingLeft: '32px' }}>Trace ID</th>
-              <th>Execution Time</th>
-              <th>Valuation</th>
-              <th style={{ textAlign: 'right', paddingRight: '32px' }}>Process State</th>
+              <th style={{ paddingLeft: '32px' }}>ລະຫັດຕິດຕາມ</th>
+              <th>ເວລາທີ່ດຳເນີນການ</th>
+              <th>ມູນຄ່າ</th>
+              <th style={{ textAlign: 'right', paddingRight: '32px' }}>ສະຖານະການດຳເນີນງານ</th>
             </tr>
           </thead>
           <tbody>
@@ -458,7 +458,8 @@ const Dashboard = () => {
                     order.status === 'Completed' ? 'badge-success' : 
                     order.status === 'Pending' ? 'badge-warning' : 'badge-danger'
                   }`}>
-                    {order.status.toUpperCase()}
+                    {order.status === 'Completed' ? 'ສຳເລັດ' : 
+                    order.status === 'Pending' ? 'ຍັງຄ້າງ' : 'ຍົກເລີກ'}
                   </span>
                 </td>
               </tr>
@@ -473,9 +474,9 @@ const Dashboard = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '12px' }}>
               <AlertCircle size={20} color="#ef4444" />
-              Inventory Velocity Alerts
+              ແຈ້ງເຕືອນຄວາມໄວສະຕັອກ
             </h3>
-            <span style={{ background: '#fee2e2', color: '#ef4444', padding: '6px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>CRITICAL REPLENISHMENT</span>
+            <span style={{ background: '#fee2e2', color: '#ef4444', padding: '6px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>ການເຕີມສິນຄ້າທີ່ວິກິດ</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
             {lowStockProducts.slice(0, 8).map((product: any) => (
@@ -486,7 +487,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p style={{ fontWeight: 800, fontSize: '0.95rem' }}>{product.name}</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>STOCK: {product.stock} {product.unit}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>ສະຕັອກ: {product.stock} {product.unit}</p>
                   </div>
                 </div>
               </div>

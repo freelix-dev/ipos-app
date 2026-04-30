@@ -95,7 +95,7 @@ const Users = () => {
       setFormData({ name: '', email: '', password: '', confirmPassword: '', role: 'staff', shop_id: '', shop_ids: [] });
       loadUsers();
     } catch (err: any) {
-      alert(err.message || 'Failed to process request');
+      alert(err.message || 'ບໍ່ສາມາດດຳເນີນການໄດ້');
     }
   };
 
@@ -114,12 +114,12 @@ const Users = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+    if (window.confirm(`ເຈົ້າແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບ ${name}?`)) {
       try {
         await api.deleteUser(id);
         loadUsers();
       } catch (err: any) {
-        alert(err.message || 'Failed to delete user');
+        alert(err.message || 'ບໍ່ສາມາດລຶບຜູ້ໃຊ້ໄດ້');
       }
     }
   };
@@ -132,8 +132,8 @@ const Users = () => {
       <div className="animate-slide-up">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
           <div>
-            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Team Directory</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global access control and staff management</p>
+            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ລາຍຊື່ທີມງານ</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ການຄວບຄຸມການເຂົ້າເຖິງທົ່ວໂລກ ແລະ ການຈັດການພະນັກງານ</p>
           </div>
           {currentUser?.role === 'admin' && (
             <button 
@@ -146,7 +146,7 @@ const Users = () => {
               style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
             >
               <UserPlus size={20} />
-              <span>Add Team Member</span>
+              <span>ເພີ່ມສະມາຊິກທີມ</span>
             </button>
           )}
         </div>
@@ -167,7 +167,7 @@ const Users = () => {
                 <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
                 <input 
                   type="text" 
-                  placeholder="Search by name, email, or personnel ID..." 
+                  placeholder="ຄົ້ນຫາຕາມຊື່, ອີເມວ ຫຼື ລະຫັດພະນັກງານ..." 
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -200,7 +200,7 @@ const Users = () => {
                     color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <option value="">All Branches</option>
+                  <option value="">ທຸກສາຂາ</option>
                   {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>{shop.name}</option>
                   ))}
@@ -220,22 +220,41 @@ const Users = () => {
                 transition: 'var(--transition)'
               }} className="btn-hover-premium">
                 <Filter size={18} />
-                <span>Identity Filters</span>
+                <span>ໂຕຕອງຂໍ້ມູນ</span>
               </button>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
-                {['All Members', 'Managers', 'Staff', 'Inactive'].map((t) => (
+                {['ສະມາຊິກທັງໝົດ', 'ຜູ້ຈັດການ', 'ພະນັກງານ', 'ບໍ່ໄດ້ໃຊ້ງານ'].map((t) => (
                   <button 
                     key={t}
-                    onClick={() => { setActiveTab(t); setCurrentPage(1); }}
+                    onClick={() => { 
+                      const mapTab = (txt: string) => {
+                        if (txt === 'ສະມາຊິກທັງໝົດ') return 'All Members';
+                        if (txt === 'ຜູ້ຈັດການ') return 'Managers';
+                        if (txt === 'ພະນັກງານ') return 'Staff';
+                        if (txt === 'ບໍ່ໄດ້ໃຊ້ງານ') return 'Inactive';
+                        return txt;
+                      };
+                      setActiveTab(mapTab(t)); 
+                      setCurrentPage(1); 
+                    }}
                     style={{
                       padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                      background: t === activeTab ? '#fff' : 'transparent',
-                      color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
+                      background: (t === 'ສະມາຊິກທັງໝົດ' && activeTab === 'All Members') || 
+                                 (t === 'ຜູ້ຈັດການ' && activeTab === 'Managers') || 
+                                 (t === 'ພະນັກງານ' && activeTab === 'Staff') || 
+                                 (t === 'ບໍ່ໄດ້ໃຊ້ງານ' && activeTab === 'Inactive') ? '#fff' : 'transparent',
+                      color: (t === 'ສະມາຊິກທັງໝົດ' && activeTab === 'All Members') || 
+                                 (t === 'ຜູ້ຈັດການ' && activeTab === 'Managers') || 
+                                 (t === 'ພະນັກງານ' && activeTab === 'Staff') || 
+                                 (t === 'ບໍ່ໄດ້ໃຊ້ງານ' && activeTab === 'Inactive') ? 'var(--primary)' : 'var(--text-muted)',
                       fontWeight: 800, fontSize: '0.85rem',
-                      boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                      boxShadow: (t === 'ສະມາຊິກທັງໝົດ' && activeTab === 'All Members') || 
+                                 (t === 'ຜູ້ຈັດການ' && activeTab === 'Managers') || 
+                                 (t === 'ພະນັກງານ' && activeTab === 'Staff') || 
+                                 (t === 'ບໍ່ໄດ້ໃຊ້ງານ' && activeTab === 'Inactive') ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
@@ -247,10 +266,10 @@ const Users = () => {
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>SECURE DIRECTORY</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ລາຍຊື່ທີ່ປອດໄພ</span>
                  </div>
                  <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
-                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredUsers.length} PERSONS</span>
+                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredUsers.length} ຄົນ</span>
               </div>
             </div>
           </div>
@@ -258,18 +277,18 @@ const Users = () => {
           {loading ? (
             <div style={{ padding: '100px', textAlign: 'center' }}>
               <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-              <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Syncing directory...</p>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງຊິງຂໍ້ມູນລາຍຊື່...</p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ borderCollapse: 'separate', borderSpacing: 0, width: '100%' }}>
                 <thead>
                   <tr>
-                    <th style={{ paddingLeft: '32px' }}>Member Profile</th>
-                    <th>Electronic Mail</th>
-                    <th>Functional Role</th>
-                    <th>Operational Status</th>
-                    <th style={{ textAlign: 'right', paddingRight: '32px' }}>Control Hub</th>
+                    <th style={{ paddingLeft: '32px' }}>ຂໍ້ມູນສະມາຊິກ</th>
+                    <th>ອີເມວ</th>
+                    <th>ບົດບາດ / ໜ້າທີ່</th>
+                    <th>ສະຖານະການເຮັດວຽກ</th>
+                    <th style={{ textAlign: 'right', paddingRight: '32px' }}>ສູນຄວບຄຸມ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -290,7 +309,7 @@ const Users = () => {
                           <div>
                             <p style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{user.name}</p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>
-                              {shops.find(s => s.id === user.shop_id)?.name || 'No Shop Assigned'}
+                              {shops.find(s => s.id === user.shop_id)?.name || 'ບໍ່ມີຮ້ານຄ້າ'}
                             </p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>UID: {user.id.toString().slice(-6)}</p>
                           </div>
@@ -304,12 +323,12 @@ const Users = () => {
                       </td>
                       <td>
                         <span className={`badge ${user.role === 'admin' ? 'badge-danger' : user.role === 'staff' ? 'badge-blue' : 'badge-success'}`}>
-                          {user.role === 'admin' ? 'MANAGER' : user.role.toUpperCase()}
+                          {user.role === 'admin' ? 'ຜູ້ຈັດການ' : user.role === 'staff' ? 'ພະນັກງານ' : 'ຜູ້ໃຊ້'}
                         </span>
                       </td>
                       <td>
                         <p style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB') : 'Auto-Sync'}
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB') : 'ຊິງອັດຕະໂນມັດ'}
                         </p>
                       </td>
                       <td style={{ textAlign: 'right', paddingRight: '32px' }}>
@@ -344,7 +363,7 @@ const Users = () => {
                               </button>
                             </>
                           ) : (
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>View only</span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>ເບິ່ງຢ່າງດຽວ</span>
                           )}
                         </div>
                       </td>
@@ -364,11 +383,11 @@ const Users = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                    Showing <span style={{ color: 'var(--text-main)' }}>{indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> members
+                    ກຳລັງສະແດງ <span style={{ color: 'var(--text-main)' }}>{indexOfFirstItem + 1}</span> ຫາ <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> ຈາກ <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> ສະມາຊິກ
                   </p>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>ຈຳນວນ:</span>
                     <select 
                       value={itemsPerPage} 
                       onChange={(e) => {
@@ -487,8 +506,8 @@ const Users = () => {
                   <UserPlus size={28} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingUser ? 'Update Team Member' : 'Onboard New Member'}</h2>
-                  <p style={{ opacity: 0.5, fontSize: '0.9rem', fontWeight: 500 }}>Assign role and access scope</p>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingUser ? 'ແກ້ໄຂສະມາຊິກທີມ' : 'ເພີ່ມສະມາຊິກໃໝ່'}</h2>
+                  <p style={{ opacity: 0.5, fontSize: '0.9rem', fontWeight: 500 }}>ກຳນົດບົດບາດ ແລະ ຂອບເຂດການເຂົ້າເຖິງ</p>
                 </div>
                 <button 
                   onClick={() => setIsModalOpen(false)} 
@@ -508,17 +527,17 @@ const Users = () => {
               <form onSubmit={handleSubmit} style={{ padding: '40px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>FULL NAME</label>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>ຊື່ແທ້ ແລະ ນາມສະກຸນ</label>
                     <input 
                       type="text" required value={formData.name}
-                      placeholder="e.g. Alexander Pierce"
+                      placeholder="ເຊັ່ນ: ສົມໃຈ ວົງສຸວັນ"
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="input-premium"
                     />
                   </div>
 
                   <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>EMAIL ADDRESS</label>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: 'var(--text-main)' }}>ທີ່ຢູ່ອີເມວ</label>
                     <input 
                       type="email" required value={formData.email}
                       placeholder="alex@ipos-pro.com"
@@ -529,33 +548,33 @@ const Users = () => {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div className="form-group">
-                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>SET PASSWORD</label>
-                      <input 
-                        type="password" 
-                        required={!editingUser}
-                        value={formData.password}
-                        placeholder="••••••••"
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                        className="input-premium"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: isPasswordError ? '#dc2626' : 'inherit' }}>CONFIRM PASSWORD</label>
-                      <input 
-                        type="password" 
-                        required={!editingUser}
-                        value={formData.confirmPassword}
-                        placeholder="••••••••"
-                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                        className="input-premium"
-                        style={{ borderColor: isPasswordError ? '#dc2626' : undefined, background: '#f8fafc' }}
-                      />
-                    </div>
+                      <div className="form-group">
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ຕັ້ງລະຫັດຜ່ານ</label>
+                        <input 
+                          type="password" 
+                          required={!editingUser}
+                          value={formData.password}
+                          placeholder="••••••••"
+                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          className="input-premium"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px', color: isPasswordError ? '#dc2626' : 'inherit' }}>ຢືນຢັນລະຫັດຜ່ານ</label>
+                        <input 
+                          type="password" 
+                          required={!editingUser}
+                          value={formData.confirmPassword}
+                          placeholder="••••••••"
+                          onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                          className="input-premium"
+                          style={{ borderColor: isPasswordError ? '#dc2626' : undefined, background: '#f8fafc' }}
+                        />
+                      </div>
                   </div>
 
                   <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ACCESS ROLE</label>
+                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '10px' }}>ບົດບາດການເຂົ້າເຖິງ</label>
                     <div style={{ position: 'relative' }}>
                       <select 
                         value={formData.role}
@@ -565,9 +584,9 @@ const Users = () => {
                         className="input-premium"
                         style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
                       >
-                        <option value="user">Standard User</option>
-                        <option value="staff">Staff / Cashier</option>
-                        <option value="admin">Manager / Business Admin</option>
+                        <option value="user">ຜູ້ໃຊ້ທົ່ວໄປ</option>
+                        <option value="staff">ພະນັກງານ / ແຄັດເຊຍ</option>
+                        <option value="admin">ຜູ້ຈັດການ / ຜູ້ດູແລທຸລະກິດ</option>
                       </select>
                       <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                         <Filter size={16} color="var(--text-sidebar)" />
@@ -578,7 +597,7 @@ const Users = () => {
                   {(isSystemAdmin || currentUser?.role === 'admin') && (
                     <div className="form-group">
                       <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 800, marginBottom: '12px' }}>
-                        {formData.role === 'admin' ? 'ASSIGN ACCESSIBLE SHOPS (MULTI-SELECT)' : 'ASSIGN PRIMARY SHOP (SINGLE)'}
+                        {formData.role === 'admin' ? 'ກຳນົດຮ້ານຄ້າທີ່ເຂົ້າເຖິງໄດ້ (ເລືອກໄດ້ຫຼາຍ)' : 'ກຳນົດຮ້ານຄ້າຫຼັກ (ເລືອກໄດ້ໜຶ່ງ)'}
                       </label>
                       
                       {formData.role === 'admin' ? (
@@ -630,7 +649,7 @@ const Users = () => {
                             className="input-premium"
                             style={{ appearance: 'none', cursor: 'pointer', fontWeight: 600 }}
                           >
-                            <option value="">-- No Shop Assigned --</option>
+                             <option value="">-- ຍັງບໍ່ທັນກຳນົດຮ້ານ --</option>
                             {shops.map(shop => (
                               <option key={shop.id} value={shop.id}>{shop.name}</option>
                             ))}
@@ -643,10 +662,10 @@ const Users = () => {
 
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>
                         {formData.shop_ids.length === 0 
-                          ? '⚠️ No shops assigned (Visible to all your shops)' 
+                          ? '⚠️ ຍັງບໍ່ທັນກຳນົດຮ້ານ (ເຫັນໄດ້ທຸກສາຂາ)' 
                           : formData.role === 'admin' 
-                            ? `✓ Selected ${formData.shop_ids.length} shop(s)` 
-                            : `✓ Assigned to ${shops.find(s => s.id === formData.shop_ids[0])?.name}`}
+                            ? `✓ ເລືອກແລ້ວ ${formData.shop_ids.length} ສາຂາ` 
+                            : `✓ ກຳນົດໃຫ້: ${shops.find(s => s.id === formData.shop_ids[0])?.name}`}
                       </p>
                     </div>
                   )}
@@ -669,7 +688,7 @@ const Users = () => {
                       onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
                       onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
                     >
-                      Dismiss
+                      ຍົກເລີກ
                     </button>
                     <button 
                       type="submit" 
@@ -677,7 +696,7 @@ const Users = () => {
                       className="btn-primary"
                       style={{ flex: 1.8, justifyContent: 'center', opacity: isPasswordError ? 0.5 : 1, fontSize: '1rem' }}
                     >
-                      {editingUser ? 'Update Member' : 'Create Account'}
+                      {editingUser ? 'ບັນທຶກການປ່ຽນແປງ' : 'ສ້າງບັນຊີ'}
                     </button>
                   </div>
                 </div>

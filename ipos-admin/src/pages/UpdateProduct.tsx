@@ -136,7 +136,7 @@ const UpdateProduct = () => {
   if (fetching) return (
     <div style={{ padding: '100px', textAlign: 'center' }}>
       <div className="spinner" style={{ margin: '0 auto 24px', width: '50px', height: '50px' }}></div>
-      <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>SYNCHRONIZING...</p>
+      <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງຊິງຂໍ້ມູນ...</p>
     </div>
   );
 
@@ -156,8 +156,8 @@ const UpdateProduct = () => {
             <ChevronLeft size={24} color="var(--text-main)" />
           </button>
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>Update Item</h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>ID: {id?.slice(-8).toUpperCase()}</p>
+            <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>ແກ້ໄຂສິນຄ້າ</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>ລະຫັດ: {id?.slice(-8).toUpperCase()}</p>
           </div>
         </div>
 
@@ -167,10 +167,10 @@ const UpdateProduct = () => {
             onClick={() => navigate('/products')}
             style={{ padding: '12px 24px', borderRadius: '12px', border: '1px solid var(--border)', background: '#fff', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' }}
           >
-            Discard
+            ຍົກເລີກ
           </button>
           <button form="update-product-form" type="submit" disabled={loading} className="btn-primary" style={{ padding: '12px 32px', borderRadius: '12px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700 }}>
-            {loading ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <><Save size={18} /> Update Asset</>}
+            {loading ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <><Save size={18} /> ອັບເດດສິນຄ້າ</>}
           </button>
         </div>
       </div>
@@ -184,22 +184,22 @@ const UpdateProduct = () => {
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                 <Package size={22} />
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Core Details</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>ລາຍລະອຽດຫຼັກ</h2>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຊື່ສິນຄ້າ</label>
                 <input type="text" name="name" required value={formData.name} onChange={handleChange} className="input-premium" style={{ fontSize: '1.1rem', padding: '16px 20px' }} />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>UNIT OF MEASURE</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຫົວໜ່ວຍ</label>
                 <input type="text" name="unit" required value={formData.unit} onChange={handleChange} className="input-premium" />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>BRANCH ASSIGNMENT</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ສາຂາທີ່ຮັບຜິດຊອບ</label>
                 <div style={{ position: 'relative' }}>
                   <select name="shop_id" required value={formData.shop_id} onChange={handleShopChange} className="input-premium" style={{ appearance: 'none', background: '#fff', paddingRight: '40px' }}>
                     {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
@@ -210,28 +210,28 @@ const UpdateProduct = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>CATEGORY</label>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ໝວດໝູ່</label>
                   <select 
                     name="category_id"
                     value={formData.category_id}
                     onChange={handleChange}
                     className="input-premium"
                   >
-                    <option value="">Uncategorized</option>
+                    <option value="">ບໍ່ມີໝວດໝູ່</option>
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>SUPPLIER</label>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຜູ້ສະໜອງ (Supplier)</label>
                   <select 
                     name="supplier_id"
                     value={formData.supplier_id}
                     onChange={handleChange}
                     className="input-premium"
                   >
-                    <option value="">None</option>
+                    <option value="">ບໍ່ມີ</option>
                     {suppliers.map(sup => (
                       <option key={sup.id} value={sup.id}>{sup.name}</option>
                     ))}
@@ -245,7 +245,7 @@ const UpdateProduct = () => {
         {/* Right Side */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           <div className="card-premium" style={{ padding: '32px', textAlign: 'center' }}>
-             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '24px', textAlign: 'left' }}>Visual Representation</h2>
+             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '24px', textAlign: 'left' }}>ຮູບພາບສິນຄ້າ</h2>
              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
              {previewUrl ? (
                <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -257,7 +257,7 @@ const UpdateProduct = () => {
              ) : (
                <div onClick={() => fileInputRef.current?.click()} style={{ height: '240px', border: '2px dashed var(--border-strong)', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', cursor: 'pointer' }}>
                  <Upload size={32} color="var(--primary)" style={{ marginBottom: '16px' }} />
-                 <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>Replace Image</p>
+                 <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>ປ່ຽນຮູບພາບໃໝ່</p>
                </div>
              )}
           </div>
@@ -267,16 +267,16 @@ const UpdateProduct = () => {
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
                 <DollarSign size={22} />
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Pricing & Inventory</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>ລາຄາ ແລະ ສະຕັອກ</h2>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>PRICE (₭)</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ລາຄາ (₭)</label>
                 <input type="number" name="price" required value={formData.price} onChange={handleChange} className="input-premium" style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>STOCK</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຈຳນວນສະຕັອກ</label>
                 <div style={{ position: 'relative' }}>
                   <input type="number" name="stock" required value={formData.stock} onChange={handleChange} className="input-premium" style={{ fontWeight: 700 }} />
                   <Box size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
@@ -285,12 +285,12 @@ const UpdateProduct = () => {
             </div>
 
             <div style={{ marginTop: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>ALERT THRESHOLD (LOW STOCK)</label>
+              <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>ຈຸດເຕືອນສະຕັອກ (ໃກ້ໝົດ)</label>
               <div style={{ position: 'relative' }}>
                 <input type="number" name="min_stock_level" required value={formData.min_stock_level} onChange={handleChange} className="input-premium" style={{ fontWeight: 700, border: '1px solid #fee2e2' }} />
                 <AlertTriangle size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#ef4444' }} />
               </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>Notify me on dashboard when stock drops below this value.</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>ແຈ້ງເຕືອນໃນໜ້າ Dashboard ເມື່ອສະຕັອກຫຼຸດລົງຮອດຈຳນວນນີ້.</p>
             </div>
           </div>
         </div>

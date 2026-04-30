@@ -7,10 +7,10 @@ const Header = () => {
   // Localized role for display
   const displayRole = (role: string) => {
     switch (role?.toLowerCase()) {
-      case 'admin': return currentUser.shop_id ? 'Shop Manager' : 'System Admin';
-      case 'staff': return 'Staff';
-      case 'user': return 'User';
-      default: return role || 'Unknown';
+      case 'admin': return currentUser.shop_id ? 'ຜູ້ຈັດການຮ້ານ' : 'ຜູ້ດູແລລະບົບ';
+      case 'staff': return 'ພະນັກງານ';
+      case 'user': return 'ຜູ້ໃຊ້';
+      default: return role || 'ບໍ່ລະບຸ';
     }
   };
 
@@ -32,7 +32,7 @@ const Header = () => {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {/* Notifications */}
-        <button className="header-action-btn" style={{ position: 'relative' }} title="Notifications">
+        <button className="header-action-btn" style={{ position: 'relative' }} title="ການແຈ້ງເຕືອນ">
           <Bell size={20} />
           <div style={{ 
             position: 'absolute', 

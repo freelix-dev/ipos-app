@@ -136,8 +136,8 @@ const ReceiptSettings = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Receipt Designer</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Customize the physical touchpoint of your customer experience</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ອອກແບບໃບບິນ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ປັບແຕ່ງຮູບແບບໃບບິນສຳລັບການບໍລິການລູກຄ້າຂອງທ່ານ</p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <select 
@@ -150,7 +150,7 @@ const ReceiptSettings = () => {
           </select>
           <button onClick={handleSave} disabled={saving || !selectedShopId} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {saving ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} />}
-            <span>Commit Design</span>
+            <span>ບັນທຶກການອອກແບບ</span>
           </button>
         </div>
       </div>
@@ -158,7 +158,7 @@ const ReceiptSettings = () => {
       {success && (
         <div style={{ marginBottom: '32px', padding: '20px', background: '#dcfce7', borderLeft: '4px solid #10b981', borderRadius: '12px', color: '#15803d', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '12px' }}>
           <CheckCircle2 size={20} />
-          Receipt configuration synchronized for selected branch!
+          ການຕັ້ງຄ່າໃບບິນໄດ້ຖືກຊິງຂໍ້ມູນສຳລັບສາຂາທີ່ເລືອກແລ້ວ!
         </div>
       )}
 
@@ -168,12 +168,12 @@ const ReceiptSettings = () => {
           <div className="card-premium" style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: 'var(--shadow-premium)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Type size={20} color="var(--primary)" />
-              Typography & Content
+              ເນື້ອໃນ ແລະ ຂໍ້ຄວາມ
             </h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>HEADER TEXT</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ຂໍ້ຄວາມສ່ວນຫົວ (HEADER)</label>
                 <textarea 
                   value={settings.header_text} 
                   onChange={(e) => handleChange('header_text', e.target.value)}
@@ -183,7 +183,7 @@ const ReceiptSettings = () => {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>FOOTER TEXT</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ຂໍ້ຄວາມສ່ວນທ້າຍ (FOOTER)</label>
                 <textarea 
                   value={settings.footer_text} 
                   onChange={(e) => handleChange('footer_text', e.target.value)}
@@ -198,7 +198,7 @@ const ReceiptSettings = () => {
           <div className="card-premium" style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: 'var(--shadow-premium)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ImageIcon size={20} color="var(--primary)" />
-              Brand Assets & Typography
+              ໂລໂກ້ ແລະ ຮູບແບບຕົວອັກສອນ
             </h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -216,12 +216,12 @@ const ReceiptSettings = () => {
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '12px', opacity: 0.6 }}>STORE LOGO (BLACK & WHITE RECOMMENDED)</label>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '12px', opacity: 0.6 }}>ໂລໂກ້ຮ້ານ (ແນະນຳເປັນສີຂາວ-ດຳ)</label>
                   <div style={{ display: 'flex', gap: '12px' }}>
                     <input type="file" id="logo-upload" hidden onChange={handleLogoUpload} accept="image/*" />
-                    <button onClick={() => document.getElementById('logo-upload')?.click()} className="btn-secondary" style={{ padding: '10px 20px', borderRadius: '12px' }}>Upload Image</button>
+                    <button onClick={() => document.getElementById('logo-upload')?.click()} className="btn-secondary" style={{ padding: '10px 20px', borderRadius: '12px' }}>ອັບໂຫຼດຮູບພາບ</button>
                     {settings.logo_path && (
-                      <button onClick={() => handleChange('logo_path', '')} style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                      <button onClick={() => handleChange('logo_path', '')} style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}>ລຶບອອກ</button>
                     )}
                   </div>
                 </div>
@@ -229,8 +229,8 @@ const ReceiptSettings = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '24px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                 <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>BASE FONT SIZE</h4>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', opacity: 0.6 }}>Adjust the overall text size on the printed bill.</p>
+                  <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>ຂະໜາດຕົວອັກສອນຫຼັກ</h4>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', opacity: 0.6 }}>ປັບຂະໜາດຕົວອັກສອນລວມຂອງໃບບິນທີ່ພິມອອກ.</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -239,19 +239,19 @@ const ReceiptSettings = () => {
                         onClick={() => handleChange('font_size', 20)}
                         style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 20 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 20 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
                       >
-                        Small (20)
+                        ນ້ອຍ (20)
                       </button>
                       <button 
                         onClick={() => handleChange('font_size', 22)}
                         style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 22 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 22 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
                       >
-                        Medium (22)
+                        ກາງ (22)
                       </button>
                       <button 
                         onClick={() => handleChange('font_size', 24)}
                         style={{ padding: '10px 14px', borderRadius: '12px', border: settings.font_size === 24 ? '2px solid var(--primary)' : '1px solid var(--border)', background: settings.font_size === 24 ? 'var(--primary-light)' : 'white', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', transition: 'all 0.2s' }}
                       >
-                        Large (24)
+                        ໃຫຍ່ (24)
                       </button>
                     </div>
                   </div>
@@ -262,7 +262,7 @@ const ReceiptSettings = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Hash size={18} color="var(--primary)" />
-                    <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>QR Code Attachment</span>
+                    <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>ແນບ QR Code ຊຳລະເງິນ</span>
                   </div>
                   <label className="switch">
                     <input type="checkbox" checked={settings.show_qr} onChange={(e) => handleChange('show_qr', e.target.checked)} />
@@ -285,7 +285,7 @@ const ReceiptSettings = () => {
                       )}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '12px', opacity: 0.6 }}>QR IMAGE (PROMPTPAY, ETC.)</label>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '12px', opacity: 0.6 }}>ຮູບ QR Code (ສຳລັບຮັບເງິນ)</label>
                       <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                         <input 
                           type="file" 
@@ -313,14 +313,14 @@ const ReceiptSettings = () => {
                           style={{ padding: '10px 20px', borderRadius: '12px' }}
                           disabled={qrUploading}
                         >
-                          {qrUploading ? 'Uploading...' : 'Upload QR Image'}
+                          {qrUploading ? 'ກຳລັງອັບໂຫຼດ...' : 'ອັບໂຫຼດຮູບ QR'}
                         </button>
                         {settings.qr_image_url && (
                           <button 
                             onClick={() => handleChange('qr_image_url', '')} 
                             style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.8rem', background: 'none', border: 'none', cursor: 'pointer' }}
                           >
-                            Remove
+                            ລຶບອອກ
                           </button>
                         )}
                       </div>
@@ -334,16 +334,16 @@ const ReceiptSettings = () => {
           <div className="card-premium" style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: 'var(--shadow-premium)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 900, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Eye size={20} color="var(--primary)" />
-              Visibility Controls
+              ການສະແດງຜົນຂໍ້ມູນ
             </h3>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               {[
-                { key: 'logo_enabled', label: 'Store Logo', icon: <ImageIcon size={18} /> },
-                { key: 'show_phone', label: 'Phone Number', icon: <Phone size={18} /> },
-                { key: 'show_address', label: 'Store Address', icon: <MapPin size={18} /> },
-                { key: 'show_order_id', label: 'Order Reference', icon: <Hash size={18} /> },
-                { key: 'show_staff_name', label: 'Staff Identity', icon: <User size={18} /> }
+                { key: 'logo_enabled', label: 'ໂລໂກ້ຮ້ານ', icon: <ImageIcon size={18} /> },
+                { key: 'show_phone', label: 'ເບີໂທລະສັບ', icon: <Phone size={18} /> },
+                { key: 'show_address', label: 'ທີ່ຢູ່ຮ້ານ', icon: <MapPin size={18} /> },
+                { key: 'show_order_id', label: 'ເລກທີບິນ', icon: <Hash size={18} /> },
+                { key: 'show_staff_name', label: 'ຊື່ພະນັກງານ', icon: <User size={18} /> }
               ].map((item) => (
                 <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: '#f8fafc', borderRadius: '16px', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -363,7 +363,7 @@ const ReceiptSettings = () => {
         {/* Preview Side */}
         <div style={{ position: 'sticky', top: '120px' }}>
           <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-             <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '0.1em' }}>LIVE PREVIEW</span>
+             <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '0.1em' }}>ຕົວຢ່າງໃບບິນ</span>
           </div>
           <div style={{ 
             background: '#fff', 
@@ -375,7 +375,7 @@ const ReceiptSettings = () => {
             fontFamily: "'Courier New', Courier, monospace",
             color: '#333',
             border: '1px solid #ddd',
-            fontSize: settings.font_size === 'small' ? '0.7rem' : settings.font_size === 'large' ? '1rem' : '0.85rem'
+            fontSize: settings.font_size === 20 ? '0.7rem' : settings.font_size === 24 ? '1rem' : '0.85rem'
           }}>
             {settings.logo_enabled && (
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
@@ -391,8 +391,8 @@ const ReceiptSettings = () => {
             
             <div style={{ padding: '24px', textAlign: 'center' }}>
               <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{shops.find(s => s.id === selectedShopId)?.name || 'YOUR STORE'}</h3>
-              {settings.show_address && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>123 Merchant Way, City Center</p>}
-              {settings.show_phone && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>TEL: +856 20 12345678</p>}
+              {settings.show_address && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>ບ້ານ ເຂດໃຈກາງເມືອງ, ນະຄອນຫຼວງວຽງຈັນ</p>}
+              {settings.show_phone && <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.6 }}>ໂທ: +856 20 12345678</p>}
               
               <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
               
@@ -404,11 +404,11 @@ const ReceiptSettings = () => {
               )}
               
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px' }}>
-                <span>Item Name x2</span>
+                <span>ລາຍການສິນຄ້າ x2</span>
                 <span>50,000</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '8px' }}>
-                <span>Another Product</span>
+                <span>ສິນຄ້າອື່ນໆ</span>
                 <span>25,000</span>
               </div>
               
@@ -427,7 +427,7 @@ const ReceiptSettings = () => {
               
               <div style={{ margin: '16px 0', borderTop: '1px dashed #ddd' }} />
               
-              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>{settings.footer_text || 'ຂອບໃຈที่ໃຊ້ບໍລິການ'}</p>
+              <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>{settings.footer_text || 'ຂອບໃຈທີ່ໃຊ້ບໍລິການ'}</p>
             </div>
             
             {settings.show_qr && (
@@ -443,7 +443,7 @@ const ReceiptSettings = () => {
                     <div style={{ width: '80px', height: '80px', margin: '0 auto', border: '4px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ width: '60px', height: '60px', border: '2px solid #333' }}></div>
                     </div>
-                    <p style={{ fontSize: '0.6rem', marginTop: '8px', fontWeight: 'bold', opacity: 0.5 }}>Upload QR image to preview</p>
+                    <p style={{ fontSize: '0.6rem', marginTop: '8px', fontWeight: 'bold', opacity: 0.5 }}>ອັບໂຫຼດຮູບ QR ເພື່ອເບິ່ງຕົວຢ່າງ</p>
                   </>
                 )}
               </div>

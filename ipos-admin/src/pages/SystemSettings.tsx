@@ -54,27 +54,27 @@ const SystemSettings = () => {
 
   const sections = [
     {
-      title: 'Identity & Brand',
+      title: 'ເອກະລັກ ແລະ ແບຣນ',
       icon: <Layout size={20} />,
       items: [
-        { key: 'app_name', label: 'APPLICATION NAME', type: 'text', description: 'Display name across the ecosystem' },
-        { key: 'business_tagline', label: 'BUSINESS TAGLINE', type: 'text', description: 'Brief description for headers' }
+        { key: 'app_name', label: 'ຊື່ແອັບພລິເຄຊັນ', type: 'text', description: 'ຊື່ທີ່ຈະສະແດງໃນທຸກລະບົບ' },
+        { key: 'business_tagline', label: 'ຄຳຂວັນທຸລະກິດ', type: 'text', description: 'ຄຳອະທິບາຍຫຍໍ້ສຳລັບສ່ວນຫົວ' }
       ]
     },
     {
-      title: 'Financial Parameters',
+      title: 'ພາລາມິເຕີທາງການເງິນ',
       icon: <Globe size={20} />,
       items: [
-        { key: 'currency_primary', label: 'PRIMARY CURRENCY', type: 'text', description: 'Base currency for accounting (e.g. LAK)' },
-        { key: 'tax_rate', label: 'DEFAULT TAX RATE (%)', type: 'number', description: 'Standard VAT/Tax percentage' }
+        { key: 'currency_primary', label: 'ສະກຸນເງິນຫຼັກ', type: 'text', description: 'ສະກຸນເງິນພື້ນຖານສຳລັບການບັນຊີ (ຕົວຢ່າງ: LAK)' },
+        { key: 'tax_rate', label: 'ອັດຕາພາສີເລີ່ມຕົ້ນ (%)', type: 'number', description: 'ເປີເຊັນອາກອນ/VAT ມາດຕະຖານ' }
       ]
     },
     {
-      title: 'Operational Logic',
+      title: 'ຕັກກະການດຳເນີນງານ',
       icon: <Smartphone size={20} />,
       items: [
-        { key: 'allow_negative_stock', label: 'NEGATIVE STOCK ALLOWANCE', type: 'select', options: ['true', 'false'], description: 'Allow sales even if stock is zero' },
-        { key: 'session_timeout', label: 'SESSION TIMEOUT (MIN)', type: 'number', description: 'Inactivity limit before auto-logout' }
+        { key: 'allow_negative_stock', label: 'ອະນຸຍາດໃຫ້ສະຕັອກຕິດລົບ', type: 'select', options: ['true', 'false'], description: 'ອະນຸຍາດໃຫ້ຂາຍໄດ້ເຖິງວ່າສະຕັອກຈະເປັນສູນ' },
+        { key: 'session_timeout', label: 'ເວລາໝົດອາຍຸເຊດຊັນ (ນາທີ)', type: 'number', description: 'ກຳນົດເວລາທີ່ບໍ່ມີການເຄື່ອນໄຫວກ່ອນອອກຈາກລະບົບອັດຕະໂນມັດ' }
       ]
     }
   ];
@@ -83,18 +83,18 @@ const SystemSettings = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Global Parameters</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>System-wide configuration and environmental variables</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ຕັ້ງຄ່າລະບົບລວມ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ການກຳນົດຄ່າທົ່ວລະບົບ ແລະ ຕົວປ່ຽນສະພາບແວດລ້ອມຕ່າງໆ</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {saving ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} />}
-          <span>{saving ? 'Syncing...' : 'Commit Changes'}</span>
+          <span>{saving ? 'ກຳລັງຊິງຂໍ້ມູນ...' : 'ບັນທຶກການປ່ຽນແປງ'}</span>
         </button>
       </div>
 
       {success && (
         <div style={{ marginBottom: '32px', padding: '20px', background: '#dcfce7', borderLeft: '4px solid #10b981', borderRadius: '12px', color: '#15803d', fontWeight: 800 }}>
-          System parameters updated successfully!
+          ອັບເດດພາລາມິເຕີລະບົບສຳເລັດແລ້ວ!
         </div>
       )}
 
@@ -150,14 +150,14 @@ const SystemSettings = () => {
                 <HardDrive size={32} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>Infrastructure State</h3>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>ສະຖານະໂຄງສ້າງພື້ນຖານ</h3>
                 <p style={{ opacity: 0.6, fontWeight: 500 }}>System core version 2.4.0-stable | Database: MySQL 8.0</p>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(16, 185, 129, 0.2)', padding: '8px 16px', borderRadius: '12px', color: '#10b981', fontWeight: 800, fontSize: '0.85rem' }}>
                   <ShieldCheck size={16} />
-                  <span>ALL SYSTEMS OPERATIONAL</span>
+                  <span>ທຸກລະບົບເຮັດວຽກປົກກະຕິ</span>
                </div>
             </div>
           </div>

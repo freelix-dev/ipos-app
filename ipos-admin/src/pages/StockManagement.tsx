@@ -104,9 +104,9 @@ const StockManagement = () => {
   };
 
   const getStockStatus = (stock: number) => {
-    if (stock <= 0) return { color: '#ef4444', label: 'CRITICAL: OUT', badge: 'badge-danger' };
-    if (stock < 10) return { color: '#f59e0b', label: 'WARNING: LOW', badge: 'badge-warning' };
-    return { color: '#10b981', label: 'OPTIMAL', badge: 'badge-success' };
+    if (stock <= 0) return { color: '#ef4444', label: 'ວິກິດ: ໝົດແລ້ວ', badge: 'badge-danger' };
+    if (stock < 10) return { color: '#f59e0b', label: 'ເຕືອນ: ໃກ້ໝົດ', badge: 'badge-warning' };
+    return { color: '#10b981', label: 'ປົກກະຕິ', badge: 'badge-success' };
   };
 
   // Filtering Logic
@@ -130,8 +130,8 @@ const StockManagement = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Inventory Control</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>High-precision stock level management and auditing</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ຄວບຄຸມສະຕັອກສິນຄ້າ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຈັດການລະດັບສິນຄ້າຄົງຄັງ ແລະ ກວດສອບຄວາມຖືກຕ້ອງຢ່າງລະອຽດ</p>
         </div>
         
         {message && (
@@ -165,7 +165,7 @@ const StockManagement = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Filter logistics items by SKU, name, or metadata..." 
+                placeholder="ຄົ້ນຫາລາຍການສິນຄ້າດ້ວຍ SKU, ຊື່ ຫຼື ຂໍ້ມູນອື່ນໆ..." 
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -199,7 +199,7 @@ const StockManagement = () => {
                     color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <option value="">All Branches</option>
+                  <option value="">ທຸກສາຂາ</option>
                   {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>{shop.name}</option>
                   ))}
@@ -215,19 +215,35 @@ const StockManagement = () => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
-              {['Global Supply', 'High Availability', 'Critical Stock', 'Depleted'].map((t) => (
+              {['ສິນຄ້າທັງໝົດ', 'ສິນຄ້າມີພຽງພໍ', 'ສິນຄ້າໃກ້ໝົດ', 'ໝົດແລ້ວ'].map((t) => (
                 <button 
                   key={t}
                   onClick={() => {
-                    setActiveTab(t);
+                    const mapTab = (txt: string) => {
+                      if (txt === 'ສິນຄ້າທັງໝົດ') return 'Global Supply';
+                      if (txt === 'ສິນຄ້າມີພຽງພໍ') return 'High Availability';
+                      if (txt === 'ສິນຄ້າໃກ້ໝົດ') return 'Critical Stock';
+                      if (txt === 'ໝົດແລ້ວ') return 'Depleted';
+                      return txt;
+                    };
+                    setActiveTab(mapTab(t));
                     setCurrentPage(1);
                   }}
                   style={{
                     padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                    background: t === activeTab ? '#fff' : 'transparent',
-                    color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
+                    background: (t === 'ສິນຄ້າທັງໝົດ' && activeTab === 'Global Supply') || 
+                               (t === 'ສິນຄ້າມີພຽງພໍ' && activeTab === 'High Availability') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Critical Stock') || 
+                               (t === 'ໝົດແລ້ວ' && activeTab === 'Depleted') ? '#fff' : 'transparent',
+                    color: (t === 'ສິນຄ້າທັງໝົດ' && activeTab === 'Global Supply') || 
+                               (t === 'ສິນຄ້າມີພຽງພໍ' && activeTab === 'High Availability') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Critical Stock') || 
+                               (t === 'ໝົດແລ້ວ' && activeTab === 'Depleted') ? 'var(--primary)' : 'var(--text-muted)',
                     fontWeight: 800, fontSize: '0.85rem',
-                    boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    boxShadow: (t === 'ສິນຄ້າທັງໝົດ' && activeTab === 'Global Supply') || 
+                               (t === 'ສິນຄ້າມີພຽງພໍ' && activeTab === 'High Availability') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Critical Stock') || 
+                               (t === 'ໝົດແລ້ວ' && activeTab === 'Depleted') ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
@@ -238,30 +254,30 @@ const StockManagement = () => {
 
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>TELEMETRY ACTIVE</span>
-               </div>
-               <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
-               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredProducts.length} LOGS Found</span>
-            </div>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ຊິງຂໍ້ມູນອັດຕະໂນມັດ</span>
+                </div>
+                <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredProducts.length} ລາຍການສິນຄ້າ</span>
+             </div>
           </div>
         </div>
 
         {loading ? (
           <div style={{ padding: '100px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Syncing logistics data...</p>
+             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງດຶງຂໍ້ມູນສະຕັອກສິນຄ້າ...</p>
           </div>
         ) : (
           <>
             <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: '32px', width: '35%' }}>Logistic Item</th>
-                  <th>Volume ID</th>
-                  <th>Supply Health</th>
-                  <th style={{ width: '180px' }}>Stock Adjustment</th>
-                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>Operational Sync</th>
+                  <th style={{ paddingLeft: '32px', width: '35%' }}>ລາຍການສິນຄ້າ</th>
+                  <th>ຈຳນວນຄົງເຫຼືອ</th>
+                  <th>ສະຖານະສະຕັອກ</th>
+                  <th style={{ width: '180px' }}>ປັບປຸງສະຕັອກ</th>
+                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>ການຈັດການ</th>
                 </tr>
               </thead>
               <tbody>
@@ -289,7 +305,7 @@ const StockManagement = () => {
                             {selectedShopId === '' && (
                               <p style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800 }}>{product.shop_name}</p>
                             )}
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>METRIC: {product.unit.toUpperCase()}</p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>ຫົວໜ່ວຍ: {product.unit.toUpperCase()}</p>
                           </div>
                         </div>
                       </td>
@@ -320,10 +336,10 @@ const StockManagement = () => {
                             }}
                           >
                             <Edit3 size={16} />
-                            <span>ADJUST</span>
+                            <span>ປັບປຸງ</span>
                           </button>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Authorized Only</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>ສະເພາະຜູ້ເບິ່ງແຍງ</span>
                         )}
                       </td>
                     </tr>
@@ -343,11 +359,11 @@ const StockManagement = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                  Showing <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> items
+                  ກຳລັງສະແດງ <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> ຫາ <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> ຈາກ <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> ລາຍການ
                 </p>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>ຈຳນວນ:</span>
                   <select 
                     value={itemsPerPage} 
                     onChange={(e) => {
@@ -459,15 +475,15 @@ const StockManagement = () => {
                 <img src={`${IMAGE_BASE_URL}/${selectedProduct.imagePath}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e: any) => { e.target.src = `${IMAGE_BASE_URL}/assets/images/default.png`; }} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Inventory Flux</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>ປັບປຸງສະຕັອກສິນຄ້າ</h2>
                 <p style={{ fontWeight: 800, color: 'var(--primary)' }}>{selectedProduct.name}</p>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>CURRENT BALANCE: {selectedProduct.stock} {selectedProduct.unit.toUpperCase()}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>ຈຳນວນປັດຈຸບັນ: {selectedProduct.stock} {selectedProduct.unit.toUpperCase()}</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Adjustment Quantum (±)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ຈຳນວນທີ່ປ່ຽນແປງ (±)</label>
                 <div style={{ position: 'relative' }}>
                   <Package size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
                   <input 
@@ -476,14 +492,14 @@ const StockManagement = () => {
                     style={{ paddingLeft: '48px' }}
                     value={adjustAmount}
                     onChange={(e) => setAdjustAmount(e.target.value)}
-                    placeholder="e.g. 50 or -10"
+                    placeholder="ຕົວຢ່າງ: 50 ຫຼື -10"
                   />
                 </div>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 600 }}>* Use positive values to ADD, negative to SUBTRACT</p>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 600 }}>* ໃຊ້ຄ່າບວກເພື່ອ ເພີ່ມ, ຄ່າລົບເພື່ອ ຫຼຸດ</p>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Movement Vector</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ຮູບແບບການປັບປຸງ</label>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button 
                     onClick={() => setAdjustType('Restock')}
@@ -495,7 +511,7 @@ const StockManagement = () => {
                       fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'var(--transition)'
                     }}
                   >
-                    <ArrowUpCircle size={18} /> RESTOCK
+                    <ArrowUpCircle size={18} /> ເພີ່ມສະຕັອກ
                   </button>
                   <button 
                     onClick={() => setAdjustType('Adjustment')}
@@ -507,32 +523,32 @@ const StockManagement = () => {
                       fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'var(--transition)'
                     }}
                   >
-                    <RefreshCw size={18} /> ADJUST
+                    <RefreshCw size={18} /> ປັບປຸງສະຕັອກ
                   </button>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Audit Justification</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ເຫດຜົນໃນການປັບປຸງ (Audit)</label>
                 <textarea 
                   className="input-premium"
                   style={{ height: '80px', resize: 'none' }}
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
-                  placeholder="Why is this adjustment necessary? (e.g., New delivery, Damage, Stock count error)..."
+                  placeholder="ລະບຸເຫດຜົນໃນການປັບປຸງ (ເຊັ່ນ: ສິນຄ້າເຂົ້າໃໝ່, ສິນຄ້າເປ່ເພ, ນັບສະຕັອກຜິດ)..."
                 />
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '16px' }}>
-              <button onClick={() => setShowAdjustModal(false)} className="btn-secondary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>Cancel</button>
+              <button onClick={() => setShowAdjustModal(false)} className="btn-secondary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>ຍົກເລີກ</button>
               <button 
                 onClick={handleAdjustStock}
                 disabled={isAdjusting || !adjustAmount || !adjustReason}
                 className="btn-primary" 
                 style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}
               >
-                {isAdjusting ? 'Processing...' : 'Apply Change'}
+                {isAdjusting ? 'ກຳລັງດຳເນີນການ...' : 'ຢືນຢັນການປ່ຽນແປງ'}
               </button>
             </div>
           </div>

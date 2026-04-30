@@ -92,31 +92,31 @@ const AdminInsights = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Network Intelligence</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Comprehensive ecosystem analytics and performance metrics</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>ຂໍ້ມູນເຄືອຂ່າຍອັດສະລິຍະ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ການວິເຄາະລະບົບນິເວດທີ່ຄົບຖ້ວນ ແລະ ຕົວຊີ້ວັດປະສິດທິພາບ</p>
         </div>
         <button onClick={fetchGlobalStats} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <RefreshCw size={20} />
-          <span>Refresh Data</span>
+          <span>ໂຫຼດຂໍ້ມູນໃໝ່</span>
         </button>
       </div>
 
       <div className="stats-grid">
         <StatCard 
-          title="Active Partnerships" 
+          title="ຄູ່ຮ່ວມງານທີ່ເຄື່ອນໄຫວ" 
           value={stats.totalShops} 
           icon={<Users size={24} />} 
           color="#10b981" 
-          label="REGISTERED MERCHANT ENTITIES"
+          label="ຫົວໜ່ວຍທຸລະກິດທີ່ລົງທະບຽນ"
         />
         {stats.globalVolume.map((v: any, i: number) => (
           <StatCard 
             key={i}
-            title={`30D Vol. (${v.currency})`} 
+            title={`ບໍລິມາດ 30 ວັນ (${v.currency})`} 
             value={formatCurrency(v.revenue, v.currency)} 
             icon={<TrendingUp size={24} />} 
             color="#3b82f6" 
-            label={`${v.count} TRANSACTIONS PROCESSED`}
+            label={`${v.count} ທຸລະກຳທີ່ດຳເນີນການແລ້ວ`}
           />
         ))}
       </div>
@@ -126,8 +126,8 @@ const AdminInsights = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
             <div>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Top Growth Partners</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>RANKED BY TRANSACTION VOLUME</p>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>ຄູ່ຮ່ວມງານທີ່ເຕີບໂຕສູງສຸດ</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>ຈັດອັນດັບຕາມບໍລິມາດທຸລະກຳ</p>
             </div>
             <Crown size={24} color="#f59e0b" />
           </div>
@@ -141,12 +141,12 @@ const AdminInsights = () => {
                   </div>
                   <div>
                     <p style={{ fontWeight: 800, fontSize: '1.05rem' }}>{shop.name}</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{shop.orderCount} ORDERS PROCESSED</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{shop.orderCount} ອໍເດີທີ່ດຳເນີນການແລ້ວ</p>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ fontWeight: 900, color: 'var(--primary)' }}>{formatCurrency(shop.totalRevenue, shop.currency)}</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>GROSS VOLUME</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>ບໍລິມາດລວມ</p>
                 </div>
               </div>
             ))}
@@ -157,8 +157,8 @@ const AdminInsights = () => {
         <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '40px', boxShadow: 'var(--shadow-premium)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
             <div>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>Network Volume (LAK)</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>AGGREGATE PERFORMANCE TRENDS</p>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 900 }}>ບໍລິມາດເຄືອຂ່າຍ (LAK)</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>ແນວໂນ້ມປະສິດທິພາບໂດຍລວມ</p>
             </div>
             <BarChart2 size={24} color="var(--primary)" />
           </div>

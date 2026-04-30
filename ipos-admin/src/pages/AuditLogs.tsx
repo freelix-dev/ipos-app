@@ -72,37 +72,37 @@ const AuditLogs = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Audit Trail</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>System activity monitoring and security forensics</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ບັນທຶກການກວດສອບ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຕິດຕາມການເຄື່ອນໄຫວຂອງລະບົບ ແລະ ຄວາມປອດໄພທັງໝົດ</p>
         </div>
         <button onClick={fetchLogs} className="btn-primary" style={{ background: '#fff', color: 'var(--primary)', border: '1px solid var(--primary)' }}>
-          Refresh Log Trace
+          ໂຫຼດຂໍ້ມູນຄືນໃໝ່
         </button>
       </div>
 
       <div className="card-premium" style={{ background: '#fff', borderRadius: '32px', padding: '32px', marginBottom: '32px', boxShadow: 'var(--shadow-premium)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>TARGET SHOP</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ສາຂາທີ່ຕ້ອງການ</label>
             <select value={filters.shopId} onChange={e => handleFilterChange('shopId', e.target.value)} className="input-premium">
-              <option value="">All Branches</option>
+              <option value="">ທຸກສາຂາ</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ACTION TYPE</label>
-            <input type="text" placeholder="e.g. Delete, Login..." value={filters.action} onChange={e => handleFilterChange('action', e.target.value)} className="input-premium" />
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ປະເພດການກະທຳ</label>
+            <input type="text" placeholder="ຕົວຢ່າງ: ລຶບ, ເຂົ້າລະບົບ..." value={filters.action} onChange={e => handleFilterChange('action', e.target.value)} className="input-premium" />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>START DATE</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ວັນທີເລີ່ມຕົ້ນ</label>
             <input type="date" value={filters.startDate} onChange={e => handleFilterChange('startDate', e.target.value)} className="input-premium" />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>END DATE</label>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ວັນທີສິ້ນສຸດ</label>
             <input type="date" value={filters.endDate} onChange={e => handleFilterChange('endDate', e.target.value)} className="input-premium" />
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <button onClick={fetchLogs} className="btn-primary" style={{ width: '100%', height: '54px' }}>Apply Filter</button>
+            <button onClick={fetchLogs} className="btn-primary" style={{ width: '100%', height: '54px' }}>ນຳໃຊ້ຕົວຕອງ</button>
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@ const AuditLogs = () => {
         ) : logs.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '100px', background: '#fff', borderRadius: '32px' }}>
              <Activity size={48} opacity={0.2} style={{ marginBottom: '16px' }} />
-             <p style={{ fontWeight: 800, color: 'var(--text-muted)' }}>No activity logs found for current criteria.</p>
+             <p style={{ fontWeight: 800, color: 'var(--text-muted)' }}>ບໍ່ພົບຂໍ້ມູນການເຄື່ອນໄຫວຕາມເງື່ອນໄຂທີ່ເລືອກ.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -138,11 +138,11 @@ const AuditLogs = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                     <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--text-main)' }}>{log.action}</span>
                     <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border-strong)' }}></div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>{log.target_type || 'SYSTEM'}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>{log.target_type || 'ລະບົບ'}</span>
                   </div>
                   <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                    <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{log.user_name || 'System Auto'}</span> 
-                    {log.shop_name && <span style={{ marginLeft: '8px' }}>at <span style={{ fontWeight: 800 }}>{log.shop_name}</span></span>}
+                    <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{log.user_name || 'ລະບົບອັດຕະໂນມັດ'}</span> 
+                    {log.shop_name && <span style={{ marginLeft: '8px' }}>ທີ່ຮ້ານ <span style={{ fontWeight: 800 }}>{log.shop_name}</span></span>}
                   </p>
                   {log.details && (
                     <div style={{ marginTop: '12px', padding: '12px 16px', background: '#f8fafc', borderRadius: '12px', fontSize: '0.85rem', color: 'var(--text-muted)', border: '1px dashed var(--border-strong)' }}>

@@ -84,8 +84,8 @@ const StockHistory = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px' }}>Inventory Ledger</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Comprehensive audit trail of global stock movements</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px' }}>ບັນທຶກການເຄື່ອນໄຫວສະຕັອກ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ກວດສອບປະຫວັດການເຂົ້າ-ອອກ ແລະ ການປ່ຽນແປງສິນຄ້າທັງໝົດໃນລະບົບ</p>
         </div>
       </div>
 
@@ -96,7 +96,7 @@ const StockHistory = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Filter by product, order ID, or reason..." 
+                placeholder="ຄົ້ນຫາຕາມຊື່ສິນຄ້າ, ເລກທີບິນ ຫຼື ເຫດຜົນ..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ width: '100%', height: '48px', padding: '0 16px 0 48px', borderRadius: '14px', border: '1px solid var(--border-strong)', background: '#f8fafc', fontWeight: 600 }}
@@ -108,11 +108,11 @@ const StockHistory = () => {
               onChange={(e) => setTypeFilter(e.target.value)}
               style={{ padding: '0 16px', height: '48px', borderRadius: '14px', border: '1px solid var(--border-strong)', background: '#fff', fontWeight: 700, color: 'var(--primary)', outline: 'none' }}
             >
-              <option value="All">All Movements</option>
-              <option value="Sale">Sales Only</option>
-              <option value="Restock">Restocks Only</option>
-              <option value="Adjustment">Adjustments</option>
-              <option value="Void">Voids / Returns</option>
+              <option value="All">ການເຄື່ອນໄຫວທັງໝົດ</option>
+              <option value="Sale">ສະເພາະການຂາຍ</option>
+              <option value="Restock">ສະເພາະການເພີ່ມສະຕັອກ</option>
+              <option value="Adjustment">ການປັບປຸງສະຕັອກ</option>
+              <option value="Void">ການຄືນສິນຄ້າ / ຍົກເລີກ</option>
             </select>
           </div>
 
@@ -125,7 +125,7 @@ const StockHistory = () => {
               }}
               style={{ height: '48px', padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border-strong)', fontWeight: 800, color: 'var(--primary)' }}
             >
-              <option value="">Global Network View</option>
+              <option value="">ພາບລວມທຸກສາຂາ</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           )}
@@ -134,18 +134,18 @@ const StockHistory = () => {
         {loading ? (
           <div style={{ padding: '100px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Retrieving chronological stock logs...</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງດຶງຂໍ້ມູນປະຫວັດສະຕັອກ...</p>
           </div>
         ) : (
           <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr>
-                <th style={{ paddingLeft: '32px' }}>Execution Date</th>
-                <th>Product Information</th>
-                <th>Movement Vector</th>
-                <th>Quantity Shift</th>
-                <th>Justification / Context</th>
-                <th style={{ textAlign: 'right', paddingRight: '32px' }}>Operator</th>
+                <th style={{ paddingLeft: '32px' }}>ວັນທີດຳເນີນການ</th>
+                <th>ຂໍ້ມູນສິນຄ້າ</th>
+                <th>ປະເພດການເຄື່ອນໄຫວ</th>
+                <th>ຈຳນວນທີ່ປ່ຽນແປງ</th>
+                <th>ເຫດຜົນ / ໝາຍເຫດ</th>
+                <th style={{ textAlign: 'right', paddingRight: '32px' }}>ຜູ້ດຳເນີນການ</th>
               </tr>
             </thead>
             <tbody>
@@ -170,7 +170,7 @@ const StockHistory = () => {
                       <div style={{ padding: '6px', borderRadius: '8px', background: '#f8fafc', border: '1px solid var(--border-strong)' }}>
                         {getMovementIcon(item.type)}
                       </div>
-                      <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.04em' }}>{item.type.toUpperCase()}</span>
+                      <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.04em' }}>{item.type === 'Sale' ? 'ຂາຍ' : item.type === 'Restock' ? 'ເພີ່ມສະຕັອກ' : item.type === 'Adjustment' ? 'ປັບປຸງ' : 'ຄືນສິນຄ້າ'}</span>
                     </div>
                   </td>
                   <td>
@@ -182,12 +182,12 @@ const StockHistory = () => {
                     </div>
                   </td>
                   <td style={{ maxWidth: '300px' }}>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>{item.reason || 'No context provided'}</p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>{item.reason || 'ບໍ່ມີຂໍ້ມູນໝາຍເຫດ'}</p>
                   </td>
                   <td style={{ textAlign: 'right', paddingRight: '32px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                       <User size={14} color="var(--text-sidebar)" />
-                      <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{item.created_by || 'Auto-System'}</span>
+                      <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{item.created_by || 'ລະບົບອັດຕະໂນມັດ'}</span>
                     </div>
                   </td>
                 </tr>
@@ -196,7 +196,7 @@ const StockHistory = () => {
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '100px', color: 'var(--text-muted)' }}>
                     <History size={48} style={{ opacity: 0.1, margin: '0 auto 20px' }} />
-                    <p style={{ fontWeight: 600 }}>No stock movement protocols detected.</p>
+                    <p style={{ fontWeight: 600 }}>ບໍ່ພົບຂໍ້ມູນການເຄື່ອນໄຫວສະຕັອກ.</p>
                   </td>
                 </tr>
               )}

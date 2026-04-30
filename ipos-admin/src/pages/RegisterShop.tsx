@@ -32,7 +32,7 @@ const RegisterShop = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      alert("ລະຫັດຜ່ານບໍ່ກົງກັນ!");
       return;
     }
 
@@ -42,7 +42,7 @@ const RegisterShop = () => {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 5000);
     } catch (error) {
-      alert('Failed to register. Email might already be taken.');
+      alert('ການລົງທະບຽນລົ້ມເຫຼວ. ອີເມວນີ້ອາດຈະມີໃນລະບົບແລ້ວ.');
     } finally {
       setLoading(false);
     }
@@ -74,10 +74,10 @@ const RegisterShop = () => {
           }}>
             <CheckCircle2 size={50} />
           </div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '16px' }}>Welcome Aboard!</h1>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '16px' }}>ຍິນດີຕ້ອນຮັບ!</h1>
           <p style={{ fontSize: '1.2rem', opacity: 0.7, lineHeight: 1.6, marginBottom: '40px' }}>
-            Your account has been created. You are now the <strong>Primary Owner</strong>. 
-            You can start managing your first shop and add more branches later!
+            ບັນຊີຂອງທ່ານຖືກສ້າງຮຽບຮ້ອຍແລ້ວ. ຕອນນີ້ທ່ານແມ່ນ <strong>ເຈົ້າຂອງຫຼັກ (Primary Owner)</strong>. 
+            ທ່ານສາມາດເລີ່ມຈັດການຮ້ານທຳອິດຂອງທ່ານ ແລະ ເພີ່ມສາຂາອື່ນໆໄດ້ໃນພາຍຫຼັງ!
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <button 
@@ -85,9 +85,9 @@ const RegisterShop = () => {
               className="btn-primary" 
               style={{ width: '100%', height: '60px', justifyContent: 'center' }}
             >
-              Go to Login
+              ໄປທີ່ໜ້າເຂົ້າລະບົບ
             </button>
-            <p style={{ fontSize: '0.9rem', opacity: 0.5 }}>Redirecting in 5 seconds...</p>
+            <p style={{ fontSize: '0.9rem', opacity: 0.5 }}>ກຳລັງປ່ຽນໜ້າໃນ 5 ວິນາທີ...</p>
           </div>
         </div>
       </div>
@@ -138,17 +138,17 @@ const RegisterShop = () => {
               <Sparkles size={32} />
             </div>
             <h1 style={{ fontSize: '2.8rem', fontWeight: 900, marginBottom: '24px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
-              Empower Your <br/><span style={{ color: 'var(--primary)' }}>Business.</span>
+              ເສີມສ້າງ <br/><span style={{ color: 'var(--primary)' }}>ທຸລະກິດຂອງທ່ານ.</span>
             </h1>
             <p style={{ opacity: 0.6, fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '48px', fontWeight: 500 }}>
-              One platform for all your branches. Register today and join the future of retail management.
+              ແພລດຟອມດຽວສຳລັບທຸກສາຂາຂອງທ່ານ. ລົງທະບຽນມື້ນີ້ ແລະ ເຂົ້າສູ່ອະນາຄົດຂອງການຈັດການຮ້ານ.
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {[
-                { icon: <ShieldCheck size={22} />, text: 'Enterprise Grade Security', sub: 'Your data is encrypted and safe' },
-                { icon: <Layers size={22} />, text: 'Multi-Shop Infrastructure', sub: 'Scale from 1 to 100 branches' },
-                { icon: <Store size={22} />, text: 'Real-time Synchronization', sub: 'Manage anywhere, anytime' }
+                { icon: <ShieldCheck size={22} />, text: 'ຄວາມປອດໄພລະດັບອົງກອນ', sub: 'ຂໍ້ມູນຂອງທ່ານຖືກເຂົ້າລະຫັດ ແລະ ປອດໄພ' },
+                { icon: <Layers size={22} />, text: 'ໂຄງສ້າງຮອງຮັບຫຼາຍສາຂາ', sub: 'ຂະຫຍາຍໄດ້ຕັ້ງແຕ່ 1 ຫາ 100 ສາຂາ' },
+                { icon: <Store size={22} />, text: 'ການຊິງຂໍ້ມູນແບບເວລາຈິງ', sub: 'ຈັດການໄດ້ທຸກບ່ອນ, ທຸກເວລາ' }
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', gap: '16px' }}>
                   <div style={{ color: 'var(--primary)', marginTop: '2px' }}>{item.icon}</div>
@@ -174,31 +174,31 @@ const RegisterShop = () => {
               transition: 'var(--transition)'
             }} className="btn-hover-premium">
               <ArrowLeft size={18} />
-              <span>Sign In Instead</span>
+              <span>ເຂົ້າລະບົບແທນ</span>
             </Link>
             <div style={{ background: '#f1f5f9', padding: '6px 16px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>
-              ACCOUNT REGISTRATION
+              ລົງທະບຽນບັນຊີໃໝ່
             </div>
           </div>
 
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '12px', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>Initialize Your Account</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontWeight: 500, fontSize: '1.05rem' }}>Enter your business details to get started.</p>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '12px', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>ເລີ່ມຕົ້ນສ້າງບັນຊີຂອງທ່ານ</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontWeight: 500, fontSize: '1.05rem' }}>ປ້ອນຂໍ້ມູນທຸລະກິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.</p>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>SHOP NAME</label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ຊື່ຮ້ານ</label>
                 <div style={{ position: 'relative' }}>
                   <Store size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                   <input 
-                    type="text" required placeholder="e.g. Galaxy Central"
+                    type="text" required placeholder="ຕົວຢ່າງ: ຮ້ານຂາຍເຄື່ອງ ກາແລັກຊີ່"
                     value={formData.shopName} onChange={e => setFormData({...formData, shopName: e.target.value})}
                     className="input-premium" style={{ paddingLeft: '54px', height: '56px' }}
                   />
                 </div>
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>CONTACT PHONE</label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ເບີໂທຕິດຕໍ່</label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                   <input 
@@ -211,11 +211,11 @@ const RegisterShop = () => {
             </div>
 
             <div className="form-group">
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>PRIMARY ADDRESS</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ທີ່ຢູ່ຫຼັກ</label>
               <div style={{ position: 'relative' }}>
                 <MapPin size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                 <input 
-                  type="text" required placeholder="Location of your first branch"
+                  type="text" required placeholder="ທີ່ຕັ້ງຂອງສາຂາທຳອິດຂອງທ່ານ"
                   value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})}
                   className="input-premium" style={{ paddingLeft: '54px', height: '56px' }}
                 />
@@ -225,11 +225,11 @@ const RegisterShop = () => {
             <div style={{ height: '1px', background: 'var(--border)', margin: '10px 0' }}></div>
 
             <div className="form-group">
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>OWNER IDENTITY</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ຊື່ເຈົ້າຂອງຮ້ານ</label>
               <div style={{ position: 'relative' }}>
                 <User size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                 <input 
-                  type="text" required placeholder="Legal Name"
+                  type="text" required placeholder="ຊື່ ແລະ ນາມສະກຸນ"
                   value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})}
                   className="input-premium" style={{ paddingLeft: '54px', height: '56px' }}
                 />
@@ -237,7 +237,7 @@ const RegisterShop = () => {
             </div>
 
             <div className="form-group">
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>BUSINESS EMAIL</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ອີເມວທຸລະກິດ</label>
               <div style={{ position: 'relative' }}>
                 <Mail size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                 <input 
@@ -250,7 +250,7 @@ const RegisterShop = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>PASSWORD</label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ລະຫັດຜ່ານ</label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                   <input 
@@ -261,7 +261,7 @@ const RegisterShop = () => {
                 </div>
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>CONFIRM</label>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, marginBottom: '12px', color: 'var(--text-main)' }}>ຢືນຢັນລະຫັດ</label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={20} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.4 }} />
                   <input 
@@ -282,11 +282,11 @@ const RegisterShop = () => {
               {loading ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div className="spinner" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div>
-                  <span>Provisioning Account...</span>
+                  <span>ກຳລັງດຳເນີນການສ້າງບັນຊີ...</span>
                 </div>
               ) : (
                 <>
-                  <span>Create Owner Account</span>
+                  <span>ສ້າງບັນຊີເຈົ້າຂອງຮ້ານ</span>
                   <ArrowRight size={22} />
                 </>
               )}

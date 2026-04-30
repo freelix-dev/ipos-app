@@ -33,21 +33,21 @@ const Sidebar = () => {
 
   const menuItems = [
     ...(isSystemAdmin ? [
-      { icon: <Activity size={20} />, label: 'Admin Insights', path: '/admin-insights' }
+      { icon: <Activity size={20} />, label: 'ຂໍ້ມູນວິເຄາະຜູ້ດູແລ', path: '/admin-insights' }
     ] : []),
-    { icon: <LayoutDashboard size={19} />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <ShoppingBag size={20} />, label: 'Orders', path: '/orders' },
-    { icon: <Wallet size={20} />, label: 'Expenses', path: '/expenses' },
-    { icon: <Package size={20} />, label: 'Products', path: '/products' },
-    { icon: <Layers size={20} />, label: 'Stock', path: '/stock' },
-    { icon: <TrendingUp size={20} />, label: 'Sale Report', path: '/reports/sales' },
-    { icon: <PieChart size={20} />, label: 'Stock Report', path: '/reports/stock' },
-    { icon: <Users size={20} />, label: 'Manage Users', path: '/users' },
-    { icon: <Truck size={20} />, label: 'Suppliers', path: '/suppliers' },
-    { icon: <Tag size={20} />, label: 'Categories', path: '/categories' },
+    { icon: <LayoutDashboard size={19} />, label: 'ແຜງຄວບຄຸມ', path: '/dashboard' },
+    { icon: <ShoppingBag size={20} />, label: 'ລາຍການສັ່ງຊື້', path: '/orders' },
+    { icon: <Wallet size={20} />, label: 'ຄ່າໃຊ້ຈ່າຍ', path: '/expenses' },
+    { icon: <Package size={20} />, label: 'ສິນຄ້າ', path: '/products' },
+    { icon: <Layers size={20} />, label: 'ສະຕັອກ', path: '/stock' },
+    { icon: <TrendingUp size={20} />, label: 'ລາຍງານການຂາຍ', path: '/reports/sales' },
+    { icon: <PieChart size={20} />, label: 'ລາຍງານສະຕັອກ', path: '/reports/stock' },
+    { icon: <Users size={20} />, label: 'ຈັດການຜູ້ໃຊ້', path: '/users' },
+    { icon: <Truck size={20} />, label: 'ຜູ້ສະໜອງ', path: '/suppliers' },
+    { icon: <Tag size={20} />, label: 'ໝວດໝູ່', path: '/categories' },
     // Only System Admin or Shop Owners (Admins) can manage shops
     ...(currentUser?.role === 'admin' ? [
-      { icon: <Store size={20} />, label: 'Manage Shops', path: '/shops' }
+      { icon: <Store size={20} />, label: 'ຈັດການຮ້ານຄ້າ', path: '/shops' }
     ] : []),
   ];
 
@@ -101,7 +101,7 @@ const Sidebar = () => {
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <Settings size={20} />
               </div>
-              <span>Control Center</span>
+              <span>ສູນຄວບຄຸມ</span>
             </div>
             {settingsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </div>
@@ -118,7 +118,7 @@ const Sidebar = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <Coins size={18} />
                     </div>
-                    <span>Exchange Rates</span>
+                    <span>ອັດຕາແລກປ່ຽນ</span>
                   </NavLink>
                   <NavLink 
                     to="/settings" 
@@ -128,7 +128,7 @@ const Sidebar = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <Database size={18} />
                     </div>
-                    <span>System Params</span>
+                    <span>ຕັ້ງຄ່າລະບົບ</span>
                   </NavLink>
                   <NavLink 
                     to="/audit-logs" 
@@ -138,7 +138,7 @@ const Sidebar = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <History size={18} />
                     </div>
-                    <span>Audit Trail</span>
+                    <span>ປະຫວັດການໃຊ້ງານ</span>
                   </NavLink>
                   <NavLink 
                     to="/receipt-settings" 
@@ -148,7 +148,7 @@ const Sidebar = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <FileText size={18} />
                     </div>
-                    <span>Receipt Designer</span>
+                    <span>ອອກແບບໃບບິນ</span>
                   </NavLink>
                   <NavLink 
                     to="/stock-history" 
@@ -158,7 +158,7 @@ const Sidebar = () => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <History size={18} />
                     </div>
-                    <span>Stock Ledger</span>
+                    <span>ບັນຊີສະຕັອກ</span>
                   </NavLink>
                   {isSystemAdmin && (
                     <NavLink 
@@ -169,7 +169,7 @@ const Sidebar = () => {
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Smartphone size={18} />
                       </div>
-                      <span>App Ecosystem</span>
+                      <span>ລະບົບນິເວດແອັບ</span>
                     </NavLink>
                   )}
                 </>
@@ -197,7 +197,7 @@ const Sidebar = () => {
           }}
         >
           <LogOut size={19} />
-          <span>Logout</span>
+          <span>ອອກຈາກລະບົບ</span>
         </button>
       </div>
 

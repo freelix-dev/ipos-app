@@ -74,13 +74,13 @@ const Products = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+    if (window.confirm(`ເຈົ້າແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບ "${name}"?`)) {
       try {
         await api.deleteProduct(id);
         setProducts(products.filter(p => p.id !== id));
       } catch (error) {
         console.error('Failed to delete product:', error);
-        alert('Failed to delete product');
+        alert('ບໍ່ສາມາດລຶບສິນຄ້າໄດ້');
       }
     }
   };
@@ -117,8 +117,8 @@ const Products = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Catalog Hub</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global inventory synchronization and product management</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ສູນລວມສິນຄ້າ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ການຊິງໂຄໄນຂໍ້ມູນສະຕັອກທົ່ວໂລກ ແລະ ການຈັດການສິນຄ້າ</p>
         </div>
         {currentUser?.role === 'admin' && (
           <button 
@@ -127,7 +127,7 @@ const Products = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >
             <Plus size={20} />
-            <span>Publish New Product</span>
+            <span>ເພີ່ມສິນຄ້າໃໝ່</span>
           </button>
         )}
       </div>
@@ -148,7 +148,7 @@ const Products = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Filter products by name, tag, or SKU..." 
+                placeholder="ຄົ້ນຫາສິນຄ້າຕາມຊື່, ແທັກ ຫຼື SKU..." 
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -179,7 +179,7 @@ const Products = () => {
                   color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)'
                 }}
               >
-                <option value="">All Categories</option>
+                <option value="">ທຸກໝວດໝູ່</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -207,7 +207,7 @@ const Products = () => {
                     color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <option value="">All Branches</option>
+                  <option value="">ທຸກສາຂາ</option>
                   {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>{shop.name}</option>
                   ))}
@@ -221,16 +221,35 @@ const Products = () => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
-              {['All Products', 'In Stock', 'Low Stock', 'Out of Stock'].map((t) => (
+              {['ທຸກສິນຄ້າ', 'ມີໃນສະຕັອກ', 'ສິນຄ້າໃກ້ໝົດ', 'ສິນຄ້າໝົດ'].map((t) => (
                 <button 
                   key={t}
-                  onClick={() => { setActiveTab(t); setCurrentPage(1); }}
+                  onClick={() => { 
+                    const mapTab = (txt: string) => {
+                      if (txt === 'ທຸກສິນຄ້າ') return 'All Products';
+                      if (txt === 'ມີໃນສະຕັອກ') return 'In Stock';
+                      if (txt === 'ສິນຄ້າໃກ້ໝົດ') return 'Low Stock';
+                      if (txt === 'ສິນຄ້າໝົດ') return 'Out of Stock';
+                      return txt;
+                    };
+                    setActiveTab(mapTab(t)); 
+                    setCurrentPage(1); 
+                  }}
                   style={{
                     padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                    background: t === activeTab ? '#fff' : 'transparent',
-                    color: t === activeTab ? 'var(--primary)' : 'var(--text-muted)',
+                    background: (t === 'ທຸກສິນຄ້າ' && activeTab === 'All Products') || 
+                               (t === 'ມີໃນສະຕັອກ' && activeTab === 'In Stock') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Low Stock') || 
+                               (t === 'ສິນຄ້າໝົດ' && activeTab === 'Out of Stock') ? '#fff' : 'transparent',
+                    color: (t === 'ທຸກສິນຄ້າ' && activeTab === 'All Products') || 
+                               (t === 'ມີໃນສະຕັອກ' && activeTab === 'In Stock') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Low Stock') || 
+                               (t === 'ສິນຄ້າໝົດ' && activeTab === 'Out of Stock') ? 'var(--primary)' : 'var(--text-muted)',
                     fontWeight: 800, fontSize: '0.85rem',
-                    boxShadow: t === activeTab ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    boxShadow: (t === 'ທຸກສິນຄ້າ' && activeTab === 'All Products') || 
+                               (t === 'ມີໃນສະຕັອກ' && activeTab === 'In Stock') || 
+                               (t === 'ສິນຄ້າໃກ້ໝົດ' && activeTab === 'Low Stock') || 
+                               (t === 'ສິນຄ້າໝົດ' && activeTab === 'Out of Stock') ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
@@ -242,10 +261,10 @@ const Products = () => {
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>CATALOG SYNCED</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ຊິງຂໍ້ມູນສິນຄ້າແລ້ວ</span>
                </div>
                <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
-               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredProducts.length} ARTICLES</span>
+               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredProducts.length} ລາຍການ</span>
             </div>
           </div>
         </div>
@@ -253,19 +272,19 @@ const Products = () => {
         {loading ? (
           <div style={{ padding: '100px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Syncing catalog...</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງຊິງຂໍ້ມູນສິນຄ້າ...</p>
           </div>
         ) : (
           <>
             <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: '32px' }}>Product Insight</th>
-                  <th>Units</th>
-                  <th>Valuation</th>
-                  <th>Quantity</th>
-                  <th>System Status</th>
-                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>Management</th>
+                  <th style={{ paddingLeft: '32px' }}>ຂໍ້ມູນສິນຄ້າ</th>
+                  <th>ຫົວໜ່ວຍ</th>
+                  <th>ລາຄາ</th>
+                  <th>ຈຳນວນ</th>
+                  <th>ສະຖານະລະບົບ</th>
+                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>ການຈັດການ</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,7 +331,7 @@ const Products = () => {
                     <td style={{ fontWeight: 800, color: 'var(--text-main)' }}>{product.stock}</td>
                     <td>
                       <span className={`badge ${getStatusColor(product.stock)}`}>
-                        {product.stock <= 0 ? 'OUT OF STOCK' : product.stock < 10 ? 'LOW STOCK' : 'IN STOCK'}
+                        {product.stock <= 0 ? 'ສິນຄ້າໝົດ' : product.stock < 10 ? 'ສິນຄ້າໃກ້ໝົດ' : 'ມີໃນສະຕັອກ'}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: '32px' }}>
@@ -335,7 +354,7 @@ const Products = () => {
                             </button>
                           </>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>View only</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>ເບິ່ງຢ່າງດຽວ</span>
                         )}
                       </div>
                     </td>
@@ -355,11 +374,11 @@ const Products = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                  Showing <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> products
+                  ກຳລັງສະແດງ <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> ຫາ <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> ຈາກ <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> ລາຍການ
                 </p>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>ຈຳນວນ:</span>
                   <select 
                     value={itemsPerPage} 
                     onChange={(e) => {

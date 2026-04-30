@@ -99,7 +99,7 @@ const Shops = () => {
       setLogoPreview('');
       loadShops();
     } catch (error) {
-      alert('Failed to save shop');
+      alert('ບໍ່ສາມາດບັນທຶກຂໍ້ມູນຮ້ານຄ້າໄດ້');
     }
   };
 
@@ -120,12 +120,12 @@ const Shops = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this shop? All linked data may be affected.')) return;
+    if (!window.confirm('ເຈົ້າແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບຮ້ານຄ້ານີ້? ຂໍ້ມູນທັງໝົດທີ່ກ່ຽວຂ້ອງອາດຈະຖືກກະທົບ.')) return;
     try {
       await api.deleteShop(id);
       loadShops();
     } catch (error) {
-      alert('Failed to delete shop');
+      alert('ບໍ່ສາມາດລຶບຮ້ານຄ້າໄດ້');
     }
   };
 
@@ -143,8 +143,8 @@ const Shops = () => {
       <div className="animate-slide-up">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
           <div>
-            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Shop Management</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Create and manage multiple branches and locations</p>
+            <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ຈັດການຮ້ານຄ້າ</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ສ້າງ ແລະ ຈັດການຫຼາຍສາຂາ ແລະ ສະຖານທີ່</p>
           </div>
           {currentUser?.role === 'admin' && (
             <button 
@@ -153,7 +153,7 @@ const Shops = () => {
               style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
             >
               <Plus size={20} />
-              <span>Add New Shop</span>
+              <span>ເພີ່ມຮ້ານຄ້າໃໝ່</span>
             </button>
           )}
         </div>
@@ -164,7 +164,7 @@ const Shops = () => {
                 <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input 
                   type="text" 
-                  placeholder="Search shops by name or location..." 
+                  placeholder="ຄົ້ນຫາຮ້ານຕາມຊື່ ຫຼື ສະຖານທີ່..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{ 
@@ -184,10 +184,10 @@ const Shops = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '20px 32px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>Shop Identity</th>
-                  <th style={{ textAlign: 'left', padding: '20px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>Location</th>
-                  <th style={{ textAlign: 'left', padding: '20px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>Contact</th>
-                  <th style={{ textAlign: 'right', padding: '20px 32px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>Actions</th>
+                  <th style={{ textAlign: 'left', padding: '20px 32px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>ຂໍ້ມູນຮ້ານຄ້າ</th>
+                  <th style={{ textAlign: 'left', padding: '20px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>ສະຖານທີ່</th>
+                  <th style={{ textAlign: 'left', padding: '20px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>ຕິດຕໍ່</th>
+                  <th style={{ textAlign: 'right', padding: '20px 32px', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800 }}>ການຈັດການ</th>
                 </tr>
               </thead>
               <tbody>
@@ -210,7 +210,7 @@ const Shops = () => {
                                background: shop.status === 'Active' ? '#dcfce7' : shop.status === 'Expired' ? '#fee2e2' : '#f1f5f9',
                                color: shop.status === 'Active' ? '#166534' : shop.status === 'Expired' ? '#991b1b' : '#475569'
                              }}>
-                               {shop.status?.toUpperCase()}
+                               {shop.status === 'Active' ? 'ເປີດໃຊ້ງານ' : shop.status === 'Expired' ? 'ໝົດອາຍຸ' : 'ລະງັບ'}
                              </span>
                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)' }}>{shop.plan_type}</span>
                           </div>
@@ -220,13 +220,13 @@ const Shops = () => {
                     <td style={{ padding: '24px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)' }}>
                         <MapPin size={16} opacity={0.5} />
-                        <span>{shop.address || 'Not specified'}</span>
+                        <span>{shop.address || 'ບໍ່ໄດ້ລະບຸ'}</span>
                       </div>
                     </td>
                     <td style={{ padding: '24px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)' }}>
                         <Phone size={16} opacity={0.5} />
-                        <span>{shop.phone || 'No phone'}</span>
+                        <span>{shop.phone || 'ບໍ່ມີເບີໂທ'}</span>
                       </div>
                     </td>
                     <td style={{ padding: '24px 32px', textAlign: 'right' }}>
@@ -241,7 +241,7 @@ const Shops = () => {
                             </button>
                           </>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>View only</span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>ເບິ່ງຢ່າງດຽວ</span>
                         )}
                       </div>
                     </td>
@@ -256,38 +256,38 @@ const Shops = () => {
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)' }}>
             <div style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
               <div style={{ padding: '32px', background: 'var(--bg-sidebar)', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingShop ? 'Edit Shop' : 'Onboard New Shop'}</h2>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingShop ? 'ແກ້ໄຂຮ້ານຄ້າ' : 'ເພີ່ມຮ້ານຄ້າໃໝ່'}</h2>
                 <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
               </div>
               <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>SHOP NAME</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ຊື່ຮ້ານຄ້າ</label>
                     <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="input-premium" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ADDRESS / LOCATION</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ທີ່ຢູ່ / ສະຖານທີ່</label>
                     <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="input-premium" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>CONTACT PHONE</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ເບີໂທລະສັບຕິດຕໍ່</label>
                     <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="input-premium" />
                   </div>
                   
                   {isSystemAdmin && editingShop && (
                     <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <p style={{ fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>LICENSE & PLAN</p>
+                      <p style={{ fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary)', letterSpacing: '0.05em' }}>ໃບອະນຸຍາດ ແລະ ແພັກເກັດ</p>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>STATUS</label>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>ສະຖານະ</label>
                           <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }}>
-                            <option value="Active">Active</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Expired">Expired</option>
+                            <option value="Active">ເປີດໃຊ້ງານ</option>
+                            <option value="Suspended">ລະງັບການໃຊ້ງານ</option>
+                            <option value="Expired">ໝົດອາຍຸ</option>
                           </select>
                         </div>
                         <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>PLAN</label>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>ແພັກເກັດ</label>
                           <select value={formData.plan_type} onChange={e => setFormData({...formData, plan_type: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }}>
                             <option value="Basic">Basic</option>
                             <option value="Premium">Premium</option>
@@ -296,7 +296,7 @@ const Shops = () => {
                         </div>
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>EXPIRY DATE</label>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 800, marginBottom: '6px' }}>ວັນໝົດອາຍຸ</label>
                         <input type="date" value={formData.license_expiry} onChange={e => setFormData({...formData, license_expiry: e.target.value})} className="input-premium" style={{ height: '44px', fontSize: '0.85rem' }} />
                       </div>
                     </div>
@@ -304,7 +304,7 @@ const Shops = () => {
 
                   {/* Shop Logo Upload */}
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '10px', fontSize: '0.85rem' }}>SHOP LOGO</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '10px', fontSize: '0.85rem' }}>ໂລໂກ້ຮ້ານຄ້າ</label>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -337,9 +337,9 @@ const Shops = () => {
                       )}
                       <div>
                         <p style={{ fontWeight: 800, fontSize: '0.9rem', color: logoPreview ? 'var(--primary)' : 'var(--text-main)' }}>
-                          {logoPreview ? (logoFile ? logoFile.name : 'Current logo') : 'Click or drag image here'}
+                          {logoPreview ? (logoFile ? logoFile.name : 'ໂລໂກ້ປະຈຸບັນ') : 'ຄລິກ ຫຼື ລາກຮູບມາທີ່ນີ້'}
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>PNG, JPG, WEBP up to 5MB</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>PNG, JPG, WEBP ສູງສຸດ 5MB</p>
                       </div>
                       <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
                         <Upload size={18} color="var(--text-muted)" />
@@ -351,13 +351,13 @@ const Shops = () => {
                         onClick={() => { setLogoFile(null); setLogoPreview(''); }}
                         style={{ marginTop: '8px', fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
                       >
-                        ✕ Remove selected file
+                        ✕ ລຶບໄຟລ໌ທີ່ເລືອກ
                       </button>
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                    <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
-                    <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingShop ? 'Save Changes' : 'Create Shop'}</button>
+                    <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>ຍົກເລີກ</button>
+                    <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingShop ? 'ບັນທຶກການປ່ຽນແປງ' : 'ສ້າງຮ້ານຄ້າ'}</button>
                   </div>
                 </div>
               </form>

@@ -81,9 +81,9 @@ const Orders = () => {
       setVoidReason('');
       setSelectedOrder(null);
       loadOrders();
-      alert('Order voided and stock restored successfully.');
+      alert('ຍົກເລີກການສັ່ງຊື້ ແລະ ຄືນສະຕັອກສິນຄ້າສຳເລັດແລ້ວ.');
     } catch (error: any) {
-      alert(error.message || 'Failed to void order');
+      alert(error.message || 'ບໍ່ສາມາດຍົກເລີກການສັ່ງຊື້ໄດ້');
     } finally {
       setIsVoiding(false);
     }
@@ -134,23 +134,23 @@ const Orders = () => {
   const voidRate = filteredOrders.length > 0 ? (cancelledOrders.length / filteredOrders.length) * 100 : 0;
   
   const stats = [
-    { label: 'Total Revenue', value: formatCurrency(totalRevenue), icon: <TrendingUp size={24} />, color: '#10b981', bg: '#10b98115' },
-    { label: 'Order Volume', value: filteredOrders.length.toString(), icon: <ShoppingCart size={24} />, color: '#3b82f6', bg: '#3b82f615' },
-    { label: 'Avg. Basket', value: formatCurrency(avgOrderValue), icon: <Hash size={24} />, color: '#6366f1', bg: '#6366f115' },
-    { label: 'Void Rate', value: `${voidRate.toFixed(1)}%`, icon: <XCircle size={24} />, color: '#ef4444', bg: '#ef444415' },
+    { label: 'ລາຍຮັບທັງໝົດ', value: formatCurrency(totalRevenue), icon: <TrendingUp size={24} />, color: '#10b981', bg: '#10b98115' },
+    { label: 'ຈຳນວນລາຍການສັ່ງຊື້', value: filteredOrders.length.toString(), icon: <ShoppingCart size={24} />, color: '#3b82f6', bg: '#3b82f615' },
+    { label: 'ຍອດຂາຍສະເລ່ຍຕໍ່ບິນ', value: formatCurrency(avgOrderValue), icon: <Hash size={24} />, color: '#6366f1', bg: '#6366f115' },
+    { label: 'ອັດຕາການຍົກເລີກ', value: `${voidRate.toFixed(1)}%`, icon: <XCircle size={24} />, color: '#ef4444', bg: '#ef444415' },
   ];
 
   return (
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Transaction Ledger</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Monitor and audit global sales operations</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ບັນທຶກທຸລະກຳ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຕິດຕາມ ແລະ ກວດສອບການຂາຍທັງໝົດ</p>
         </div>
         <div style={{ display: 'flex', gap: '16px' }}>
           <button className="btn-primary" style={{ background: '#fff', color: 'var(--text-main)', border: '1px solid var(--border-strong)', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Download size={20} />
-            <span>Export Analytics</span>
+            <span>ສົ່ງອອກຂໍ້ມູນການວິເຄາະ</span>
           </button>
         </div>
       </div>
@@ -195,7 +195,7 @@ const Orders = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Search transaction ID, remark, or client info..." 
+                placeholder="ຄົ້ນຫາລະຫັດທຸລະກຳ, ໝາຍເຫດ ຫຼື ຂໍ້ມູນລູກຄ້າ..." 
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -229,7 +229,7 @@ const Orders = () => {
                     color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <option value="">All Branches</option>
+                  <option value="">ທຸກສາຂາ</option>
                   {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>{shop.name}</option>
                   ))}
@@ -247,7 +247,7 @@ const Orders = () => {
               padding: '0 16px', height: '50px', gap: '12px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>FROM</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຈາກ</span>
                 <input 
                   type="date" 
                   value={startDate}
@@ -260,7 +260,7 @@ const Orders = () => {
               </div>
               <div style={{ width: '1px', height: '20px', background: 'var(--border-strong)' }}></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>UNTIL</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຮອດ</span>
                 <input 
                   type="date" 
                   value={endDate}
@@ -290,25 +290,41 @@ const Orders = () => {
               transition: 'var(--transition)'
             }} className="btn-hover-premium">
               <Download size={18} />
-              <span>Export</span>
+              <span>ສົ່ງອອກ</span>
             </button>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '8px', background: '#f1f5f9', padding: '4px', borderRadius: '14px' }}>
-              {['All', 'Completed', 'Pending', 'Cancelled'].map((t) => (
+              {['ທັງໝົດ', 'ສຳເລັດແລ້ວ', 'ກຳລັງລໍຖ້າ', 'ຍົກເລີກແລ້ວ'].map((t) => (
                 <button 
                   key={t}
                   onClick={() => {
-                    setFilter(t);
+                    const mapFilter = (txt: string) => {
+                      if (txt === 'ທັງໝົດ') return 'All';
+                      if (txt === 'ສຳເລັດແລ້ວ') return 'Completed';
+                      if (txt === 'ກຳລັງລໍຖ້າ') return 'Pending';
+                      if (txt === 'ຍົກເລີກແລ້ວ') return 'Cancelled';
+                      return txt;
+                    };
+                    setFilter(mapFilter(t));
                     setCurrentPage(1);
                   }}
                   style={{
                     padding: '8px 20px', borderRadius: '11px', border: 'none', cursor: 'pointer',
-                    background: filter === t ? '#fff' : 'transparent',
-                    color: filter === t ? 'var(--primary)' : 'var(--text-muted)',
+                    background: (t === 'ທັງໝົດ' && filter === 'All') || 
+                               (t === 'ສຳເລັດແລ້ວ' && filter === 'Completed') || 
+                               (t === 'ກຳລັງລໍຖ້າ' && filter === 'Pending') || 
+                               (t === 'ຍົກເລີກແລ້ວ' && filter === 'Cancelled') ? '#fff' : 'transparent',
+                    color: (t === 'ທັງໝົດ' && filter === 'All') || 
+                               (t === 'ສຳເລັດແລ້ວ' && filter === 'Completed') || 
+                               (t === 'ກຳລັງລໍຖ້າ' && filter === 'Pending') || 
+                               (t === 'ຍົກເລີກແລ້ວ' && filter === 'Cancelled') ? 'var(--primary)' : 'var(--text-muted)',
                     fontWeight: 800, fontSize: '0.85rem',
-                    boxShadow: filter === t ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+                    boxShadow: (t === 'ທັງໝົດ' && filter === 'All') || 
+                               (t === 'ສຳເລັດແລ້ວ' && filter === 'Completed') || 
+                               (t === 'ກຳລັງລໍຖ້າ' && filter === 'Pending') || 
+                               (t === 'ຍົກເລີກແລ້ວ' && filter === 'Cancelled') ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
@@ -320,10 +336,10 @@ const Orders = () => {
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>AUTO-SYNC ACTIVE</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>ຊິງຂໍ້ມູນອັດຕະໂນມັດ</span>
                </div>
                <div style={{ width: '1px', height: '16px', background: 'var(--border-strong)' }}></div>
-               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredOrders.length} RESULTS</span>
+               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>{filteredOrders.length} ຜົນລາຍການ</span>
             </div>
           </div>
         </div>
@@ -331,19 +347,19 @@ const Orders = () => {
         {loading ? (
           <div style={{ padding: '100px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Deciphering transaction logs...</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງຖອດລະຫັດບັນທຶກທຸລະກຳ...</p>
           </div>
         ) : (
           <>
             <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: '32px', width: '220px' }}>Tracing Protocol</th>
-                  <th>Execution Delay</th>
-                  <th>Payment Vector</th>
-                  <th>Valuation</th>
-                  <th>System State</th>
-                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>Insight</th>
+                  <th style={{ paddingLeft: '32px', width: '220px' }}>ລະຫັດທຸລະກຳ</th>
+                  <th>ເວລາທີ່ເຮັດທຸລະກຳ</th>
+                  <th>ວິທີການຊຳລະ</th>
+                  <th>ຍອດລວມ</th>
+                  <th>ສະຖານະລະບົບ</th>
+                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>ເບິ່ງລາຍລະອຽດ</th>
                 </tr>
               </thead>
               <tbody>
@@ -374,8 +390,8 @@ const Orders = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: order.paymentMethod === 'cash' ? '#10b981' : '#3b82f6' }}></div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>{order.paymentMethod === 'cash' ? 'CASH SETTLEMENT' : 'BANK TRANSFER'}</span>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>{order.currency.toUpperCase()} GATEWAY</span>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>{order.paymentMethod === 'cash' ? 'ຊຳລະດ້ວຍເງິນສົດ' : 'ໂອນຜ່ານທະນາຄານ'}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>ຊ່ອງທາງ {order.currency.toUpperCase()}</span>
                         </div>
                       </div>
                     </td>
@@ -386,7 +402,7 @@ const Orders = () => {
                         color: order.status === 'Voided' ? '#ef4444' : undefined,
                         border: order.status === 'Voided' ? '1px solid #fecaca' : undefined
                       }}>
-                        {order.status.toUpperCase()}
+                        {order.status === 'Completed' ? 'ສຳເລັດແລ້ວ' : order.status === 'Voided' ? 'ຍົກເລີກແລ້ວ' : order.status.toUpperCase()}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: '32px' }}>
@@ -433,11 +449,11 @@ const Orders = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                  Showing <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> transactions
+                  ກຳລັງສະແດງ <span style={{ color: 'var(--text-main)' }}>{totalItems === 0 ? 0 : indexOfFirstItem + 1}</span> ຫາ <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> ຈາກ <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> ທຸລະກຳ
                 </p>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>ຈຳນວນ:</span>
                   <select 
                     value={itemsPerPage} 
                     onChange={(e) => {
@@ -548,7 +564,7 @@ const Orders = () => {
           <div style={{ background: '#fff', width: '90%', maxWidth: '600px', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
             <div style={{ padding: '32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' }}>
               <div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>Order Particulars</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>ລາຍລະອຽດການສັ່ງຊື້</h2>
                 <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 800 }}>INV#{selectedOrder.id.substring(0, 12).toUpperCase()}</span>
               </div>
               <button onClick={() => setShowViewModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '24px', opacity: 0.5 }}>✕</button>
@@ -556,14 +572,14 @@ const Orders = () => {
             <div style={{ padding: '32px', maxHeight: '60vh', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
                 <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '20px' }}>
-                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Operator Identity</p>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>ຜູ້ເຮັດລາຍການ</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <User size={14} color="var(--primary)" />
-                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{selectedOrder.user_name || 'System Auto'}</span>
+                    <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{selectedOrder.user_name || 'ລະບົບອັດຕະໂນມັດ'}</span>
                   </div>
                 </div>
                 <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '20px' }}>
-                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>Timestamp</p>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>ເວລາ</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Clock size={14} color="var(--primary)" />
                     <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{new Date(selectedOrder.date).toLocaleString()}</span>
@@ -574,7 +590,7 @@ const Orders = () => {
               <div style={{ marginBottom: '32px' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <ShoppingCart size={18} color="var(--primary)" />
-                  Inventory Items
+                  ລາຍການສິນຄ້າ
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {safeParseItems(selectedOrder.itemsJson).map((item: any, i: number) => (
@@ -591,11 +607,11 @@ const Orders = () => {
 
               <div style={{ padding: '24px', background: 'var(--bg-main)', borderRadius: '24px', border: '1px solid var(--border-strong)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>Sub-Total</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>ລວມກ່ອນພາສີ</span>
                   <span style={{ fontWeight: 800 }}>{formatCurrency(selectedOrder.total, selectedOrder.currency)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px dashed var(--border-strong)' }}>
-                  <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.1rem' }}>GRAND TOTAL</span>
+                  <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.1rem' }}>ຍອດລວມທັງໝົດ</span>
                   <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }}>{formatCurrency(selectedOrder.total, selectedOrder.currency)}</span>
                 </div>
               </div>
@@ -604,9 +620,9 @@ const Orders = () => {
                 <div style={{ marginTop: '24px', padding: '16px', background: '#fff1f2', borderRadius: '16px', border: '1px solid #fecaca' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#be123c', marginBottom: '4px' }}>
                     <AlertTriangle size={16} />
-                    <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>VOID INFORMATION</span>
+                    <span style={{ fontWeight: 900, fontSize: '0.8rem' }}>ຂໍ້ມູນການຍົກເລີກ</span>
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 600 }}>{selectedOrder.void_reason || 'No reason provided'}</p>
+                  <p style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 600 }}>{selectedOrder.void_reason || 'ບໍ່ໄດ້ລະບຸເຫດຜົນ'}</p>
                 </div>
               )}
             </div>
@@ -622,16 +638,16 @@ const Orders = () => {
               <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <XCircle size={32} />
               </div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Authorize Transaction Void</h2>
-              <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '8px' }}>This action will reverse inventory stock and mark this order as invalid. This cannot be undone.</p>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>ຢືນຢັນການຍົກເລີກທຸລະກຳ</h2>
+              <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '8px' }}>ການດຳເນີນການນີ້ຈະຄືນສິນຄ້າເຂົ້າສະຕັອກ ແລະ ໝາຍວ່າບິນນີ້ບໍ່ຖືກຕ້ອງ. ບໍ່ສາມາດຍ້ອນກັບໄດ້.</p>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sidebar)', marginBottom: '8px', opacity: 0.6, letterSpacing: '0.05em' }}>MANDATORY VOID JUSTIFICATION</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-sidebar)', marginBottom: '8px', opacity: 0.6, letterSpacing: '0.05em' }}>ເຫດຜົນໃນການຍົກເລີກ (ຈຳເປັນ)</label>
               <textarea 
                 value={voidReason}
                 onChange={(e) => setVoidReason(e.target.value)}
-                placeholder="Specify the reason for cancellation (e.g., Wrong items, Payment failure, Customer request)..."
+                placeholder="ລະບຸເຫດຜົນໃນການຍົກເລີກ (ເຊັ່ນ: ເລືອກສິນຄ້າຜິດ, ຊຳລະເງິນບໍ່ສຳເລັດ, ລູກຄ້າຂົຍົກເລີກ)..."
                 style={{ 
                   width: '100%', height: '100px', padding: '16px', borderRadius: '16px', 
                   border: '1px solid var(--border-strong)', background: '#f8fafc', 
@@ -646,7 +662,7 @@ const Orders = () => {
                 className="btn-secondary" 
                 style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}
               >
-                Cancel
+                ຍົກເລີກ
               </button>
               <button 
                 onClick={handleVoid}
@@ -654,7 +670,7 @@ const Orders = () => {
                 className="btn-primary" 
                 style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800, background: '#ef4444' }}
               >
-                {isVoiding ? 'Voiding...' : 'Confirm Void'}
+                {isVoiding ? 'ກຳລັງຍົກເລີກ...' : 'ຢືນຢັນການຍົກເລີກ'}
               </button>
             </div>
           </div>

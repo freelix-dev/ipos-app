@@ -43,7 +43,7 @@ const AppManagement = () => {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      alert('Failed to update app configuration');
+      alert('ບໍ່ສາມາດອັບເດດການຕັ້ງຄ່າໄດ້');
     } finally {
       setSaving(false);
     }
@@ -57,18 +57,18 @@ const AppManagement = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>App Ecosystem</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global mobile application control and maintenance suite</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>ຈັດການແອັບພລິເຄຊັນ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຄວບຄຸມ ແລະ ບຳລຸງຮັກສາແອັບໃຊ້ງານໃນໂທລະສັບ</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {saving ? <RefreshCw className="animate-spin" size={20} /> : <Save size={20} />}
-          <span>Push Updates</span>
+          <span>{saving ? 'ກຳລັງອັບເດດ...' : 'ສົ່ງການອັບເດດ'}</span>
         </button>
       </div>
 
       {success && (
         <div style={{ marginBottom: '32px', padding: '20px', background: '#dcfce7', borderLeft: '4px solid #10b981', borderRadius: '12px', color: '#15803d', fontWeight: 800 }}>
-          Application parameters synchronized across all mobile clients!
+          ຊິງຂໍ້ມູນການຕັ້ງຄ່າໄປຫາທຸກໂທລະສັບສຳເລັດແລ້ວ!
         </div>
       )}
 
@@ -78,24 +78,24 @@ const AppManagement = () => {
           <div className="card-premium" style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: 'var(--shadow-premium)' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                <div style={{ background: 'var(--primary-light)', color: 'var(--primary)', padding: '12px', borderRadius: '14px' }}><Smartphone size={20} /></div>
-               Release Management
+               ຈັດການເວີຊັນ
             </h3>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>CURRENT VERSION</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ເວີຊັນປະຈຸບັນ</label>
                 <input type="text" value={config.app_current_version || ''} onChange={e => handleChange('app_current_version', e.target.value)} className="input-premium" placeholder="e.g. 1.2.0" />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>MINIMUM VERSION</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ເວີຊັນຕ່ຳສຸດ</label>
                 <input type="text" value={config.app_min_version || ''} onChange={e => handleChange('app_min_version', e.target.value)} className="input-premium" placeholder="e.g. 1.0.0" />
               </div>
             </div>
 
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', background: '#f8fafc', borderRadius: '20px', border: '1px solid var(--border)' }}>
               <div>
-                <p style={{ fontWeight: 800, fontSize: '0.95rem' }}>Force Update</p>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Require all users to update to current version</p>
+                <p style={{ fontWeight: 800, fontSize: '0.95rem' }}>ບັງຄັບອັບເດດ</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ກຳນົດໃຫ້ຜູ້ໃຊ້ທຸກຄົນຕ້ອງອັບເດດເປັນເວີຊັນລ່າສຸດ</p>
               </div>
               <label className="switch">
                 <input type="checkbox" checked={config.force_update === 'true'} onChange={e => handleChange('force_update', e.target.checked ? 'true' : 'false')} />
@@ -108,15 +108,15 @@ const AppManagement = () => {
           <div className="card-premium" style={{ background: '#fff', padding: '40px', borderRadius: '32px', boxShadow: 'var(--shadow-premium)', border: config.maintenance_mode === 'true' ? '2px solid #ef4444' : '1px solid var(--border)' }}>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                <div style={{ background: config.maintenance_mode === 'true' ? '#fee2e2' : 'var(--primary-light)', color: config.maintenance_mode === 'true' ? '#ef4444' : 'var(--primary)', padding: '12px', borderRadius: '14px' }}><Server size={20} /></div>
-               System Availability
+               ສະຖານະລະບົບ
             </h3>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', background: config.maintenance_mode === 'true' ? '#fef2f2' : '#f8fafc', borderRadius: '20px', border: '1px solid var(--border)', marginBottom: '24px' }}>
                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   <ShieldAlert size={24} color={config.maintenance_mode === 'true' ? '#ef4444' : '#64748b'} />
                   <div>
-                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>Maintenance Mode</p>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Disable all mobile client operations</p>
+                    <p style={{ fontWeight: 800, fontSize: '1rem' }}>ໂໝດດູແລລະບົບ</p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ປິດການໃຊ້ງານທຸກການດຳເນີນງານໃນໂທລະສັບ</p>
                   </div>
                </div>
                <label className="switch">
@@ -126,7 +126,7 @@ const AppManagement = () => {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>MAINTENANCE MESSAGE</label>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, marginBottom: '8px', opacity: 0.6 }}>ຂໍ້ຄວາມໃນໂໝດດູແລ</label>
               <textarea 
                 value={config.maintenance_message || ''} 
                 onChange={e => handleChange('maintenance_message', e.target.value)}
@@ -142,24 +142,24 @@ const AppManagement = () => {
           <div className="card-premium" style={{ background: 'var(--bg-sidebar)', color: '#fff', borderRadius: '32px', padding: '32px' }}>
              <h4 style={{ fontSize: '1.1rem', fontWeight: 900, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Monitor size={20} />
-                Client Statistics
+                ສະຖິຕິໂທລະສັບ
              </h4>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ opacity: 0.6 }}>Active Installs</span>
+                  <span style={{ opacity: 0.6 }}>ຈຳນວນການຕິດຕັ້ງ</span>
                   <span style={{ fontWeight: 800 }}>1,248</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ opacity: 0.6 }}>iOS Clients</span>
+                  <span style={{ opacity: 0.6 }}>ໂທລະສັບ iOS</span>
                   <span style={{ fontWeight: 800 }}>482</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ opacity: 0.6 }}>Android Clients</span>
+                  <span style={{ opacity: 0.6 }}>ໂທລະສັບ Android</span>
                   <span style={{ fontWeight: 800 }}>766</span>
                 </div>
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#10b981' }}>
-                  <span style={{ fontWeight: 800 }}>Sync Health</span>
+                  <span style={{ fontWeight: 800 }}>ສຸຂະພາບການຊິງ</span>
                   <span style={{ fontWeight: 900 }}>99.8%</span>
                 </div>
              </div>
@@ -169,13 +169,13 @@ const AppManagement = () => {
              <div style={{ display: 'flex', gap: '12px' }}>
                 <Info size={20} color="var(--primary)" />
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                  Changing the <strong>Minimum Version</strong> will prompt users on older builds to update immediately upon opening the app.
+                  ການປ່ຽນ <strong>ເວີຊັນຕ່ຳສຸດ</strong> ຈະເຮັດໃຫ້ຜູ້ໃຊ້ທີ່ໃຊ້ເວີຊັນເກົ່າຕ້ອງອັບເດດທັນທີ່ເມື່ອເປີດແອັບ.
                 </p>
              </div>
              <div style={{ display: 'flex', gap: '12px' }}>
                 <AlertCircle size={20} color="#f59e0b" />
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                  <strong>Maintenance Mode</strong> prevents any data synchronization or order placement from the mobile app.
+                  <strong>ໂໝດດູແລລະບົບ</strong> ຈະປ້ອງກັນການຊິງຂໍ້ມູນ ແລະ ການສັ່ງຊື້ຈາກໂທລະສັບທັງໝົດ.
                 </p>
              </div>
           </div>

@@ -83,7 +83,7 @@ const Categories = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
+    if (window.confirm(`ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບໝວດໝູ່ "${name}"?`)) {
       try {
         await api.deleteCategory(id);
         loadCategories();
@@ -105,8 +105,8 @@ const Categories = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Inventory Categories</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Organize your products for better reporting and navigation</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ໝວດໝູ່ສິນຄ້າ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຈັດລະບຽບສິນຄ້າຂອງທ່ານເພື່ອການລາຍງານ ແລະ ການຄົ້ນຫາທີ່ດີຂຶ້ນ</p>
         </div>
         {currentUser?.role === 'admin' && (
           <button 
@@ -115,7 +115,7 @@ const Categories = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >
             <Plus size={20} />
-            <span>Create Category</span>
+            <span>ສ້າງໝວດໝູ່</span>
           </button>
         )}
       </div>
@@ -126,7 +126,7 @@ const Categories = () => {
             <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input 
               type="text" 
-              placeholder="Search categories..." 
+              placeholder="ຄົ້ນຫາໝວດໝູ່..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ 
@@ -146,7 +146,7 @@ const Categories = () => {
                 background: '#fff', fontWeight: 800, color: 'var(--primary)', outline: 'none'
               }}
             >
-              <option value="">All Branches</option>
+              <option value="">ທຸກສາຂາ</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           )}
@@ -158,10 +158,10 @@ const Categories = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc' }}>
-                <th style={{ textAlign: 'left', padding: '20px 32px' }}>Category Name</th>
-                <th style={{ textAlign: 'left', padding: '20px' }}>Description</th>
-                <th style={{ textAlign: 'left', padding: '20px' }}>Branch</th>
-                <th style={{ textAlign: 'right', padding: '20px 32px' }}>Actions</th>
+                <th style={{ textAlign: 'left', padding: '20px 32px' }}>ຊື່ໝວດໝູ່</th>
+                <th style={{ textAlign: 'left', padding: '20px' }}>ຄຳອະທິບາຍ</th>
+                <th style={{ textAlign: 'left', padding: '20px' }}>ສາຂາ</th>
+                <th style={{ textAlign: 'right', padding: '20px 32px' }}>ການຈັດການ</th>
               </tr>
             </thead>
             <tbody>
@@ -176,7 +176,7 @@ const Categories = () => {
                     </div>
                   </td>
                   <td style={{ padding: '24px 20px' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{cat.description || 'No description provided'}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{cat.description || 'ບໍ່ມີຄຳອະທິບາຍ'}</span>
                   </td>
                   <td style={{ padding: '24px 20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontWeight: 700, fontSize: '0.85rem' }}>
@@ -200,7 +200,7 @@ const Categories = () => {
                 <tr>
                   <td colSpan={4} style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
                     <Layers size={48} style={{ opacity: 0.1, marginBottom: '16px' }} />
-                    <p>No categories found for this filter</p>
+                    <p>ບໍ່ພົບໝວດໝູ່ສິນຄ້າສຳລັບການຄົ້ນຫານີ້</p>
                   </td>
                 </tr>
               )}
@@ -213,31 +213,31 @@ const Categories = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
             <div style={{ padding: '32px', background: 'var(--bg-sidebar)', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingCategory ? 'Edit Category' : 'New Category'}</h2>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingCategory ? 'ແກ້ໄຂໝວດໝູ່' : 'ໝວດໝູ່ໃໝ່'}</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>CATEGORY NAME</label>
-                  <input type="text" required placeholder="e.g. Beverages, Snacks" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="input-premium" />
+                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ຊື່ໝວດໝູ່</label>
+                  <input type="text" required placeholder="ເຊັ່ນ: ເຄື່ອງດື່ມ, ອາຫານຫວ່າງ" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="input-premium" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>DESCRIPTION</label>
-                  <textarea placeholder="Briefly describe what this category contains" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="input-premium" style={{ height: '100px', resize: 'none' }} />
+                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ຄຳອະທິບາຍ</label>
+                  <textarea placeholder="ລະບຸລາຍລະອຽດສັ້ນໆ ກ່ຽວກັບໝວດໝູ່ນີ້" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="input-premium" style={{ height: '100px', resize: 'none' }} />
                 </div>
                 {isSystemAdmin && (
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ASSIGN TO BRANCH</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ກຳນົດໃຫ້ສາຂາ</label>
                     <select value={formData.shop_id} onChange={e => setFormData({...formData, shop_id: e.target.value})} className="input-premium">
-                      <option value="">Global / All Branches</option>
+                      <option value="">ທົ່ວໄປ / ທຸກສາຂາ</option>
                       {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
                     </select>
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                  <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingCategory ? 'Save Changes' : 'Create Category'}</button>
+                  <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>ຍົກເລີກ</button>
+                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingCategory ? 'ບັນທຶກການປ່ຽນແປງ' : 'ສ້າງໝວດໝູ່'}</button>
                 </div>
               </div>
             </form>

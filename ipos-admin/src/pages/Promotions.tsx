@@ -85,12 +85,12 @@ const Promotions = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Marketing Campaigns</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Drive sales with dynamic promotions and seasonal offers</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>ແຄມເປນການຕະຫຼາດ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ເພີ່ມຍອດຂາຍດ້ວຍໂປຣໂມຊັ່ນ ແລະ ຂໍ້ສະເໜີພິເສດຕາມລະດູການ</p>
         </div>
         <button onClick={() => setShowAddModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Plus size={20} />
-          <span>New Promotion</span>
+          <span>ໂປຣໂມຊັ່ນໃໝ່</span>
         </button>
       </div>
 
@@ -117,7 +117,7 @@ const Promotions = () => {
                 gap: '6px'
               }}>
                 {promo.status === 'active' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                {promo.status.toUpperCase()}
+                {promo.status === 'active' ? 'ເປີດໃຊ້ງານ' : 'ປິດໃຊ້ງານ'}
               </div>
 
               <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
@@ -137,14 +137,14 @@ const Promotions = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px', padding: '16px', background: '#f8fafc', borderRadius: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px' }}>VALUE</label>
+                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px' }}>ມູນຄ່າ</label>
                   <p style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--primary)' }}>
-                    {promo.type === 'percentage' ? `${promo.value}% OFF` : (promo.type === 'bogo' ? 'BUY 1 GET 1' : `${promo.value} ₭ OFF`)}
+                    {promo.type === 'percentage' ? `ຫຼຸດ ${promo.value}%` : (promo.type === 'bogo' ? 'ຊື້ 1 ແຖມ 1' : `ຫຼຸດ ${promo.value} ₭`)}
                   </p>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px' }}>MIN. SPEND</label>
-                  <p style={{ fontWeight: 900, fontSize: '1rem' }}>{promo.min_spend > 0 ? `${promo.min_spend} ₭` : 'NO LIMIT'}</p>
+                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '4px' }}>ຂັ້ນຕ່ຳ</label>
+                  <p style={{ fontWeight: 900, fontSize: '1rem' }}>{promo.min_spend > 0 ? `${promo.min_spend} ₭` : 'ບໍ່ມີຂັ້ນຕ່ຳ'}</p>
                 </div>
               </div>
 
@@ -166,50 +166,50 @@ const Promotions = () => {
       {showAddModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000 }}>
           <div className="animate-scale-in" style={{ background: '#fff', width: '600px', borderRadius: '32px', padding: '40px', boxShadow: '0 25px 50px rgba(0,0,0,0.2)' }}>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px' }}>Launch Campaign</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500 }}>Create a new promotional offer for your customers</p>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px' }}>ສ້າງແຄມເປນໃໝ່</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontWeight: 500 }}>ສ້າງຂໍ້ສະເໜີໂປຣໂມຊັ່ນໃໝ່ສຳລັບລູກຄ້າຂອງທ່ານ</p>
 
             <form onSubmit={handleCreate}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
-                  <label className="input-label">CAMPAIGN NAME</label>
-                  <input type="text" value={newPromo.name} onChange={e => setNewPromo({...newPromo, name: e.target.value})} className="input-premium" required placeholder="e.g. Songkran Special 2024" />
+                  <label className="input-label">ຊື່ແຄມເປນ</label>
+                  <input type="text" value={newPromo.name} onChange={e => setNewPromo({...newPromo, name: e.target.value})} className="input-premium" required placeholder="ຕົວຢ່າງ: ໂປຣໂມຊັ່ນປີໃໝ່ 2024" />
                 </div>
                 
                 <div>
-                  <label className="input-label">DESCRIPTION</label>
-                  <textarea value={newPromo.description} onChange={e => setNewPromo({...newPromo, description: e.target.value})} className="input-premium" style={{ height: '80px', resize: 'none' }} placeholder="Detail of the promotion..." />
+                  <label className="input-label">ລາຍລະອຽດ</label>
+                  <textarea value={newPromo.description} onChange={e => setNewPromo({...newPromo, description: e.target.value})} className="input-premium" style={{ height: '80px', resize: 'none' }} placeholder="ລະບຸລາຍລະອຽດຂອງໂປຣໂມຊັ່ນ..." />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div>
-                    <label className="input-label">PROMO TYPE</label>
+                    <label className="input-label">ປະເພດໂປຣໂມຊັ່ນ</label>
                     <select value={newPromo.type} onChange={e => setNewPromo({...newPromo, type: e.target.value})} className="input-premium">
-                      <option value="percentage">Percentage (%)</option>
-                      <option value="fixed">Fixed Amount (₭)</option>
-                      <option value="bogo">Buy 1 Get 1 Free</option>
+                      <option value="percentage">ສ່ວນຫຼຸດເປັນເປີເຊັນ (%)</option>
+                      <option value="fixed">ສ່ວນຫຼຸດເປັນຈຳນວນເງິນ (₭)</option>
+                      <option value="bogo">ຊື້ 1 ແຖມ 1</option>
                     </select>
                   </div>
                   <div>
-                    <label className="input-label">VALUE</label>
+                    <label className="input-label">ມູນຄ່າ</label>
                     <input type="number" value={newPromo.value} onChange={e => setNewPromo({...newPromo, value: Number(e.target.value)})} className="input-premium" disabled={newPromo.type === 'bogo'} />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div>
-                    <label className="input-label">START DATE</label>
+                    <label className="input-label">ວັນທີເລີ່ມຕົ້ນ</label>
                     <input type="date" value={newPromo.start_date} onChange={e => setNewPromo({...newPromo, start_date: e.target.value})} className="input-premium" required />
                   </div>
                   <div>
-                    <label className="input-label">END DATE</label>
+                    <label className="input-label">ວັນທີສິ້ນສຸດ</label>
                     <input type="date" value={newPromo.end_date} onChange={e => setNewPromo({...newPromo, end_date: e.target.value})} className="input-premium" required />
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '20px', marginTop: '12px' }}>
-                  <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary" style={{ flex: 1 }}>Discard</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>Launch Campaign</button>
+                  <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary" style={{ flex: 1 }}>ຍົກເລີກ</button>
+                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>ສ້າງແຄມເປນ</button>
                 </div>
               </div>
             </form>

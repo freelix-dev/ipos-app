@@ -240,7 +240,7 @@ const SaleReports = () => {
     <div className="animate-slide-up">
       {/* 🚀 Header Actions matching Stock style */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>Transaction Reports</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>ລາຍງານການຂາຍ</h1>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           {/* Date Range */}
@@ -251,7 +251,7 @@ const SaleReports = () => {
             boxShadow: 'var(--shadow-sm)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>FROM</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຈາກ</span>
               <input
                 type="date"
                 value={startDate}
@@ -261,7 +261,7 @@ const SaleReports = () => {
             </div>
             <div style={{ width: '1px', height: '20px', background: 'var(--border-strong)' }}></div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>UNTIL</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຮອດ</span>
               <input
                 type="date"
                 value={endDate}
@@ -289,7 +289,7 @@ const SaleReports = () => {
             }}
           >
             <FileText size={18} />
-            <span>Remittance Slip</span>
+            <span>ໃບສະຫຼຸບຍອດ</span>
           </button>
 
           <button
@@ -298,7 +298,7 @@ const SaleReports = () => {
             onClick={() => window.print()}
           >
             <Download size={18} />
-            <span>Generate Ledger</span>
+            <span>ສົ່ງອອກລາຍງານ</span>
           </button>
         </div>
       </div>
@@ -334,7 +334,7 @@ const SaleReports = () => {
                     boxShadow: 'var(--shadow-sm)'
                   }}
                 >
-                  <option value="">All Branches</option>
+                  <option value="">ທຸກສາຂາ</option>
                   {shops.map(shop => (
                     <option key={shop.id} value={shop.id}>{shop.name}</option>
                   ))}
@@ -356,7 +356,7 @@ const SaleReports = () => {
                 }}
                 value=""
               >
-                <option value="">Filter by Account</option>
+                <option value="">ເລືອກຕາມບັນຊີ</option>
                 {allMethods.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
               </select>
               <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -375,7 +375,7 @@ const SaleReports = () => {
                 }}
                 value=""
               >
-                <option value="">Filter by User</option>
+                <option value="">ເລືອກຕາມຜູ້ໃຊ້</option>
                 {allUsers.map(u => <option key={u} value={u}>{u}</option>)}
               </select>
               <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -394,7 +394,7 @@ const SaleReports = () => {
                 }}
                 value=""
               >
-                <option value="">Filter by Currency</option>
+                <option value="">ເລືອກຕາມສະກຸນເງິນ</option>
                 {allCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -436,18 +436,18 @@ const SaleReports = () => {
           <table style={{ width: '100%', height: 'fit-content', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', height: '55px' }}>
-                  <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>DATE & CASHIER</th>
-                  {showCash && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟢 CASH</th>}
-                  {showBank && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔵 BANK</th>}
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ITEM</th>
-                  <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>TOTAL</th>
+                  <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ວັນທີ ແລະ ຜູ້ຂາຍ</th>
+                  {showCash && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🟢 ເງິນສົດ</th>}
+                  {showBank && <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔵 ທະນາຄານ</th>}
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ຈຳນວນ</th>
+                  <th style={{ padding: '12px 24px', textAlign: 'right', fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ຍອດລວມ</th>
                 </tr>
               </thead>
               <tbody>
                 {reportRows.length === 0 && (
                   <tr>
                     <td colSpan={colSpanCount} style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: 600 }}>
-                      No data found for the selected filters.
+                      ບໍ່ພົບຂໍ້ມູນຕາມການຄັດເລືອກຂອງທ່ານ.
                     </td>
                   </tr>
                 )}
@@ -486,7 +486,7 @@ const SaleReports = () => {
                 {/* Grand Total Footer Row */}
                 {reportRows.length > 0 && (
                   <tr style={{ borderTop: '2px solid var(--border)', background: '#f8fafc' }}>
-                    <td style={{ padding: '12px 24px', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'right', verticalAlign: 'top' }}>GRAND TOTAL</td>
+                    <td style={{ padding: '12px 24px', fontWeight: 900, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'right', verticalAlign: 'top' }}>ຍອດລວມທັງໝົດ</td>
                     {showCash && (
                       <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'top' }}>
                         {showLAK && <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.95rem' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>}
@@ -517,9 +517,9 @@ const SaleReports = () => {
               {/* Left: Showing + Limit */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                  Showing <strong style={{ color: 'var(--text-main)' }}>{Math.min((cashierPage - 1) * cashierPerPage + 1, reportRows.length)}</strong> to <strong style={{ color: 'var(--text-main)' }}>{Math.min(cashierPage * cashierPerPage, reportRows.length)}</strong> of <strong style={{ color: 'var(--text-main)' }}>{reportRows.length}</strong> items
+                  ກຳລັງສະແດງ <strong style={{ color: 'var(--text-main)' }}>{Math.min((cashierPage - 1) * cashierPerPage + 1, reportRows.length)}</strong> ຫາ <strong style={{ color: 'var(--text-main)' }}>{Math.min(cashierPage * cashierPerPage, reportRows.length)}</strong> ຈາກ <strong style={{ color: 'var(--text-main)' }}>{reportRows.length}</strong> ລາຍການ
                 </span>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700 }}>LIMIT:</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700 }}>ຈຳນວນ:</span>
                 <select
                   value={cashierPerPage}
                   onChange={(e) => { setCashierPerPage(Number(e.target.value)); setCashierPage(1); }}
@@ -560,10 +560,10 @@ const SaleReports = () => {
             {/* Modal Header */}
             <div style={{ padding: '24px 28px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ fontWeight: 900, fontSize: '1.3rem', color: '#1e293b', margin: 0 }}>Remittance Slip</h2>
+                <h2 style={{ fontWeight: 900, fontSize: '1.3rem', color: '#1e293b', margin: 0 }}>ໃບສະຫຼຸບຍອດ</h2>
                 <p style={{ color: '#64748b', fontSize: '0.82rem', margin: '4px 0 0' }}>
-                  {shops.find(s => s.id === selectedShopId)?.name || 'All Branches'} &nbsp;·&nbsp;
-                  {startDate || 'All time'} {endDate ? `→ ${endDate}` : ''}
+                  {shops.find(s => s.id === selectedShopId)?.name || 'ທຸກສາຂາ'} &nbsp;·&nbsp;
+                  {startDate || 'ທຸກເວລາ'} {endDate ? `→ ${endDate}` : ''}
                 </p>
               </div>
               <button onClick={() => setShowRemit(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '10px', width: 36, height: 36, cursor: 'pointer', fontSize: '1.1rem', color: '#64748b' }}>✕</button>
@@ -574,11 +574,11 @@ const SaleReports = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
                 <thead>
                   <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 900, color: '#475569', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date & Cashier</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#065f46', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cash</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#1e40af', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bank</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#0f766e', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#7c3aed', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 900, color: '#475569', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ວັນທີ ແລະ ຜູ້ຂາຍ</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#065f46', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ເງິນສົດ</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#1e40af', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ທະນາຄານ</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#0f766e', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ຈຳນວນ</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 900, color: '#7c3aed', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ຍອດລວມ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -610,7 +610,7 @@ const SaleReports = () => {
                   )})}
                   {/* Grand Total */}
                   <tr style={{ borderTop: '2px solid #1e293b', background: '#f1f5f9' }}>
-                    <td style={{ padding: '12px', fontWeight: 900, color: '#1e293b', fontSize: '0.8rem' }}>GRAND TOTAL</td>
+                    <td style={{ padding: '12px', fontWeight: 900, color: '#1e293b', fontSize: '0.8rem' }}>ຍອດລວມທັງໝົດ</td>
                     <td style={{ padding: '12px', textAlign: 'right', verticalAlign: 'top' }}>
                       {showLAK && <div style={{ fontWeight: 800, color: '#10b981' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashLAK, 0), 'LAK')}</div>}
                       {showTHB && <div style={{ fontSize: '0.75rem', color: '#eab308' }}>{formatCurrency(reportRows.reduce((sum, s) => sum + s.cashTHB, 0), 'THB')} ฿</div>}
@@ -634,17 +634,17 @@ const SaleReports = () => {
               {/* Footer */}
               <div style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '12px', fontSize: '0.78rem', color: '#64748b' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Generated: {new Date().toLocaleString()}</span>
-                  <span>Prepared by: {currentUser?.name || currentUser?.username || '-'}</span>
+                  <span>ອອກເມື່ອ: {new Date().toLocaleString()}</span>
+                  <span>ຈັດທຳໂດຍ: {currentUser?.name || currentUser?.username || '-'}</span>
                 </div>
                 <div style={{ marginTop: '20px', display: 'flex', gap: '40px', justifyContent: 'space-around', paddingTop: '12px', borderTop: '1px dashed #cbd5e1' }}>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ height: '40px', borderBottom: '1px solid #94a3b8', width: '140px', marginBottom: '6px' }}></div>
-                    <div style={{ fontWeight: 700 }}>Cashier Signature</div>
+                    <div style={{ fontWeight: 700 }}>ລາຍເຊັນຜູ້ຂາຍ</div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ height: '40px', borderBottom: '1px solid #94a3b8', width: '140px', marginBottom: '6px' }}></div>
-                    <div style={{ fontWeight: 700 }}>Manager Signature</div>
+                    <div style={{ fontWeight: 700 }}>ລາຍເຊັນຜູ້ຈັດການ</div>
                   </div>
                 </div>
               </div>
@@ -652,9 +652,9 @@ const SaleReports = () => {
 
             {/* Modal Actions */}
             <div style={{ padding: '16px 28px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowRemit(false)} style={{ padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', fontWeight: 700, color: '#64748b' }}>Close</button>
+              <button onClick={() => setShowRemit(false)} style={{ padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer', fontWeight: 700, color: '#64748b' }}>ປິດ</button>
               <button onClick={() => window.print()} style={{ padding: '10px 20px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Download size={16} /> Print Remit
+                <Download size={16} /> ພິມໃບສະຫຼຸບຍອດ
               </button>
             </div>
           </div>

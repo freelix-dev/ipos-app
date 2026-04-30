@@ -87,9 +87,9 @@ const StockReports = () => {
   };
 
   const getStatusLabel = (stock: number) => {
-    if (stock <= 0) return 'Out of Stock';
-    if (stock <= 10) return 'Low Stock';
-    return 'In Stock';
+    if (stock <= 0) return 'ໝົດສະຕັອກ';
+    if (stock <= 10) return 'ໃກ້ໝົດສະຕັອກ';
+    return 'ມີສິນຄ້າ';
   };
 
   const filteredProducts = products.filter(p => {
@@ -138,7 +138,7 @@ const StockReports = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Search logistics items..." 
+                placeholder="ຄົ້ນຫາລາຍການສິນຄ້າ..." 
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -161,7 +161,7 @@ const StockReports = () => {
               padding: '0 16px', height: '50px', gap: '12px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>FROM</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຈາກ</span>
                 <input 
                   type="date" 
                   value={startDate}
@@ -174,7 +174,7 @@ const StockReports = () => {
               </div>
               <div style={{ width: '1px', height: '20px', background: 'var(--border-strong)' }}></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>UNTIL</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sidebar)', letterSpacing: '0.05em' }}>ຮອດ</span>
                 <input 
                   type="date" 
                   value={endDate}
@@ -204,7 +204,7 @@ const StockReports = () => {
               transition: 'var(--transition)'
             }} className="btn-hover-premium" onClick={() => window.print()}>
               <Download size={18} />
-              <span>Export PDF</span>
+              <span>ສົ່ງອອກ PDF</span>
             </button>
           </div>
         </div>
@@ -212,17 +212,17 @@ const StockReports = () => {
         {loading ? (
           <div style={{ padding: '100px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 24px' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Analyzing inventory depth...</p>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>ກຳລັງວິເຄາະລາຍງານສະຕັອກ...</p>
           </div>
         ) : (
           <>
             <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: '32px' }}>Asset Identifier</th>
-                  <th>Total</th>
-                  <th>Stock Sale</th>
-                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>Stock</th>
+                  <th style={{ paddingLeft: '32px' }}>ລາຍການສິນຄ້າ</th>
+                  <th>ທັງໝົດ</th>
+                  <th>ຂາຍອອກ</th>
+                  <th style={{ textAlign: 'right', paddingRight: '32px' }}>ຄົງເຫຼືອ</th>
                 </tr>
               </thead>
               <tbody>
@@ -287,11 +287,11 @@ const StockReports = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-                    Showing <span style={{ color: 'var(--text-main)' }}>{indexOfFirstItem + 1}</span> to <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> of <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> items
+                    ກຳລັງສະແດງ <span style={{ color: 'var(--text-main)' }}>{indexOfFirstItem + 1}</span> ຫາ <span style={{ color: 'var(--text-main)' }}>{Math.min(indexOfLastItem, totalItems)}</span> ຈາກ <span style={{ color: 'var(--text-main)' }}>{totalItems}</span> ລາຍການ
                   </p>
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>LIMIT:</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>ຈຳນວນ:</span>
                     <select 
                       value={itemsPerPage} 
                       onChange={(e) => {

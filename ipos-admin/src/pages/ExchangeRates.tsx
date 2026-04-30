@@ -77,8 +77,8 @@ const ExchangeRates = () => {
     <div className="animate-slide-up" style={{ padding: '20px' }}>
       <div style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>Exchange Control</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Global currency valuation and conversion parameters</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)', marginBottom: '8px' }}>ຄວບຄຸມອັດຕາແລກປ່ຽນ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ກຳນົດມູນຄ່າເງິນຕາຕ່າງປະເທດ ແລະ ພາລາມິເຕີການແປງສະກຸນເງິນລວມ</p>
         </div>
 
         {/* Shop Selector */}
@@ -98,7 +98,7 @@ const ExchangeRates = () => {
                 color: 'var(--primary)', boxShadow: 'var(--shadow-sm)'
               }}
             >
-              <option value="global">GLOBAL DEFAULT</option>
+              <option value="global">ຄ່າເລີ່ມຕົ້ນທັງໝົດ (GLOBAL)</option>
               {shops.map(shop => (
                 <option key={shop.id} value={shop.id}>{shop.name}</option>
               ))}
@@ -127,7 +127,7 @@ const ExchangeRates = () => {
           fontWeight: 600
         }}>
           <Save size={20} />
-          Valuation models updated for {selectedShopId === 'global' ? 'Global Default' : shops.find(s => s.id === selectedShopId)?.name}!
+          ອັບເດດຮູບແບບການຄິດໄລ່ມູນຄ່າສຳລັບ {selectedShopId === 'global' ? 'ຄ່າເລີ່ມຕົ້ນທັງໝົດ' : shops.find(s => s.id === selectedShopId)?.name} ສຳເລັດແລ້ວ!
         </div>
       )}
 
@@ -144,12 +144,12 @@ const ExchangeRates = () => {
             </div>
             <div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
-                {selectedShopId === 'global' ? 'Global Default Rates' : `Rates for ${shops.find(s => s.id === selectedShopId)?.name}`}
+                {selectedShopId === 'global' ? 'ອັດຕາແລກປ່ຽນເລີ່ມຕົ້ນທັງໝົດ' : `ອັດຕາແລກປ່ຽນສຳລັບ ${shops.find(s => s.id === selectedShopId)?.name}`}
               </h2>
               <p style={{ opacity: 0.6, fontSize: '0.95rem', marginTop: '4px', fontWeight: 500 }}>
                 {selectedShopId === 'global' 
-                  ? 'These rates will be used by all shops unless they have specific rates defined.' 
-                  : 'These rates will override the global defaults for this specific branch.'}
+                  ? 'ອັດຕາເຫຼົ່ານີ້ຈະຖືກນຳໃຊ້ກັບທຸກໆຮ້ານ ເວັ້ນເສຍແຕ່ວ່າຮ້ານນັ້ນຈະມີການກຳນົດອັດຕາສະເພາະ.' 
+                  : 'ອັດຕາເຫຼົ່ານີ້ຈະຖືກນຳໃຊ້ແທນຄ່າເລີ່ມຕົ້ນສຳລັບສາຂານີ້ໂດຍສະເພາະ.'}
               </p>
             </div>
           </div>
@@ -160,9 +160,9 @@ const ExchangeRates = () => {
               <div style={{ background: '#f59e0b15', padding: '12px', borderRadius: '14px', color: '#f59e0b' }}>
                 <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>฿</span>
               </div>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>Thai Baht (THB)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>THAI REGIONAL VALUATION</p>
+               <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>ເງິນບາດ (THB)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>ອັດຕາແລກປ່ຽນພາກພື້ນໄທ</p>
               </div>
             </div>
             
@@ -192,9 +192,9 @@ const ExchangeRates = () => {
               <div style={{ background: '#10b98115', padding: '12px', borderRadius: '14px', color: '#10b981' }}>
                 <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>$</span>
               </div>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>US Dollar (USD)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>GLOBAL RESERVE VALUATION</p>
+               <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>ເງິນໂດລາ (USD)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>ອັດຕາແລກປ່ຽນສາກົນ</p>
               </div>
             </div>
             
@@ -233,15 +233,15 @@ const ExchangeRates = () => {
               boxShadow: '0 15px 30px rgba(16, 185, 129, 0.25)', border: 'none'
             }}
           >
-            {saving ? (
+             {saving ? (
               <>
                 <RefreshCw className="animate-spin" size={24} />
-                SYNCHRONIZING RATES...
+                ກຳລັງຊິງຂໍ້ມູນອັດຕາແລກປ່ຽນ...
               </>
             ) : (
               <>
                 <Save size={24} />
-                COMMIT VALUATION FOR {selectedShopId === 'global' ? 'GLOBAL DEFAULT' : shops.find(s => s.id === selectedShopId)?.name.toUpperCase()}
+                ຢືນຢັນອັດຕາແລກປ່ຽນສຳລັບ {selectedShopId === 'global' ? 'ຄ່າເລີ່ມຕົ້ນທັງໝົດ' : shops.find(s => s.id === selectedShopId)?.name.toUpperCase()}
               </>
             )}
           </button>

@@ -23,7 +23,7 @@ const Login = () => {
       }
       window.location.href = '/dashboard';
     } catch (err: any) {
-      setError(err.message || 'Verification failed. Please check credentials.');
+      setError(err.message || 'ການຢືນຢັນຕົວຕົນຫຼົ້ມເຫຼວ. ກະລຸນາກວດສອບຂໍ້ມູນຄືນໃໝ່.');
     } finally {
       setLoading(false);
     }
@@ -57,8 +57,8 @@ const Login = () => {
           }}>
             <ShoppingCart size={32} color="white" />
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em' }}>Welcome Back</h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '10px', fontSize: '1rem', fontWeight: 500 }}>Global iPOS Network Control</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.04em' }}>ຍິນດີຕ້ອນຮັບກັບຄືນ</h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '10px', fontSize: '1rem', fontWeight: 500 }}>ການຄວບຄຸມເຄືອຂ່າຍ iPOS ທົ່ວໂລກ</p>
         </div>
 
         {error && (
@@ -74,7 +74,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>WORK EMAIL</label>
+            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>ອີເມວວຽກ</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
               <input 
@@ -89,7 +89,7 @@ const Login = () => {
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>ACCESS KEY</label>
+            <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.85rem', fontWeight: 800, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>ລະຫັດຜ່ານ</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
               <input 
@@ -138,7 +138,7 @@ const Login = () => {
           >
             {loading ? <Loader2 size={22} className="animate-spin" /> : (
               <>
-                <span>Secure Access</span>
+                <span>ເຂົ້າສູ່ລະບົບຢ່າງປອດໄພ</span>
                 <ArrowUpRight size={18} />
               </>
             )}
@@ -147,10 +147,10 @@ const Login = () => {
 
         <div style={{ marginTop: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <Link to="/pricing" style={{ color: 'var(--primary)', fontWeight: 800, textDecoration: 'none', fontSize: '0.9rem' }}>
-            View Subscription Plans
+            ເບິ່ງແຜນການສະໝັກສະມາຊິກ
           </Link>
           <Link to="/register-shop" style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, textDecoration: 'none', fontSize: '0.85rem' }}>
-            Don't have a shop? Register now
+            ຍັງບໍ່ມີຮ້ານຄ້າ? ລົງທະບຽນດຽວນີ້
           </Link>
         </div>
       </div>

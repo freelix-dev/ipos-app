@@ -157,8 +157,8 @@ const AddProduct = () => {
             <ChevronLeft size={24} color="var(--text-main)" />
           </button>
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>New Product</h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Deploy a new item to your active inventory</p>
+            <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>ເພີ່ມສິນຄ້າໃໝ່</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>ເພີ່ມລາຍການສິນຄ້າໃໝ່ເຂົ້າໃນສະຕັອກຂອງທ່ານ</p>
           </div>
         </div>
 
@@ -171,7 +171,7 @@ const AddProduct = () => {
               background: '#fff', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' 
             }}
           >
-            Cancel
+            ຍົກເລີກ
           </button>
           <button 
             form="add-product-form"
@@ -183,7 +183,7 @@ const AddProduct = () => {
               display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 700
             }}
           >
-            {loading ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <><Save size={18} /> Publish Item</>}
+            {loading ? <div className="spinner" style={{ width: '18px', height: '18px' }}></div> : <><Save size={18} /> ເພີ່ມສິນຄ້າ</>}
           </button>
         </div>
       </div>
@@ -197,39 +197,39 @@ const AddProduct = () => {
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
                 <Package size={22} />
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Product Details</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>ລາຍລະອຽດສິນຄ້າ</h2>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>PRODUCT NAME</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຊື່ສິນຄ້າ</label>
                 <input 
                   type="text" 
                   name="name"
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g. Premium Lao Coffee"
+                  placeholder="ຕົວຢ່າງ: ກາເຟລາວ ພຣີມ່ຽມ"
                   className="input-premium"
                   style={{ fontSize: '1.1rem', padding: '16px 20px' }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>UNIT OF MEASURE</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຫົວໜ່ວຍ</label>
                 <input 
                   type="text" 
                   name="unit"
                   required
                   value={formData.unit}
                   onChange={handleChange}
-                  placeholder="e.g. Bottle, Pack, Box"
+                  placeholder="ຕົວຢ່າງ: ແກ້ວ, ຊອງ, ກ່ອງ"
                   className="input-premium"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>TARGET BRANCH</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ສາຂາທີ່ຕ້ອງການ</label>
                 <div style={{ position: 'relative' }}>
                   <select 
                     name="shop_id"
@@ -249,28 +249,28 @@ const AddProduct = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>CATEGORY</label>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ໝວດໝູ່</label>
                   <select 
                     name="category_id"
                     value={formData.category_id}
                     onChange={handleChange}
                     className="input-premium"
                   >
-                    <option value="">Uncategorized</option>
+                    <option value="">ບໍ່ມີໝວດໝູ່</option>
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>SUPPLIER</label>
+                  <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຜູ້ສະໜອງ (Supplier)</label>
                   <select 
                     name="supplier_id"
                     value={formData.supplier_id}
                     onChange={handleChange}
                     className="input-premium"
                   >
-                    <option value="">None</option>
+                    <option value="">ບໍ່ມີ</option>
                     {suppliers.map(sup => (
                       <option key={sup.id} value={sup.id}>{sup.name}</option>
                     ))}
@@ -285,7 +285,7 @@ const AddProduct = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {/* Media Card */}
           <div className="card-premium" style={{ padding: '32px', textAlign: 'center' }}>
-             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '24px', textAlign: 'left' }}>Product Media</h2>
+             <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '24px', textAlign: 'left' }}>ຮູບພາບສິນຄ້າ</h2>
              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />
              {previewUrl ? (
                <div style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -312,7 +312,7 @@ const AddProduct = () => {
                 }}
                >
                  <Upload size={32} color="var(--primary)" style={{ marginBottom: '16px' }} />
-                 <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>Drop image here</p>
+                 <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>ວາງຮູບພາບທີ່ນີ້</p>
                </div>
              )}
           </div>
@@ -323,12 +323,12 @@ const AddProduct = () => {
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
                 <DollarSign size={22} />
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Pricing & Inventory</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>ລາຄາ ແລະ ສະຕັອກ</h2>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>UNIT PRICE (₭)</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ລາຄາຕໍ່ໜ່ວຍ (₭)</label>
                 <input 
                   type="number" 
                   name="price"
@@ -341,7 +341,7 @@ const AddProduct = () => {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>STOCK</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>ຈຳນວນສະຕັອກ</label>
                 <div style={{ position: 'relative' }}>
                   <input 
                     type="number" 
@@ -359,7 +359,7 @@ const AddProduct = () => {
             </div>
 
             <div style={{ marginTop: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>ALERT THRESHOLD (LOW STOCK)</label>
+              <label style={{ display: 'block', marginBottom: '10px', fontSize: '0.9rem', fontWeight: 800, color: '#ef4444' }}>ຈຸດເຕືອນສະຕັອກ (ໃກ້ໝົດ)</label>
               <div style={{ position: 'relative' }}>
                 <input 
                   type="number" 
@@ -372,7 +372,7 @@ const AddProduct = () => {
                 />
                 <AlertTriangle size={18} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: '#ef4444' }} />
               </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>Notify me on dashboard when stock drops below this value.</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>ແຈ້ງເຕືອນໃນໜ້າ Dashboard ເມື່ອສະຕັອກຫຼຸດລົງຮອດຈຳນວນນີ້.</p>
             </div>
           </div>
         </div>

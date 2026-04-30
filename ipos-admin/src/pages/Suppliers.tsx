@@ -92,7 +92,7 @@ const Suppliers = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete supplier "${name}"?`)) {
+    if (window.confirm(`ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບຜູ້ສະໜອງ "${name}"?`)) {
       try {
         await api.deleteSupplier(id);
         loadSuppliers();
@@ -115,8 +115,8 @@ const Suppliers = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>Supplier Network</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Manage inventory sources and procurement contacts</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-main)' }}>ເຄືອຂ່າຍຜູ້ສະໜອງ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຈັດການແຫຼ່ງສິນຄ້າ ແລະ ຂໍ້ມູນຕິດຕໍ່ຜູ້ສະໜອງທັງໝົດ</p>
         </div>
         {currentUser?.role === 'admin' && (
           <button 
@@ -125,7 +125,7 @@ const Suppliers = () => {
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >
             <Plus size={20} />
-            <span>Onboard Supplier</span>
+            <span>ເພີ່ມຜູ້ສະໜອງ</span>
           </button>
         )}
       </div>
@@ -136,7 +136,7 @@ const Suppliers = () => {
             <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input 
               type="text" 
-              placeholder="Search suppliers..." 
+              placeholder="ຄົ້ນຫາຜູ້ສະໜອງ..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ 
@@ -156,7 +156,7 @@ const Suppliers = () => {
                 background: '#fff', fontWeight: 800, color: 'var(--primary)', outline: 'none'
               }}
             >
-              <option value="">All Branches</option>
+              <option value="">ທຸກສາຂາ</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           )}
@@ -168,10 +168,10 @@ const Suppliers = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f8fafc' }}>
-                <th style={{ textAlign: 'left', padding: '20px 32px' }}>Supplier Detail</th>
-                <th style={{ textAlign: 'left', padding: '20px' }}>Contact Person</th>
-                <th style={{ textAlign: 'left', padding: '20px' }}>Communication</th>
-                <th style={{ textAlign: 'right', padding: '20px 32px' }}>Actions</th>
+                <th style={{ textAlign: 'left', padding: '20px 32px' }}>ລາຍລະອຽດຜູ້ສະໜອງ</th>
+                <th style={{ textAlign: 'left', padding: '20px' }}>ຜູ້ຕິດຕໍ່</th>
+                <th style={{ textAlign: 'left', padding: '20px' }}>ການຕິດຕໍ່ສື່ສານ</th>
+                <th style={{ textAlign: 'right', padding: '20px 32px' }}>ການຈັດການ</th>
               </tr>
             </thead>
             <tbody>
@@ -184,7 +184,7 @@ const Suppliers = () => {
                       </div>
                       <div>
                         <p style={{ fontWeight: 800, color: 'var(--text-main)' }}>{supplier.name}</p>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{supplier.address || 'No address'}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{supplier.address || 'ບໍ່ມີທີ່ຢູ່'}</p>
                       </div>
                     </div>
                   </td>
@@ -198,7 +198,7 @@ const Suppliers = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-main)', fontSize: '0.85rem' }}>
                         <Phone size={14} opacity={0.5} />
-                        <span>{supplier.phone || 'No phone'}</span>
+                        <span>{supplier.phone || 'ບໍ່ມີເບີໂທ'}</span>
                       </div>
                       {supplier.email && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
@@ -229,45 +229,45 @@ const Suppliers = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ background: '#fff', width: '100%', maxWidth: '500px', borderRadius: '24px', overflow: 'hidden' }}>
             <div style={{ padding: '32px', background: 'var(--bg-sidebar)', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingSupplier ? 'Edit Supplier' : 'New Supplier'}</h2>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{editingSupplier ? 'ແກ້ໄຂຜູ້ສະໜອງ' : 'ຜູ້ສະໜອງໃໝ່'}</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit} style={{ padding: '32px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>SUPPLIER NAME</label>
+                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ຊື່ຜູ້ສະໜອງ</label>
                   <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="input-premium" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>CONTACT PERSON</label>
+                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ຊື່ຜູ້ຕິດຕໍ່</label>
                   <input type="text" value={formData.contact_name} onChange={e => setFormData({...formData, contact_name: e.target.value})} className="input-premium" />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>PHONE</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ເບີໂທລະສັບ</label>
                     <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="input-premium" />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>EMAIL</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ອີເມວ</label>
                     <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="input-premium" />
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ADDRESS</label>
+                  <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ທີ່ຢູ່</label>
                   <textarea value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="input-premium" style={{ height: '80px', resize: 'none' }} />
                 </div>
                 {isSystemAdmin && (
                   <div>
-                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ASSIGN TO SHOP</label>
+                    <label style={{ display: 'block', fontWeight: 800, marginBottom: '8px', fontSize: '0.85rem' }}>ກຳນົດໃຫ້ສາຂາ</label>
                     <select value={formData.shop_id} onChange={e => setFormData({...formData, shop_id: e.target.value})} className="input-premium">
-                      <option value="">Global / All Shops</option>
+                      <option value="">ທົ່ວໄປ / ທຸກສາຂາ</option>
                       {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
                     </select>
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                  <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
-                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingSupplier ? 'Save Changes' : 'Onboard'}</button>
+                  <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', fontWeight: 800, cursor: 'pointer' }}>ຍົກເລີກ</button>
+                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingSupplier ? 'ບັນທຶກການປ່ຽນແປງ' : 'ເພີ່ມຜູ້ສະໜອງ'}</button>
                 </div>
               </div>
             </form>

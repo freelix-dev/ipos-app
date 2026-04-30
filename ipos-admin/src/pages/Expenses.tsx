@@ -116,12 +116,12 @@ const Expenses = () => {
     <div className="animate-slide-up">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px' }}>
         <div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px' }}>Expense Management</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Track operational costs and overheads</p>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.04em', marginBottom: '8px' }}>ຈັດການຄ່າໃຊ້ຈ່າຍ</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>ຕິດຕາມຕົ້ນທຶນການດຳເນີນງານ ແລະ ຄ່າໃຊ້ຈ່າຍທົ່ວໄປ</p>
         </div>
         <button onClick={() => setShowAddModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 28px' }}>
           <Plus size={20} />
-          <span>Record Expense</span>
+          <span>ບັນທຶກຄ່າໃຊ້ຈ່າຍ</span>
         </button>
       </div>
 
@@ -132,7 +132,7 @@ const Expenses = () => {
               <DollarSign size={24} />
             </div>
             <div>
-              <p style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Expenditure</p>
+              <p style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ລວມຄ່າໃຊ້ຈ່າຍທັງໝົດ</p>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ef4444' }}>{new Intl.NumberFormat('lo-LA', { style: 'currency', currency: 'LAK' }).format(totalExpense)}</h2>
             </div>
           </div>
@@ -144,8 +144,8 @@ const Expenses = () => {
               <Tag size={24} />
             </div>
             <div>
-              <p style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Primary Category</p>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Utilities & Rent</h2>
+              <p style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ໝວດໝູ່ຫຼັກ</p>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>ຄ່ານ້ຳ-ໄຟ & ຄ່າເຊົ່າ</h2>
             </div>
           </div>
         </div>
@@ -158,7 +158,7 @@ const Expenses = () => {
               <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sidebar)', opacity: 0.6 }} />
               <input 
                 type="text" 
-                placeholder="Search descriptions or categories..." 
+                placeholder="ຄົ້ນຫາລາຍລະອຽດ ຫຼື ໝວດໝູ່..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ width: '100%', height: '48px', padding: '0 16px 0 48px', borderRadius: '14px', border: '1px solid var(--border-strong)', background: '#f8fafc', fontWeight: 600 }}
@@ -170,8 +170,22 @@ const Expenses = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
               style={{ padding: '0 16px', height: '48px', borderRadius: '14px', border: '1px solid var(--border-strong)', background: '#fff', fontWeight: 700, color: 'var(--primary)', outline: 'none' }}
             >
-              <option value="All">All Categories</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              <option value="All">ທຸກໝວດໝູ່</option>
+              {categories.map(c => {
+                const mapCat = (txt: string) => {
+                  const m: any = {
+                    'Supplies': 'ອຸປະກອນ',
+                    'Utilities': 'ຄ່ານ້ຳ-ໄຟ',
+                    'Rent': 'ຄ່າເຊົ່າ',
+                    'Salaries': 'ເງິນເດືອນ',
+                    'Maintenance': 'ບຳລຸງຮັກສາ',
+                    'Marketing': 'ການຕະຫຼາດ',
+                    'Other': 'ອື່ນໆ'
+                  };
+                  return m[txt] || txt;
+                };
+                return <option key={c} value={c}>{mapCat(c)}</option>;
+              })}
             </select>
           </div>
 
@@ -184,7 +198,7 @@ const Expenses = () => {
               }}
               style={{ height: '48px', padding: '0 20px', borderRadius: '14px', border: '1px solid var(--border-strong)', fontWeight: 800, color: 'var(--primary)' }}
             >
-              <option value="">Select Branch</option>
+              <option value="">ເລືອກສາຂາ</option>
               {shops.map(shop => <option key={shop.id} value={shop.id}>{shop.name}</option>)}
             </select>
           )}
@@ -193,17 +207,17 @@ const Expenses = () => {
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 20px' }}></div>
-            <p style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Analyzing financial records...</p>
+            <p style={{ fontWeight: 600, color: 'var(--text-muted)' }}>ກຳລັງວິເຄາະບັນທຶກການເງິນ...</p>
           </div>
         ) : (
           <table style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr>
-                <th style={{ paddingLeft: '32px' }}>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th style={{ textAlign: 'right', paddingRight: '32px' }}>Action</th>
+                <th style={{ paddingLeft: '32px' }}>ວັນທີ</th>
+                <th>ໝວດໝູ່</th>
+                <th>ລາຍລະອຽດ</th>
+                <th>ຈຳນວນເງິນ</th>
+                <th style={{ textAlign: 'right', paddingRight: '32px' }}>ການຈັດການ</th>
               </tr>
             </thead>
             <tbody>
@@ -221,7 +235,18 @@ const Expenses = () => {
                       fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)',
                       border: '1px solid var(--border-strong)'
                     }}>
-                      {expense.category.toUpperCase()}
+                      {(() => {
+                        const m: any = {
+                          'Supplies': 'ອຸປະກອນ',
+                          'Utilities': 'ຄ່ານ້ຳ-ໄຟ',
+                          'Rent': 'ຄ່າເຊົ່າ',
+                          'Salaries': 'ເງິນເດືອນ',
+                          'Maintenance': 'ບຳລຸງຮັກສາ',
+                          'Marketing': 'ການຕະຫຼາດ',
+                          'Other': 'ອື່ນໆ'
+                        };
+                        return (m[expense.category] || expense.category).toUpperCase();
+                      })()}
                     </span>
                   </td>
                   <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{expense.description || '-'}</td>
@@ -238,7 +263,7 @@ const Expenses = () => {
               {filteredExpenses.length === 0 && (
                 <tr>
                   <td colSpan={5} style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    No expense records found for this period.
+                    ບໍ່ພົບຂໍ້ມູນຄ່າໃຊ້ຈ່າຍໃນໄລຍະເວລານີ້.
                   </td>
                 </tr>
               )}
@@ -250,23 +275,37 @@ const Expenses = () => {
       {showAddModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
           <form onSubmit={handleAddExpense} className="animate-slide-up" style={{ background: '#fff', width: '90%', maxWidth: '500px', borderRadius: '32px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px' }}>Record Expense</h2>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginBottom: '32px' }}>Enter the details of your operational expenditure.</p>
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px' }}>ບັນທຶກຄ່າໃຊ້ຈ່າຍ</h2>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginBottom: '32px' }}>ລະບຸລາຍລະອຽດຂອງຄ່າໃຊ້ຈ່າຍໃນການດຳເນີນງານຂອງທ່ານ.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Classification</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ການຈັດປະເພດ</label>
                 <select 
                   className="input-premium"
                   value={newExpense.category}
                   onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
                 >
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                  {categories.map(c => {
+                    const mapCat = (txt: string) => {
+                      const m: any = {
+                        'Supplies': 'ອຸປະກອນ',
+                        'Utilities': 'ຄ່ານ້ຳ-ໄຟ',
+                        'Rent': 'ຄ່າເຊົ່າ',
+                        'Salaries': 'ເງິນເດືອນ',
+                        'Maintenance': 'ບຳລຸງຮັກສາ',
+                        'Marketing': 'ການຕະຫຼາດ',
+                        'Other': 'ອື່ນໆ'
+                      };
+                      return m[txt] || txt;
+                    };
+                    return <option key={c} value={c}>{mapCat(c)}</option>;
+                  })}
                 </select>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Financial Valuation (LAK)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ມູນຄ່າເງິນ (ກີບ)</label>
                 <div style={{ position: 'relative' }}>
                   <DollarSign size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
                   <input 
@@ -282,7 +321,7 @@ const Expenses = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Chronological Date</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ວັນທີທີ່ໃຊ້ຈ່າຍ</label>
                 <input 
                   type="date" 
                   className="input-premium"
@@ -293,20 +332,20 @@ const Expenses = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Particulars / Remark</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>ລາຍລະອຽດ / ໝາຍເຫດ</label>
                 <textarea 
                   className="input-premium"
                   style={{ height: '100px', resize: 'none' }}
                   value={newExpense.description}
                   onChange={(e) => setNewExpense({...newExpense, description: e.target.value})}
-                  placeholder="Describe the nature of this expense..."
+                  placeholder="ລະບຸລາຍລະອຽດຂອງຄ່າໃຊ້ຈ່າຍນີ້..."
                 />
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '16px' }}>
-              <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>Cancel</button>
-              <button type="submit" className="btn-primary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>Commit Entry</button>
+              <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>ຍົກເລີກ</button>
+              <button type="submit" className="btn-primary" style={{ flex: 1, padding: '14px', borderRadius: '16px', fontWeight: 800 }}>ຢືນຢັນການບັນທຶກ</button>
             </div>
           </form>
         </div>

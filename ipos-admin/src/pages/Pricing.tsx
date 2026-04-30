@@ -16,59 +16,59 @@ const PricingPage = () => {
   const plans = [
     {
       name: "Starter",
-      tagline: "Perfect for single shop owners",
+      tagline: "ເໝາະສຳລັບເຈົ້າຂອງຮ້ານໃນສາຂາດຽວ",
       price: "199,000",
       currency: "₭",
-      period: "/month",
+      period: "/ເດືອນ",
       features: [
-        "1 Shop Location",
-        "Unlimited Products",
-        "Basic Sales Reports",
-        "Mobile POS App Access",
-        "2 Staff Accounts",
-        "Standard Support"
+        "1 ສາຂາ",
+        "ສິນຄ້າໄດ້ຄວາມໄມ່ຈຳກັດ",
+        "ລາຍງານການຂາຍພື້ນຖານ",
+        "ໃຊ້ແອັບ POS ບນໂທລະສັບ",
+        "2 ບັນຊີພະນັກງານ",
+        "ສະຫຼັກມາດຕະຖານ"
       ],
-      buttonText: "Get Started",
+      buttonText: "ເລີ່ມຕົ້ນ",
       recommended: false,
       color: "#64748b"
     },
     {
       name: "Business",
-      tagline: "More tools and power for growth",
+      tagline: "ເຄື່ອງມືເພີ່ມເຕີມ ແລະ ພະລັງສຳລັບການເຕີບໂຕ",
       price: "499,000",
       currency: "₭",
-      period: "/month",
+      period: "/ເດືອນ",
       features: [
-        "Up to 5 Shop Locations",
-        "Advance Marketing Hub",
-        "Coupon & Promo System",
-        "Inventory Forecasting",
-        "10 Staff Accounts",
-        "Priority 24/7 Support",
-        "Custom Receipt Branding",
-        "Multi-currency Dashboard"
+        "ສູງສຸດ 5 ສາຂາ",
+        "ສູນການຕະຫຼາດພື້ນຖານ",
+        "ລະບົບຄູປອງ ແລະ ໂປຣໂມຊັນ",
+        "ການພະຍາກອນສະຕັອກ",
+        "10 ບັນຊີພະນັກງານ",
+        "ສະຫຼັກດ່ວນ 24/7",
+        "ກຳນົດຂໍ້ມູນໃບເສຣັດໂດຍຕົວເອງ",
+        "ການຈັດການສະກຸນເງິນຫຼາຍ"
       ],
-      buttonText: "Choose Business",
+      buttonText: "ເລືອກ Business",
       recommended: true,
       color: "#3b82f6"
     },
     {
       name: "Enterprise",
-      tagline: "Full power for retail networks",
+      tagline: "ພະລັງເຕັມສຳລັບເຄືອຂ່າຍຮ້ານ",
       price: "999,000",
       currency: "₭",
-      period: "/month",
+      period: "/ເດືອນ",
       features: [
-        "Unlimited Shop Locations",
-        "Global Network Insights",
-        "Audit Trail & Security",
-        "API Access for ERP",
-        "Unlimited Staff Accounts",
-        "Dedicated Account Manager",
+        "ສາຂາໄມ່ຈຳກັດ",
+        "ຂໍ້ມູນເຄືອຂ່າຍທົ່ວໂລກ",
+        "ບັນທຶກການກວດສອບ ແລະ ຄວາມປອດໄພ",
+        "ໃຊ້ API ສຳລັບ ERP",
+        "ບັນຊີພະນັກງານໄມ່ຈຳກັດ",
+        "ຜູ້ຈັດການບັນຊີສ່ວນຕົວ",
         "Custom Domain",
         "White-label POS App"
       ],
-      buttonText: "Contact Sales",
+      buttonText: "ຕິດຕໍ່ທີມຂາຍ",
       recommended: false,
       color: "#1e293b"
     }
@@ -93,14 +93,14 @@ const PricingPage = () => {
           letterSpacing: '0.05em'
         }}>
           <Star size={16} fill="#2563eb" />
-          <span>Trusted by 500+ Local Businesses</span>
+          <span>ໃຊ້ໂດຍທຸລະກິດເຫຼືອ 500+ ໃນລາວ</span>
         </div>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.04em', color: '#0f172a', marginBottom: '24px' }}>
-          Choose the perfect plan <br />
-          <span style={{ color: '#3b82f6' }}>for your business growth</span>
+          ເລືອກແຜນທີ່ເໝາະສຳລັບ <br />
+          <span style={{ color: '#3b82f6' }}>ການເຕີບໂຕຂອງທຸລະກິດທ່ານ</span>
         </h1>
         <p style={{ fontSize: '1.2rem', color: '#64748b', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6, fontWeight: 500 }}>
-          Flexible pricing designed to scale with your retail network. Start small, grow big with iPOS Pro.
+          ລາຄາທີ່ຍືດຫຍຸ່ນ ສຳລັບທ່ານ ເລີ່ມຈາກເລັກ ແລ ໂຕເຕີບໃຫ່ຍກັບ iPOS Pro.
         </p>
       </div>
 
@@ -141,7 +141,7 @@ const PricingPage = () => {
                 fontWeight: 900,
                 boxShadow: '0 10px 20px rgba(59, 130, 246, 0.3)'
               }}>
-                MOST POPULAR
+                ນິຍົມທີ່ສຸດ
               </div>
             )}
 
@@ -179,7 +179,7 @@ const PricingPage = () => {
 
             <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '40px' }}>
               <p style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Everything in {index > 0 ? plans[index-1].name : 'base'}, plus:
+                {index > 0 ? `ທຸກອະງໃນ ${plans[index-1].name}, ບວກກັບ:` : 'ຄຸນສົມບັດທີ່ສາມາດໃຊ້ໄດ້:'}
               </p>
               <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {plan.features.map((feature, i) => (
@@ -207,23 +207,23 @@ const PricingPage = () => {
 
       {/* Trust Badges */}
       <div style={{ marginTop: '100px', textAlign: 'center' }}>
-        <p style={{ color: '#64748b', fontWeight: 700, fontSize: '0.9rem', marginBottom: '40px', textTransform: 'uppercase' }}>Powerful Features Included</p>
+        <p style={{ color: '#64748b', fontWeight: 700, fontSize: '0.9rem', marginBottom: '40px', textTransform: 'uppercase' }}>ຟັງຊັນທີ່ຮວມຢູ່ທຸກແຜນ</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '60px', opacity: 0.6 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800 }}>
             <Smartphone size={32} />
-            <span>Mobile Ready</span>
+            <span>ຮອງຮັບໂທລະສັບ</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800 }}>
             <BarChart3 size={32} />
-            <span>Smart Analytics</span>
+            <span>ວິເຄາະໂດຍອັດລະສັບ</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800 }}>
             <Users2 size={32} />
-            <span>Team Management</span>
+            <span>ຈັດການທີມງານ</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: 800 }}>
             <Store size={32} />
-            <span>Multi-Shop</span>
+            <span>ຫຼາຍສາຂາ</span>
           </div>
         </div>
       </div>

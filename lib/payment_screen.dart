@@ -132,7 +132,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   if (_vatEnabled) ...[
                     const SizedBox(height: 8),
                     Text(
-                      'Subtotal: ${formatPrice(_convertedSubtotal)} | VAT ($_taxRate%): ${formatPrice(_convertedVat)}',
+                      'ລວມກ່ອນພາສີ: ${formatPrice(_convertedSubtotal)} | VAT ($_taxRate%): ${formatPrice(_convertedVat)}',
                       style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -170,7 +170,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 16),
             _buildPaymentOption(
               icon: Icons.money,
-              title: 'ຊຳລະດວ້ຍເງີນສົດ',
+              title: 'ຊຳລະດ້ວຍເງິນສົດ',
               subtitle: 'Cash Payment',
               value: 'cash',
             ),
@@ -184,7 +184,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             if (selectedMethod == 'cash') ...[
               const SizedBox(height: 24),
               const Text(
-                'ຮັບເງີນຈາກລູກຄ້າ:',
+                'ຮັບເງິນຈາກລູກຄ້າ:',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -216,7 +216,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _receivedAmount >= _convertedTotal ? 'ເງີນທອນ:' : 'ຍັງເຫຼືອ:',
+                        _receivedAmount >= _convertedTotal ? 'ເງິນທອນ:' : 'ຍັງເຫຼືອ:',
                         style: TextStyle(
                           fontSize: 18, 
                           fontWeight: FontWeight.bold,
@@ -404,7 +404,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'ລະບົບໄດ້ເກັບບັນທຶกຂໍ້ມູນຮຽບຮ້ອຍແລ້ວ',
+              'ລະບົບໄດ້ບັນທຶກຂໍ້ມູນຮຽບຮ້ອຍແລ້ວ',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -419,7 +419,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     onPressed: () => PrinterService.printReceipt(order),
                     icon: const Icon(Icons.print),
-                    label: const Text('ພິມບິນ'),
+                    label: const Text('ພິມໃບບິນ'),
                   ),
                 ),
                 const SizedBox(width: 12),

@@ -357,9 +357,9 @@ class _PosScreenState extends State<PosScreen> {
                       ),
                     const Divider(),
                     if (_vatEnabled) ...[
-                      _buildPriceRow('Subtotal', _convertPrice(cartTotal)),
+                      _buildPriceRow('ລວມກ່ອນພາສີ', _convertPrice(cartTotal)),
                       _buildPriceRow(
-                        'VAT ($_taxRate%)',
+                        'ພາສີມູນຄ່າເພີ່ມ (VAT $_taxRate%)',
                         _convertPrice(cartTotal * _taxRate / 100),
                       ),
                       const SizedBox(height: 4),
@@ -370,7 +370,7 @@ class _PosScreenState extends State<PosScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _vatEnabled ? 'Grand Total' : 'ລວມທັງໝົດ',
+                            'ລວມທັງໝົດ',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -705,7 +705,7 @@ class _PosScreenState extends State<PosScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No products found\nPlease sync with intelligence hub',
+                          'ບໍ່ພົບສິນຄ້າ\nກະລຸນາຊິງຂໍ້ມູນກັບສູນກາງ',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.grey.shade500,
@@ -789,7 +789,7 @@ class _PosScreenState extends State<PosScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${cartItems.length} ITEMS',
+                                '${cartItems.length} ລາຍການ',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.8),
                                   fontSize: 10,

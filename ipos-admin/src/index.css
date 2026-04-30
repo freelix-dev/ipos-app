@@ -37,11 +37,14 @@
   box-sizing: border-box;
 }
 
+body, button, input, select, textarea {
+  font-family: 'Noto Sans Lao', 'Outfit', 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
-  font-family: 'Noto Sans Lao', 'Outfit', 'Inter', -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
